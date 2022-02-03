@@ -1,1 +1,5 @@
-# py-clob-client
+## py-clob-client
+
+
+Python client for the Polymarket CLOB
+
