@@ -15,4 +15,4 @@ class Signer:
         """
         Signs a message hash
         """
-        return Account._sign_hash(message_hash, self._key).signature.hex()
+        return Account._sign_hash(message_hash, self.private_key).signature.hex()

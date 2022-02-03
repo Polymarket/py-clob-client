@@ -10,8 +10,7 @@ class PolyApiException(PolyException):
     
     def __init__(self, resp: Response=None, error_msg= None):
         assert(resp is not None or error_msg is not None)
-
-        if resp:
+        if resp is not None:
             self.status_code = resp.status_code
             self.error_msg = self._get_message(resp)
         if error_msg is not None:
@@ -21,7 +20,7 @@ class PolyApiException(PolyException):
     def _get_message(self, resp: Response):
         try:
             return resp.json()
-        except:
+        except Exception:
             return resp.text
 
     def __repr__(self):
