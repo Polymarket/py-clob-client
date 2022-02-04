@@ -13,3 +13,18 @@ class RequestArgs:
     request_path: str
     body: Any = None
 
+@dataclass
+class LimitOrderArgs:
+    price: float
+    size: float
+    side: str
+    token_id: str # TODO: how to get the tokenID 
+
+@dataclass
+class MarketOrderArgs:
+    size: float
+    side: str
+    token_id: str
+
+
+

@@ -1,3 +1,10 @@
+
+# Access levels
+L0 = 0
+L1 = 1
+L2 = 2
+
+
 CREDENTIAL_CREATION_WARNING = """🚨🚨🚨
 Your credentials CANNOT be recovered after they've been created. 
 Be sure to store them safely!

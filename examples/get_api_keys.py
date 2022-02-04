@@ -11,7 +11,7 @@ def main():
     host = "http://localhost:8080"
     key = os.getenv("PK")
     creds = ApiCreds(api_key=os.getenv("CLOB_API_KEY"), api_secret=os.getenv("CLOB_SECRET"), api_passphrase=os.getenv("CLOB_PASS_PHRASE"))
-    client = ClobClient(host, key=key, creds=creds)
+    client = ClobClient(host, key=key, chain_id=42, creds=creds)
 
     print(client.get_api_keys())
 
