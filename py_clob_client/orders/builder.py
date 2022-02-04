@@ -30,9 +30,7 @@ class OrderBuilder:
         return get_contract_config(chain_id)
 
     def _create_limit_order_builder(self):
-        chain_id = self.signer.get_chain_id()
-        exchange = get_contract_config(chain_id).get_exchange()
-        return LimitOrderBuilder(exchange, chain_id, self.signer)
+        return LimitOrderBuilder(self.contract_config.exchange, self.signer.chain_id, self.signer)
 
 
     def create_limit_order(self, order_args: LimitOrderArgs):
