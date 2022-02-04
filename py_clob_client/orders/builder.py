@@ -35,6 +35,7 @@ class OrderBuilder:
 
     def create_limit_order(self, order_args: LimitOrderArgs):
         """
+        Creates and signs a limit order
         """
         if order_args.side == BUY:
             maker_asset = self.contract_config.get_collateral()
@@ -55,7 +56,6 @@ class OrderBuilder:
             size_2_digits = round_down(order_args.size, 2)
             maker_amount = to_conditional_token_decimals(size_2_digits)
             taker_amount = to_collateral_token_decimals(round_down(order_args.price * size_2_digits, 2))
-            pass
         
         #TODO: move some functions to helpers
         limit_order = self.limit_order_builder.build_limit_order(LimitOrderData(
@@ -64,10 +64,10 @@ class OrderBuilder:
                 maker_asset_id=maker_asset_id,
                 taker_asset_address=taker_asset,
                 taker_asset_id=taker_asset_id,
-                maker_address=self.signer.address,
+                maker_address=self.funder,
                 maker_amount=maker_amount,
                 taker_amount=taker_amount,
-                signer=self.funder,
+                signer=self.signer.address,
                 sig_type=self.sig_type
             )
         )
