@@ -1,10 +1,12 @@
 import logging
 
+from .orders.builder import OrderBuilder
+
 from .headers import create_level_1_headers, create_level_2_headers
 from .signer import Signer
 
 from .endpoints import CREATE_API_KEY, GET_API_KEYS, TIME
-from .clob_types import ApiCreds, RequestArgs
+from .clob_types import ApiCreds, LimitOrderArgs, RequestArgs
 from .exceptions import PolyException
 from .http_helpers.helpers import get, post
 from .constants import CREDENTIAL_CREATION_WARNING, L0, L1, L1_AUTH_UNAVAILABLE, L2, L2_AUTH_UNAVAILABLE
@@ -32,6 +34,8 @@ class ClobClient:
         self.signer = Signer(key, chain_id) if key else None
         self.creds = creds
         self.mode = self._get_client_mode()
+        # TODO: currently only allowing EOA signers, constructor just needs to accept sig type and funder 
+        self.builder = OrderBuilder(self.signer) 
         self.logger = logging.getLogger(self.__class__.__name__)
         
     def get_ok(self):
@@ -73,14 +77,14 @@ class ClobClient:
         headers = create_level_2_headers(self.signer, self.creds, request_args)
         return get("{}{}".format(self.host, GET_API_KEYS), headers=headers)
 
-    def create_limit_order(self):
+    def create_limit_order(self, order_args: LimitOrderArgs):
         """
         Creates and signs a limit order
         Level 2 Auth required
         """
         self.assert_level_2_auth()
 
-        pass
+        return self.builder.create_limit_order(order_args)
 
 
     def assert_level_1_auth(self):

@@ -17,7 +17,7 @@ class Signer:
     def get_chain_id(self):
         return self.chain_id
 
-    def sign_hash(self, message_hash):
+    def sign(self, message_hash):
         """
         Signs a message hash
         """

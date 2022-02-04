@@ -13,6 +13,6 @@ def get_clob_auth_domain():
 def sign_clob_auth_message(signer: Signer, timestamp: int)-> str:
     clob_auth_msg = ClobAuth(address=signer.address, timestamp=str(timestamp), message=MSG_TO_SIGN)
     auth_struct_hash = Web3.keccak(clob_auth_msg.signable_bytes(get_clob_auth_domain()))
-    return signer.sign_hash(auth_struct_hash)
+    return signer.sign(auth_struct_hash)
 
 
