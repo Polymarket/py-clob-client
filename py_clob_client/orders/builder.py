@@ -44,21 +44,20 @@ class OrderBuilder:
             maker_asset_id = None
             taker_asset_id = int(order_args.token_id)
 
-            size_2_digits = round_down(order_args.size, 2)
-            maker_amount = to_collateral_token_decimals(round_down(order_args.price * size_2_digits, 2))
-            taker_amount = to_conditional_token_decimals(size_2_digits)
+            size_normalized = round_down(order_args.size, 2)
+            maker_amount = to_collateral_token_decimals(round_down(order_args.price * size_normalized, 2))
+            taker_amount = to_conditional_token_decimals(size_normalized)
         else:
             maker_asset = "0x0000000000000000000000000000000000000000" #same TODO as above
             taker_asset = self.contract_config.get_collateral()
             maker_asset_id = int(order_args.token_id)
             taker_asset_id = None
 
-            size_2_digits = round_down(order_args.size, 2)
-            maker_amount = to_conditional_token_decimals(size_2_digits)
-            taker_amount = to_collateral_token_decimals(round_down(order_args.price * size_2_digits, 2))
-        
-        #TODO: move some functions to helpers
-        limit_order = self.limit_order_builder.build_limit_order(LimitOrderData(
+            size_normalized = round_down(order_args.size, 2)
+            maker_amount = to_conditional_token_decimals(size_normalized)
+            taker_amount = to_collateral_token_decimals(round_down(order_args.price * size_normalized, 2))
+
+        data = LimitOrderData(
                 exchange_address=self.contract_config.exchange,
                 maker_asset_address=maker_asset,
                 maker_asset_id=maker_asset_id,
@@ -69,8 +68,10 @@ class OrderBuilder:
                 taker_amount=taker_amount,
                 signer=self.signer.address,
                 sig_type=self.sig_type
-            )
         )
+        
+        #TODO: move some functions to helpers
+        limit_order = self.limit_order_builder.build_limit_order(data)
         signature = self.limit_order_builder.build_limit_order_signature(limit_order)
         return self.limit_order_builder.build_limit_order_and_signature(limit_order, signature)
 
