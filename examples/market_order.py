@@ -16,9 +16,7 @@ def main():
     chain_id = 80001
     client = ClobClient(host, key=key, chain_id=chain_id, creds=creds)
 
-    """
-    Create and sign a market order selling 100 YES tokens
-    """
+    # Create and sign a market order selling 100 YES tokens
     order_args = MarketOrderArgs(
         size=100.0,
         side=SELL,

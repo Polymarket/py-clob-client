@@ -19,7 +19,7 @@ class OrderBuilder:
 
         # Address which holds funds to be used.
         # Used for Polymarket proxy wallets and other smart contract wallets
-        # If not provided, funder is the signer address
+        # Defaults to the address of the signer
         self.funder = funder if funder is not None else self.signer.address
         self.contract_config = self._get_contract_config(self.signer.get_chain_id())
         self.limit_order_builder = LimitOrderBuilder(self.contract_config.exchange, self.signer.chain_id, self.signer)
