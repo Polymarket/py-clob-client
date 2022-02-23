@@ -10,7 +10,7 @@ PUT = "PUT"
 
 def request(endpoint: str, method:str, headers=None, data=None):
     try:
-        resp = requests.request(method=method, url=endpoint, headers=headers, data=json.dumps(data) if data else None)
+        resp = requests.request(method=method, url=endpoint, headers=headers, json=data if data else None)
         if resp.status_code != 200:
             raise PolyApiException(resp)
         return resp.json()

@@ -14,7 +14,8 @@ def main():
     chain_id = 80001
     client = ClobClient(host, key=key, chain_id=chain_id, creds=creds)
 
-    print(client.get_api_keys())
-
+    resp = client.cancel_all()
+    print(resp)
+    print("Done!")
 
 main()

@@ -18,7 +18,7 @@ class LimitOrderArgs:
     price: float
     size: float
     side: str
-    token_id: str # TODO: how to get the tokenID 
+    token_id: str
 
 @dataclass
 class MarketOrderArgs:

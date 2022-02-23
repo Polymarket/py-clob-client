@@ -2,7 +2,7 @@ from py_order_utils.builders import LimitOrderBuilder
 from py_order_utils.model import EOA, LimitOrderData
 from py_order_utils.config import get_contract_config
 
-from .helpers import round_down, to_collateral_token_decimals, to_conditional_token_decimals
+from .helpers import round_down, to_token_decimals
 from .constants import BUY
 
 from ..signer import Signer
@@ -11,17 +11,15 @@ from ..clob_types import LimitOrderArgs
 
 class OrderBuilder:
     
-    def __init__(self, signer: Signer, sig_type=EOA, funder=None):
-        """
-        """
+    def __init__(self, signer: Signer, sig_type=None, funder=None):
         self.signer = signer
         
         # Signature type used sign Limit and Market orders, defaults to EOA type
-        self.sig_type = sig_type
+        self.sig_type = sig_type if sig_type is not None else EOA
 
         # Address which holds funds to be used.
         # Used for Polymarket proxy wallets and other smart contract wallets
-        # If not provided, funderAddress is the signer address
+        # If not provided, funder is the signer address
         self.funder = funder if funder is not None else self.signer.address
         self.contract_config = self._get_contract_config(self.signer.get_chain_id())
         self.limit_order_builder = self._create_limit_order_builder()
@@ -37,28 +35,28 @@ class OrderBuilder:
         """
         Creates and signs a limit order
         """
+        print("builder.py: creating order..")
         if order_args.side == BUY:
             maker_asset = self.contract_config.get_collateral()
-            # taker_asset = conditional_token TODO: update when py_order_utils has the conditional token
-            taker_asset = "0x0000000000000000000000000000000000000000"
+            taker_asset = self.contract_config.get_conditional()
             maker_asset_id = None
             taker_asset_id = int(order_args.token_id)
 
             size_normalized = round_down(order_args.size, 2)
-            maker_amount = to_collateral_token_decimals(round_down(order_args.price * size_normalized, 2))
-            taker_amount = to_conditional_token_decimals(size_normalized)
+            maker_amount = to_token_decimals(round_down(order_args.price * size_normalized, 2))
+            taker_amount = to_token_decimals(size_normalized)
         else:
-            maker_asset = "0x0000000000000000000000000000000000000000" #same TODO as above
+            maker_asset = self.contract_config.get_conditional()
             taker_asset = self.contract_config.get_collateral()
             maker_asset_id = int(order_args.token_id)
             taker_asset_id = None
 
             size_normalized = round_down(order_args.size, 2)
-            maker_amount = to_conditional_token_decimals(size_normalized)
-            taker_amount = to_collateral_token_decimals(round_down(order_args.price * size_normalized, 2))
+            maker_amount = to_token_decimals(size_normalized)
+            taker_amount = to_token_decimals(round_down(order_args.price * size_normalized, 2))
 
         data = LimitOrderData(
-                exchange_address=self.contract_config.exchange,
+                exchange_address=self.contract_config.get_exchange(),
                 maker_asset_address=maker_asset,
                 maker_asset_id=maker_asset_id,
                 taker_asset_address=taker_asset,
@@ -70,7 +68,6 @@ class OrderBuilder:
                 sig_type=self.sig_type
         )
         
-        #TODO: move some functions to helpers
         limit_order = self.limit_order_builder.build_limit_order(data)
         signature = self.limit_order_builder.build_limit_order_signature(limit_order)
         return self.limit_order_builder.build_limit_order_and_signature(limit_order, signature)
