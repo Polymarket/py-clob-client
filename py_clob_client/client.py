@@ -6,7 +6,7 @@ from .headers import create_level_1_headers, create_level_2_headers
 from .signer import Signer
 
 from .endpoints import CANCEL_ALL, CREATE_API_KEY, GET_API_KEYS, POST_ORDER, TIME
-from .clob_types import ApiCreds, LimitOrderArgs, RequestArgs
+from .clob_types import ApiCreds, LimitOrderArgs, MarketOrderArgs, RequestArgs
 from .exceptions import PolyException
 from .http_helpers.helpers import delete, get, post
 from .constants import CREDENTIAL_CREATION_WARNING, L0, L1, L1_AUTH_UNAVAILABLE, L2, L2_AUTH_UNAVAILABLE
@@ -91,6 +91,14 @@ class ClobClient:
         self.assert_level_2_auth()
 
         return self.builder.create_limit_order(order_args)
+
+    def create_market_order(self, order_args: MarketOrderArgs):
+        """
+        Creates and signs a market order
+        Level 2 Auth required
+        """
+        self.assert_level_2_auth()
+        return self.builder.create_market_order(order_args)
     
     def cancel_all(self):
         """
@@ -107,11 +115,7 @@ class ClobClient:
         Posts the order
         """
         self.assert_level_2_auth()
-        body = {
-            "order": order.order.to_dict(),
-            "signature": order.signature,
-            "orderType": order.orderType,
-        }
+        body = order.dict()
         headers = create_level_2_headers(self.signer, self.creds, RequestArgs(method="POST", request_path=POST_ORDER, body=body))
         return post("{}{}".format(self.host, POST_ORDER), headers=headers, data=body)
 

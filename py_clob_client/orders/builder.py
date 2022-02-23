@@ -1,12 +1,12 @@
-from py_order_utils.builders import LimitOrderBuilder
-from py_order_utils.model import EOA, LimitOrderData
+from py_order_utils.builders import LimitOrderBuilder, MarketOrderBuilder
+from py_order_utils.model import EOA, LimitOrderData, MarketOrderData
 from py_order_utils.config import get_contract_config
 
 from .helpers import round_down, to_token_decimals
 from .constants import BUY
 
 from ..signer import Signer
-from ..clob_types import LimitOrderArgs
+from ..clob_types import LimitOrderArgs, MarketOrderArgs
 
 
 class OrderBuilder:
@@ -22,7 +22,8 @@ class OrderBuilder:
         # If not provided, funder is the signer address
         self.funder = funder if funder is not None else self.signer.address
         self.contract_config = self._get_contract_config(self.signer.get_chain_id())
-        self.limit_order_builder = self._create_limit_order_builder()
+        self.limit_order_builder = LimitOrderBuilder(self.contract_config.exchange, self.signer.chain_id, self.signer)
+        self.market_order_builder = MarketOrderBuilder(self.contract_config.exchange, self.signer.chain_id, self.signer)
 
     def _get_contract_config(self, chain_id: int):
         return get_contract_config(chain_id)
@@ -35,7 +36,6 @@ class OrderBuilder:
         """
         Creates and signs a limit order
         """
-        print("builder.py: creating order..")
         if order_args.side == BUY:
             maker_asset = self.contract_config.get_collateral()
             taker_asset = self.contract_config.get_conditional()
@@ -68,12 +68,37 @@ class OrderBuilder:
                 sig_type=self.sig_type
         )
         
-        limit_order = self.limit_order_builder.build_limit_order(data)
-        signature = self.limit_order_builder.build_limit_order_signature(limit_order)
-        return self.limit_order_builder.build_limit_order_and_signature(limit_order, signature)
+        return self.limit_order_builder.create_limit_order(data)
 
+    def create_market_order(self, order_args: MarketOrderArgs):
+        """
+        """
+        if order_args.side == BUY:
+            maker_asset = self.contract_config.get_collateral()
+            taker_asset = self.contract_config.get_conditional()
+            maker_asset_id = None
+            taker_asset_id = int(order_args.token_id)
 
-    
+            size_normalized = round_down(order_args.size, 2)
+            maker_amount = to_token_decimals(round_down(order_args.price * size_normalized, 2))
+        else:
+            maker_asset = self.contract_config.get_conditional()
+            taker_asset = self.contract_config.get_collateral()
+            maker_asset_id = int(order_args.token_id)
+            taker_asset_id = None
 
-    
+            size_normalized = round_down(order_args.size, 2)
+            maker_amount = to_token_decimals(size_normalized)
 
+        data = MarketOrderData(
+                exchange_address=self.contract_config.get_exchange(),
+                maker_asset_address=maker_asset,
+                maker_asset_id=maker_asset_id,
+                taker_asset_address=taker_asset,
+                taker_asset_id=taker_asset_id,
+                maker_address=self.funder,
+                maker_amount=maker_amount,
+                signer=self.signer.address,
+                sig_type=self.sig_type
+        )        
+        return self.market_order_builder.create_market_order(data)
