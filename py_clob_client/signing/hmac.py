@@ -13,8 +13,6 @@ def build_hmac_signature(secret: str, timestamp: str, method: str, requestPath: 
         # NOTE: Necessary to replace single quotes with double quotes
         # to generate the same hmac message as go and typescript
         message += str(body).replace("'", '"') 
-    print("Message:")
-    print(message)
     
     h = hmac.new(base64_secret, bytes(message, "utf-8"), hashlib.sha256)
 
