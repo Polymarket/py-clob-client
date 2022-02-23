@@ -5,7 +5,7 @@ from .orders.builder import OrderBuilder
 from .headers import create_level_1_headers, create_level_2_headers
 from .signer import Signer
 
-from .endpoints import CANCEL_ALL, CREATE_API_KEY, GET_API_KEYS, POST_ORDER, TIME
+from .endpoints import CANCEL, CANCEL_ALL, CREATE_API_KEY, GET_API_KEYS, GET_ORDER, OPEN_ORDERS, POST_ORDER, TIME, TRADE_HISTORY
 from .clob_types import ApiCreds, LimitOrderArgs, MarketOrderArgs, RequestArgs
 from .exceptions import PolyException
 from .http_helpers.helpers import delete, get, post
@@ -13,10 +13,6 @@ from .constants import CREDENTIAL_CREATION_WARNING, L0, L1, L1_AUTH_UNAVAILABLE,
 
 
 class ClobClient:
-    """
-    Clob Client
-    """
-
     def __init__(self, host, chain_id: int = None, key:str = None, creds:ApiCreds = None, signature_type: int = None, funder: str = None):
         """
         Initializes the clob client
@@ -70,6 +66,7 @@ class ClobClient:
         
         creds = post(endpoint, headers=headers)
         self.logger.info(CREDENTIAL_CREATION_WARNING)
+        self.logger.info(creds)
         return creds
 
     def get_api_keys(self):
@@ -99,16 +96,6 @@ class ClobClient:
         """
         self.assert_level_2_auth()
         return self.builder.create_market_order(order_args)
-    
-    def cancel_all(self):
-        """
-        Cancels all available orders for the user
-        Level 2 Auth required
-        """
-        self.assert_level_2_auth()
-        request_args = RequestArgs(method="DELETE", request_path=CANCEL_ALL)
-        headers = create_level_2_headers(self.signer, self.creds, request_args)
-        return delete("{}{}".format(self.host, CANCEL_ALL), headers=headers)
 
     def post_order(self, order):
         """
@@ -119,6 +106,57 @@ class ClobClient:
         headers = create_level_2_headers(self.signer, self.creds, RequestArgs(method="POST", request_path=POST_ORDER, body=body))
         return post("{}{}".format(self.host, POST_ORDER), headers=headers, data=body)
 
+    def cancel(self, order_id):
+        """
+        Cancels an order
+        Level 2 Auth required
+        """
+        self.assert_level_2_auth()
+        body = {
+            "orderID": order_id
+        }
+
+        request_args = RequestArgs(method="DELETE", request_path=CANCEL, body=body)
+        headers = create_level_2_headers(self.signer, self.creds, request_args)
+        return delete("{}{}".format(self.host, CANCEL), headers=headers, body=body)
+
+    def cancel_all(self):
+        """
+        Cancels all available orders for the user
+        Level 2 Auth required
+        """
+        self.assert_level_2_auth()
+        request_args = RequestArgs(method="DELETE", request_path=CANCEL_ALL)
+        headers = create_level_2_headers(self.signer, self.creds, request_args)
+        return delete("{}{}".format(self.host, CANCEL_ALL), headers=headers)
+
+    def get_open_orders(self):
+        """
+        Gets open orders for the API key
+        Requires Level 2 authentication
+        """
+        self.assert_level_2_auth()
+        request_args = RequestArgs(method="GET", request_path=OPEN_ORDERS)
+        headers = create_level_2_headers(self.signer, self.creds, request_args)
+        return get("{}{}".format(self.host, OPEN_ORDERS), headers=headers)
+
+    def get_order(self, order_id):
+        """
+        Fetches the order corresponding to the order_id
+        Requires Level 2 authentication
+        """
+        self.assert_level_2_auth()
+        endpoint = "{}{}".format(GET_ORDER, order_id)
+        request_args = RequestArgs(method="GET", request_path=endpoint)
+        headers = create_level_2_headers(self.signer, self.creds, request_args)
+        return get("{}{}".format(self.host, endpoint), headers=headers)
+
+    def get_trade_history(self):
+        self.assert_level_2_auth()
+        request_args = RequestArgs(method="GET", request_path=TRADE_HISTORY)
+        headers = create_level_2_headers(self.signer, self.creds, request_args)
+        return get("{}{}".format(self.host, TRADE_HISTORY), headers=headers)
+    
     def assert_level_1_auth(self):
         """
         Level 1 Poly Auth
