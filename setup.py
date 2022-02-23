@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="py_clob_client",
-    version="0.0.1",
+    version="0.0.2",
     author="Jonathan Amenechi",
     author_email="jonathanamenechi@gmail.com",
     description="Python client for the Polymarket CLOB",
@@ -13,8 +13,8 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/Polymarket/py-clob-client",
     install_requires=[
-        'dotenv',
-        'py_order_utils'
+        'python-dotenv',
+        'py-order-utils'
     ],
     project_urls={
         "Bug Tracker": "https://github.com/Polymarket/py-clob-client/issues",
