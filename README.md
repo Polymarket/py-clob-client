@@ -2,6 +2,14 @@
 
 Python client for the Polymarket CLOB
 
+### Installation
+
+`pip install py-clob-client`
+
+Intended for use with Python 3.9
+
+### Usage
+
 ```py
 host = "http://localhost:8080"
 key = os.getenv("PK")
