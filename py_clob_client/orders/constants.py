@@ -1,0 +1,3 @@
+BUY = "buy"
+SELL = "sell"
+
