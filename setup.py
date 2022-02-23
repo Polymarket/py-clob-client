@@ -14,7 +14,7 @@ setuptools.setup(
     url="https://github.com/Polymarket/py-clob-client",
     install_requires=[
         'python-dotenv',
-        'py-order-utils'
+        'py-order-utils>=0.0.11'
     ],
     project_urls={
         "Bug Tracker": "https://github.com/Polymarket/py-clob-client/issues",
