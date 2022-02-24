@@ -1,7 +1,7 @@
 ## py-clob-client
 
-<a href='https://pypi.org/project/py-order-utils'>
-    <img src='https://img.shields.io/pypi/v/py-order-utils.svg' alt='PyPI'/>
+<a href='https://pypi.org/project/py-clob-client'>
+    <img src='https://img.shields.io/pypi/v/py-clob-client.svg' alt='PyPI'/>
 </a>
 
 Python client for the Polymarket CLOB
