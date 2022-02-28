@@ -5,10 +5,11 @@ from .orders.builder import OrderBuilder
 from .headers import create_level_1_headers, create_level_2_headers
 from .signer import Signer
 
-from .endpoints import CANCEL, CANCEL_ALL, CREATE_API_KEY, GET_API_KEYS, GET_ORDER, OPEN_ORDERS, POST_ORDER, TIME, TRADE_HISTORY
+from .endpoints import CANCEL, CANCEL_ALL, CREATE_API_KEY, GET_API_KEYS, GET_ORDER, MID_POINT, OPEN_ORDERS, POST_ORDER, TIME, TRADE_HISTORY
 from .clob_types import ApiCreds, LimitOrderArgs, MarketOrderArgs, RequestArgs
 from .exceptions import PolyException
 from .http_helpers.helpers import delete, get, post
+from py_order_utils.config import get_contract_config
 from .constants import CREDENTIAL_CREATION_WARNING, L0, L1, L1_AUTH_UNAVAILABLE, L2, L2_AUTH_UNAVAILABLE
 
 
@@ -30,8 +31,10 @@ class ClobClient:
         self.signer = Signer(key, chain_id) if key else None
         self.creds = creds
         self.mode = self._get_client_mode()
+        if chain_id:
+            self.contract_config = get_contract_config(chain_id)
         if self.signer:
-            self.builder = OrderBuilder(self.signer, sig_type=signature_type, funder=funder) 
+            self.builder = OrderBuilder(self.signer, sig_type=signature_type, funder=funder)
         self.logger = logging.getLogger(self.__class__.__name__)
 
     def get_address(self):
@@ -80,6 +83,12 @@ class ClobClient:
         headers = create_level_2_headers(self.signer, self.creds, request_args)
         return get("{}{}".format(self.host, GET_API_KEYS), headers=headers)
 
+    def get_midpoint(self, tokenID):
+        """
+        Get the mid market price for the given market
+        """
+        return get("{}{}?market={}&tokenID={}".format(self.host, MID_POINT, self.contract_config.conditional, tokenID))
+
     def create_limit_order(self, order_args: LimitOrderArgs):
         """
         Creates and signs a limit order
@@ -106,6 +115,20 @@ class ClobClient:
         headers = create_level_2_headers(self.signer, self.creds, RequestArgs(method="POST", request_path=POST_ORDER, body=body))
         return post("{}{}".format(self.host, POST_ORDER), headers=headers, data=body)
 
+    def create_and_post_limit_order(self, order_args: LimitOrderArgs):
+        """
+        Utility function to create and publish a limit order
+        """
+        lim = self.create_limit_order(order_args)
+        return self.post_order(lim)
+
+    def create_and_post_market_order(self, order_args: MarketOrderArgs):
+        """
+        Utility function to create and publish a market order
+        """
+        mkt = self.create_market_order(order_args)
+        return self.post_order(mkt)
+
     def cancel(self, order_id):
         """
         Cancels an order
@@ -130,7 +153,7 @@ class ClobClient:
         headers = create_level_2_headers(self.signer, self.creds, request_args)
         return delete("{}{}".format(self.host, CANCEL_ALL), headers=headers)
 
-    def get_open_orders(self):
+    def get_open_orders(self, tokenID = None):
         """
         Gets open orders for the API key
         Requires Level 2 authentication
@@ -138,6 +161,10 @@ class ClobClient:
         self.assert_level_2_auth()
         request_args = RequestArgs(method="GET", request_path=OPEN_ORDERS)
         headers = create_level_2_headers(self.signer, self.creds, request_args)
+        
+        if tokenID is not None:
+            return get("{}{}?market={}&tokenID={}".format(self.host, OPEN_ORDERS, self.contract_config.conditional, tokenID), headers=headers)
+        
         return get("{}{}".format(self.host, OPEN_ORDERS), headers=headers)
 
     def get_order(self, order_id):
