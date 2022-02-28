@@ -42,6 +42,20 @@ class ClobClient:
         Returns the public address of the signer
         """
         return self.signer.address if self.signer else None
+
+    def get_collateral_address(self):
+        """
+        Returns the collateral token address
+        """
+        if self.contract_config:
+            return self.contract_config.get_collateral()
+
+    def get_conditional_address(self):
+        """
+        Returns the conditional token address
+        """
+        if self.contract_config:
+            return self.contract_config.get_conditional()
     
     def get_ok(self):
         """
@@ -87,7 +101,7 @@ class ClobClient:
         """
         Get the mid market price for the given market
         """
-        return get("{}{}?market={}&tokenID={}".format(self.host, MID_POINT, self.contract_config.conditional, tokenID))
+        return get("{}{}?market={}&tokenID={}".format(self.host, MID_POINT, self.get_conditional_address(), tokenID))
 
     def create_limit_order(self, order_args: LimitOrderArgs):
         """
@@ -163,7 +177,7 @@ class ClobClient:
         headers = create_level_2_headers(self.signer, self.creds, request_args)
         
         if tokenID is not None:
-            return get("{}{}?market={}&tokenID={}".format(self.host, OPEN_ORDERS, self.contract_config.conditional, tokenID), headers=headers)
+            return get("{}{}?market={}&tokenID={}".format(self.host, OPEN_ORDERS, self.get_conditional_address(), tokenID), headers=headers)
         
         return get("{}{}".format(self.host, OPEN_ORDERS), headers=headers)
 
