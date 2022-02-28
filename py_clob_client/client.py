@@ -141,7 +141,7 @@ class ClobClient:
 
         request_args = RequestArgs(method="DELETE", request_path=CANCEL, body=body)
         headers = create_level_2_headers(self.signer, self.creds, request_args)
-        return delete("{}{}".format(self.host, CANCEL), headers=headers, body=body)
+        return delete("{}{}".format(self.host, CANCEL), headers=headers, data=body)
 
     def cancel_all(self):
         """
