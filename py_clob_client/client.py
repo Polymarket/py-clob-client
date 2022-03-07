@@ -56,6 +56,20 @@ class ClobClient:
         """
         if self.contract_config:
             return self.contract_config.get_conditional()
+
+    def get_exchange_address(self):
+        """
+        Returns the exchange address
+        """
+        if self.contract_config:
+            return self.contract_config.get_exchange()
+
+    def get_executor_address(self):
+        """
+        Returns the executor address
+        """
+        if self.contract_config:
+            return self.contract_config.get_executor()
     
     def get_ok(self):
         """
