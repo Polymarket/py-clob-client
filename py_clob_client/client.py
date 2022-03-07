@@ -5,7 +5,7 @@ from .orders.builder import OrderBuilder
 from .headers import create_level_1_headers, create_level_2_headers
 from .signer import Signer
 
-from .endpoints import CANCEL, CANCEL_ALL, CREATE_API_KEY, GET_API_KEYS, GET_ORDER, MID_POINT, OPEN_ORDERS, POST_ORDER, TIME, TRADE_HISTORY
+from .endpoints import CANCEL, CANCEL_ALL, CREATE_API_KEY, DELETE_API_KEY, GET_API_KEYS, GET_ORDER, GET_ORDER_BOOK, MID_POINT, OPEN_ORDERS, POST_ORDER, PRICE, TIME, TRADE_HISTORY
 from .clob_types import ApiCreds, LimitOrderArgs, MarketOrderArgs, RequestArgs
 from .exceptions import PolyException
 from .http_helpers.helpers import delete, get, post
@@ -97,11 +97,28 @@ class ClobClient:
         headers = create_level_2_headers(self.signer, self.creds, request_args)
         return get("{}{}".format(self.host, GET_API_KEYS), headers=headers)
 
+    def delete_api_key(self):
+        """
+        Deletes an API key
+        Level 2 Auth required
+        """
+        self.assert_level_2_auth()
+        
+        request_args = RequestArgs(method="DELETE", request_path=DELETE_API_KEY)
+        headers = create_level_2_headers(self.signer, self.creds, request_args)
+        return delete("{}{}".format(self.host, DELETE_API_KEY), headers=headers)
+
     def get_midpoint(self, tokenID):
         """
         Get the mid market price for the given market
         """
-        return get("{}{}?market={}&tokenID={}".format(self.host, MID_POINT, self.get_conditional_address(), tokenID))
+        return get("{}{}?market={}".format(self.host, MID_POINT, tokenID))
+
+    def get_price(self, tokenID, side):
+        """
+        Get the mid market price for the given market
+        """
+        return get("{}{}?price={}&side={}".format(self.host, PRICE, tokenID, side))
 
     def create_limit_order(self, order_args: LimitOrderArgs):
         """
@@ -177,9 +194,15 @@ class ClobClient:
         headers = create_level_2_headers(self.signer, self.creds, request_args)
         
         if tokenID is not None:
-            return get("{}{}?market={}&tokenID={}".format(self.host, OPEN_ORDERS, self.get_conditional_address(), tokenID), headers=headers)
+            return get("{}{}?market={}".format(self.host, OPEN_ORDERS, tokenID), headers=headers)
         
         return get("{}{}".format(self.host, OPEN_ORDERS), headers=headers)
+
+    def get_order_book(self, token_id):
+        """
+        Fetches the orderbook for the token_id
+        """
+        return get("{}{}?market={}".format(self.host, GET_ORDER_BOOK, token_id))
 
     def get_order(self, order_id):
         """
@@ -193,6 +216,8 @@ class ClobClient:
         return get("{}{}".format(self.host, endpoint), headers=headers)
 
     def get_trade_history(self):
+        """
+        """
         self.assert_level_2_auth()
         request_args = RequestArgs(method="GET", request_path=TRADE_HISTORY)
         headers = create_level_2_headers(self.signer, self.creds, request_args)
