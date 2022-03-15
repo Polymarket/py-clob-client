@@ -28,10 +28,6 @@ class OrderBuilder:
     def _get_contract_config(self, chain_id: int):
         return get_contract_config(chain_id)
 
-    def _create_limit_order_builder(self):
-        return LimitOrderBuilder(self.contract_config.exchange, self.signer.chain_id, self.signer)
-
-
     def create_limit_order(self, order_args: LimitOrderArgs):
         """
         Creates and signs a limit order
@@ -79,16 +75,14 @@ class OrderBuilder:
             maker_asset_id = None
             taker_asset_id = int(order_args.token_id)
 
-            size_normalized = round_down(order_args.size, 2)
-            maker_amount = to_token_decimals(round_down(order_args.price * size_normalized, 2))
+            maker_amount = to_token_decimals(round_down(order_args.size, 2))
         else:
             maker_asset = self.contract_config.get_conditional()
             taker_asset = self.contract_config.get_collateral()
             maker_asset_id = int(order_args.token_id)
             taker_asset_id = None
 
-            size_normalized = round_down(order_args.size, 2)
-            maker_amount = to_token_decimals(size_normalized)
+            maker_amount = to_token_decimals(round_down(order_args.size, 2))
 
         data = MarketOrderData(
                 exchange_address=self.contract_config.get_exchange(),
