@@ -42,3 +42,5 @@ print(resp)
 ```
 
 See [examples](examples/) for more
+
+[Bulk orders](examples/README_BULK_ORDERS.md) howto
