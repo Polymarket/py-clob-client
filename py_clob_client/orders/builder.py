@@ -58,6 +58,7 @@ class OrderBuilder:
                 taker_asset_address=taker_asset,
                 taker_asset_id=taker_asset_id,
                 maker_address=self.funder,
+                taker_address=self.contract_config.get_executor(),
                 maker_amount=maker_amount,
                 taker_amount=taker_amount,
                 signer=self.signer.address,
