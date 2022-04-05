@@ -5,7 +5,7 @@ from .orders.builder import OrderBuilder
 from .headers import create_level_1_headers, create_level_2_headers
 from .signer import Signer
 
-from .endpoints import CANCEL, CANCEL_ALL, CREATE_API_KEY, DELETE_API_KEY, GET_API_KEYS, GET_ORDER, GET_ORDER_BOOK, MID_POINT, OPEN_ORDERS, POST_ORDER, PRICE, TIME, TRADE_HISTORY
+from .endpoints import CANCEL, CANCEL_ALL, CREATE_API_KEY, DELETE_API_KEY, GET_API_KEYS, GET_ORDER, GET_ORDER_BOOK, MID_POINT, OPEN_ORDERS, ORDER_HISTORY, POST_ORDER, PRICE, TIME, TRADE_HISTORY
 from .clob_types import ApiCreds, LimitOrderArgs, MarketOrderArgs, RequestArgs
 from .exceptions import PolyException
 from .http_helpers.helpers import delete, get, post
@@ -231,13 +231,32 @@ class ClobClient:
         headers = create_level_2_headers(self.signer, self.creds, request_args)
         return get("{}{}".format(self.host, endpoint), headers=headers)
 
-    def get_trade_history(self):
+    def get_trade_history(self, tokenID = None):
         """
+        Fetches the trade history for a user
+        Requires Level 2 authentication
         """
         self.assert_level_2_auth()
         request_args = RequestArgs(method="GET", request_path=TRADE_HISTORY)
         headers = create_level_2_headers(self.signer, self.creds, request_args)
+        if tokenID is not None:
+            return get("{}{}?market={}".format(self.host, TRADE_HISTORY, tokenID), headers=headers)
+        
         return get("{}{}".format(self.host, TRADE_HISTORY), headers=headers)
+    
+    def get_order_history(self, tokenID = None):
+        """
+        Fetches order history for a user
+        Requires Level 2 Authentication
+        """
+        self.assert_level_2_auth()
+        request_args = RequestArgs(method="GET", request_path=ORDER_HISTORY)
+        headers = create_level_2_headers(self.signer, self.creds, request_args)
+        
+        if tokenID is not None:
+            return get("{}{}?market={}".format(self.host, ORDER_HISTORY, tokenID), headers=headers)
+        
+        return get("{}{}".format(self.host, ORDER_HISTORY), headers=headers)
     
     def assert_level_1_auth(self):
         """
