@@ -8,8 +8,7 @@ from pprint import pprint
 load_dotenv()
 
 def main():
-    # host = "http://localhost:8080"
-    host = "https://clob-staging.polymarket.com"
+    host = "http://localhost:8080"
     key = os.getenv("PK")
     creds = ApiCreds(api_key=os.getenv("CLOB_API_KEY"), api_secret=os.getenv("CLOB_SECRET"), api_passphrase=os.getenv("CLOB_PASS_PHRASE"))
     chain_id = 80001
