@@ -132,7 +132,7 @@ class ClobClient:
 
     def get_price(self, tokenID, side):
         """
-        Get the mid market price for the given market
+        Get the market price for the given market
         """
         return get("{}{}?price={}&side={}".format(self.host, PRICE, tokenID, side))
 
