@@ -28,4 +28,10 @@ class MarketOrderArgs:
     token_id: str
 
 
+@dataclass
+class FilterParams:
+    market: str = None
+    max: int = None
+    start_ts: int = None
+    end_ts: int = None
 

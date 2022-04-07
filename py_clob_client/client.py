@@ -6,9 +6,9 @@ from .headers import create_level_1_headers, create_level_2_headers
 from .signer import Signer
 
 from .endpoints import CANCEL, CANCEL_ALL, CREATE_API_KEY, DELETE_API_KEY, GET_API_KEYS, GET_ORDER, GET_ORDER_BOOK, MID_POINT, OPEN_ORDERS, ORDER_HISTORY, POST_ORDER, PRICE, TIME, TRADE_HISTORY
-from .clob_types import ApiCreds, LimitOrderArgs, MarketOrderArgs, RequestArgs
+from .clob_types import ApiCreds, FilterParams, LimitOrderArgs, MarketOrderArgs, RequestArgs
 from .exceptions import PolyException
-from .http_helpers.helpers import delete, get, post
+from .http_helpers.helpers import add_query_params, delete, get, post
 from py_order_utils.config import get_contract_config
 from .constants import CREDENTIAL_CREATION_WARNING, L0, L1, L1_AUTH_UNAVAILABLE, L2, L2_AUTH_UNAVAILABLE
 
@@ -200,7 +200,7 @@ class ClobClient:
         headers = create_level_2_headers(self.signer, self.creds, request_args)
         return delete("{}{}".format(self.host, CANCEL_ALL), headers=headers)
 
-    def get_open_orders(self, tokenID = None):
+    def get_open_orders(self, params: FilterParams = None):
         """
         Gets open orders for the API key
         Requires Level 2 authentication
@@ -208,11 +208,8 @@ class ClobClient:
         self.assert_level_2_auth()
         request_args = RequestArgs(method="GET", request_path=OPEN_ORDERS)
         headers = create_level_2_headers(self.signer, self.creds, request_args)
-        
-        if tokenID is not None:
-            return get("{}{}?market={}".format(self.host, OPEN_ORDERS, tokenID), headers=headers)
-        
-        return get("{}{}".format(self.host, OPEN_ORDERS), headers=headers)
+        url = add_query_params("{}{}".format(self.host, OPEN_ORDERS), params)
+        return get(url, headers=headers)
 
     def get_order_book(self, token_id):
         """
@@ -231,7 +228,7 @@ class ClobClient:
         headers = create_level_2_headers(self.signer, self.creds, request_args)
         return get("{}{}".format(self.host, endpoint), headers=headers)
 
-    def get_trade_history(self, tokenID = None):
+    def get_trade_history(self, params: FilterParams=None):
         """
         Fetches the trade history for a user
         Requires Level 2 authentication
@@ -239,12 +236,10 @@ class ClobClient:
         self.assert_level_2_auth()
         request_args = RequestArgs(method="GET", request_path=TRADE_HISTORY)
         headers = create_level_2_headers(self.signer, self.creds, request_args)
-        if tokenID is not None:
-            return get("{}{}?market={}".format(self.host, TRADE_HISTORY, tokenID), headers=headers)
-        
-        return get("{}{}".format(self.host, TRADE_HISTORY), headers=headers)
+        url = add_query_params("{}{}".format(self.host, TRADE_HISTORY), params)
+        return get(url, headers=headers)
     
-    def get_order_history(self, tokenID = None):
+    def get_order_history(self, params: FilterParams = None):
         """
         Fetches order history for a user
         Requires Level 2 Authentication
@@ -252,11 +247,8 @@ class ClobClient:
         self.assert_level_2_auth()
         request_args = RequestArgs(method="GET", request_path=ORDER_HISTORY)
         headers = create_level_2_headers(self.signer, self.creds, request_args)
-        
-        if tokenID is not None:
-            return get("{}{}?market={}".format(self.host, ORDER_HISTORY, tokenID), headers=headers)
-        
-        return get("{}{}".format(self.host, ORDER_HISTORY), headers=headers)
+        url = add_query_params("{}{}".format(self.host, ORDER_HISTORY), params)
+        return get(url, headers=headers)
     
     def assert_level_1_auth(self):
         """
