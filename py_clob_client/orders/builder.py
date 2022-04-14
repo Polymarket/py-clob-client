@@ -77,6 +77,12 @@ class OrderBuilder:
             taker_asset_id = int(order_args.token_id)
 
             maker_amount = to_token_decimals(round_down(order_args.size, 2))
+
+            worst_price = order_args.worst_price
+            min_amt_received = 0
+            if worst_price is not None:
+                # Calculate minimum amount received from worst price
+                min_amt_received = to_token_decimals(round_down(order_args.size / worst_price, 2))
         else:
             maker_asset = self.contract_config.get_conditional()
             taker_asset = self.contract_config.get_collateral()
@@ -84,6 +90,11 @@ class OrderBuilder:
             taker_asset_id = None
 
             maker_amount = to_token_decimals(round_down(order_args.size, 2))
+            worst_price = order_args.worst_price
+            min_amt_received = 0
+            if worst_price is not None:
+                # Calculate minimum amount received from worst price
+                min_amt_received = to_token_decimals(round_down(order_args.size * worst_price, 2))
 
         data = MarketOrderData(
                 exchange_address=self.contract_config.get_exchange(),
@@ -94,6 +105,7 @@ class OrderBuilder:
                 maker_address=self.funder,
                 maker_amount=maker_amount,
                 signer=self.signer.address,
-                sig_type=self.sig_type
+                sig_type=self.sig_type,
+                min_amount_received=min_amt_received,
         )        
         return self.market_order_builder.create_market_order(data)
