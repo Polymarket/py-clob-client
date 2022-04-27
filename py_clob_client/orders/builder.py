@@ -38,18 +38,16 @@ class OrderBuilder:
             maker_asset_id = None
             taker_asset_id = int(order_args.token_id)
 
-            size_normalized = round_down(order_args.size, 2)
-            maker_amount = to_token_decimals(round_down(order_args.price * size_normalized, 2))
-            taker_amount = to_token_decimals(size_normalized)
+            maker_amount = to_token_decimals(order_args.price * order_args.size)
+            taker_amount = to_token_decimals(order_args.size)
         else:
             maker_asset = self.contract_config.get_conditional()
             taker_asset = self.contract_config.get_collateral()
             maker_asset_id = int(order_args.token_id)
             taker_asset_id = None
 
-            size_normalized = round_down(order_args.size, 2)
-            maker_amount = to_token_decimals(size_normalized)
-            taker_amount = to_token_decimals(round_down(order_args.price * size_normalized, 2))
+            maker_amount = to_token_decimals(order_args.size)
+            taker_amount = to_token_decimals(order_args.price * order_args.size)
 
         data = LimitOrderData(
                 exchange_address=self.contract_config.get_exchange(),
