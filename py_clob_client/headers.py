@@ -7,21 +7,29 @@ from datetime import datetime
 POLY_ADDRESS = "POLY_ADDRESS"
 POLY_SIGNATURE = "POLY_SIGNATURE"
 POLY_TIMESTAMP = "POLY_TIMESTAMP"
+POLY_NONCE = "POLY_NONCE"
 POLY_API_KEY = "POLY_API_KEY"
 POLY_PASSPHRASE = "POLY_PASSPHRASE"
 
 
-def create_level_1_headers(signer: Signer):
+def create_level_1_headers(signer: Signer, nonce : int = None):
     """
     Creates Level 1 Poly headers for a request
     """
     timestamp = int(datetime.now().timestamp())
-    signature = sign_clob_auth_message(signer, timestamp)
+    
+    n = 0
+    if nonce is not None:
+        n = nonce
+
+    signature = sign_clob_auth_message(signer, timestamp, n)
     headers = {
         POLY_ADDRESS: signer.address,
         POLY_SIGNATURE: signature,
         POLY_TIMESTAMP: str(timestamp),
+        POLY_NONCE: str(n),
     }
+    
     return headers
 
 

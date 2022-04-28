@@ -5,12 +5,12 @@ from .orders.builder import OrderBuilder
 from .headers import create_level_1_headers, create_level_2_headers
 from .signer import Signer
 
-from .endpoints import CANCEL, CANCEL_ALL, CREATE_API_KEY, DELETE_API_KEY, GET_API_KEYS, GET_ORDER, GET_ORDER_BOOK, MID_POINT, OPEN_ORDERS, ORDER_HISTORY, POST_ORDER, PRICE, TIME, TRADE_HISTORY
+from .endpoints import CANCEL, CANCEL_ALL, CREATE_API_KEY, DELETE_API_KEY, DERIVE_API_KEY, GET_API_KEYS, GET_ORDER, GET_ORDER_BOOK, MID_POINT, OPEN_ORDERS, ORDER_HISTORY, POST_ORDER, PRICE, TIME, TRADE_HISTORY
 from .clob_types import ApiCreds, FilterParams, LimitOrderArgs, MarketOrderArgs, RequestArgs
 from .exceptions import PolyException
 from .http_helpers.helpers import add_query_params, delete, get, post
 from py_order_utils.config import get_contract_config
-from .constants import CREDENTIAL_CREATION_WARNING, L0, L1, L1_AUTH_UNAVAILABLE, L2, L2_AUTH_UNAVAILABLE
+from .constants import L0, L1, L1_AUTH_UNAVAILABLE, L2, L2_AUTH_UNAVAILABLE
 
 
 class ClobClient:
@@ -88,17 +88,29 @@ class ClobClient:
         """
         return get("{}{}".format(self.host, TIME))
 
-    def create_api_key(self):
+    def create_api_key(self, nonce : int = None):
         """
         Creates a new CLOB API key for the given 
         """
         self.assert_level_1_auth()
         
         endpoint = "{}{}".format(self.host, CREATE_API_KEY)
-        headers= create_level_1_headers(self.signer)
+        headers= create_level_1_headers(self.signer, nonce)
         
         creds = post(endpoint, headers=headers)
-        self.logger.info(CREDENTIAL_CREATION_WARNING)
+        self.logger.info(creds)
+        return creds
+
+    def derive_api_key(self, nonce : int = None):
+        """
+        Derives an already existing CLOB API key for the given address and nonce 
+        """
+        self.assert_level_1_auth()
+        
+        endpoint = "{}{}".format(self.host, DERIVE_API_KEY)
+        headers= create_level_1_headers(self.signer, nonce)
+        
+        creds = get(endpoint, headers=headers)
         self.logger.info(creds)
         return creds
 
