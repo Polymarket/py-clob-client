@@ -5,7 +5,7 @@ from .orders.builder import OrderBuilder
 from .headers import create_level_1_headers, create_level_2_headers
 from .signer import Signer
 
-from .endpoints import CANCEL, CANCEL_ALL, CREATE_API_KEY, DELETE_API_KEY, DERIVE_API_KEY, GET_API_KEYS, GET_ORDER, GET_ORDER_BOOK, MID_POINT, OPEN_ORDERS, ORDER_HISTORY, POST_ORDER, PRICE, TIME, TRADE_HISTORY
+from .endpoints import CANCEL, CANCEL_ALL, CREATE_API_KEY, DELETE_API_KEY, DERIVE_API_KEY, GET_API_KEYS, GET_LAST_TRADE_PRICE, GET_ORDER, GET_ORDER_BOOK, MID_POINT, OPEN_ORDERS, ORDER_HISTORY, POST_ORDER, PRICE, TIME, TRADE_HISTORY
 from .clob_types import ApiCreds, FilterParams, LimitOrderArgs, MarketOrderArgs, RequestArgs
 from .exceptions import PolyException
 from .http_helpers.helpers import add_query_params, delete, get, post
@@ -261,6 +261,12 @@ class ClobClient:
         headers = create_level_2_headers(self.signer, self.creds, request_args)
         url = add_query_params("{}{}".format(self.host, ORDER_HISTORY), params)
         return get(url, headers=headers)
+    
+    def get_last_trade_price(self, token_id):
+        """
+        Fetches the last trade price token_id
+        """
+        return get("{}{}?market={}".format(self.host, GET_LAST_TRADE_PRICE, token_id))
     
     def assert_level_1_auth(self):
         """
