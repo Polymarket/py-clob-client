@@ -13,3 +13,4 @@ ORDER_HISTORY = "/order-history"
 CANCEL_ALL = "/cancel-all"
 MID_POINT="/midpoint"
 PRICE = "/price"
+GET_LAST_TRADE_PRICE = "/last-trade-price";
