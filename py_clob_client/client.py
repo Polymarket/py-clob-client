@@ -262,11 +262,11 @@ class ClobClient:
         url = add_query_params("{}{}".format(self.host, ORDER_HISTORY), params)
         return get(url, headers=headers)
     
-    def get_last_trade_price(self, token_id):
+    def get_last_trade_price(self, token_id, side):
         """
         Fetches the last trade price token_id
         """
-        return get("{}{}?market={}".format(self.host, GET_LAST_TRADE_PRICE, token_id))
+        return get("{}{}?market={}&side={}".format(self.host, GET_LAST_TRADE_PRICE, token_id, side))
     
     def assert_level_1_auth(self):
         """
