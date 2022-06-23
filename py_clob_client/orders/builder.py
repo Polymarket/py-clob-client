@@ -94,7 +94,7 @@ class OrderBuilder:
                 # Calculate minimum amount received from worst price
                 min_amt_received = to_token_decimals(round_down(order_args.size * worst_price, 2))
 
-        time_in_force = order_args.time_in_foce
+        time_in_force = order_args.time_in_force
         if time_in_force is None:
             time_in_force = "FOK"
 
