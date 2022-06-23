@@ -34,7 +34,6 @@ def main():
         token_id=no_token,
         time_in_force="FOK",
     )
-    print(fok_order_args)
     fok_mkt_order = client.create_market_order(fok_order_args)
     print("FOK market order")
     print(client.post_order(fok_mkt_order))
