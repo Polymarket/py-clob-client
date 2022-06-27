@@ -1,7 +1,7 @@
 import os
 
 from py_clob_client.client import ClobClient
-from py_clob_client.clob_types import ApiCreds, LimitOrderArgs, MarketOrderArgs
+from py_clob_client.clob_types import ApiCreds, MarketOrderArgs
 from dotenv import load_dotenv
 
 from py_clob_client.orders.constants import BUY, SELL

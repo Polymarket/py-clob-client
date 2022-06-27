@@ -27,6 +27,7 @@ class MarketOrderArgs:
     side: str
     token_id: str
     worst_price: float = None
+    time_in_force: str = "FOK"
 
 
 @dataclass
