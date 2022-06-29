@@ -5,7 +5,7 @@ from .orders.builder import OrderBuilder
 from .headers import create_level_1_headers, create_level_2_headers
 from .signer import Signer
 
-from .endpoints import CANCEL, CANCEL_ALL, CREATE_API_KEY, DELETE_API_KEY, DERIVE_API_KEY, GET_API_KEYS, GET_LAST_TRADE_PRICE, GET_ORDER, GET_ORDER_BOOK, MID_POINT, OPEN_ORDERS, ORDER_HISTORY, POST_ORDER, PRICE, TIME, TRADE_HISTORY
+from .endpoints import CANCEL, CANCEL_ALL, CREATE_API_KEY, DELETE_API_KEY, DERIVE_API_KEY, GET_API_KEYS, GET_LAST_TRADE_PRICE, GET_ORDER, GET_ORDER_BOOK, LARGE_ORDERS, MID_POINT, OPEN_ORDERS, ORDER_HISTORY, POST_ORDER, PRICE, TIME, TRADE_HISTORY
 from .clob_types import ApiCreds, FilterParams, LimitOrderArgs, MarketOrderArgs, RequestArgs
 from .exceptions import PolyException
 from .http_helpers.helpers import add_query_params, delete, get, post
@@ -147,6 +147,13 @@ class ClobClient:
         Get the market price for the given market
         """
         return get("{}{}?price={}&side={}".format(self.host, PRICE, tokenID, side))
+
+    def get_large_orders(self, params: FilterParams = None):
+        """
+        Gets large orders
+        """
+        url = add_query_params("{}{}".format(self.host, LARGE_ORDERS), params)
+        return get(url)
 
     def create_limit_order(self, order_args: LimitOrderArgs):
         """
