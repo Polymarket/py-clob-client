@@ -36,4 +36,5 @@ class FilterParams:
     max: int = None
     start_ts: int = None
     end_ts: int = None
+    min_value: str = None
 
