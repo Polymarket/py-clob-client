@@ -5,7 +5,7 @@ from .orders.builder import OrderBuilder
 from .headers import create_level_1_headers, create_level_2_headers
 from .signer import Signer
 
-from .endpoints import CANCEL, CANCEL_ALL, CREATE_API_KEY, DELETE_API_KEY, DERIVE_API_KEY, GET_API_KEYS, GET_LAST_TRADE_PRICE, GET_ORDER, GET_ORDER_BOOK, LARGE_ORDERS, MID_POINT, OPEN_ORDERS, ORDER_HISTORY, POST_ORDER, PRICE, TIME, TRADE_HISTORY
+from .endpoints import CANCEL, CANCEL_ALL, CREATE_API_KEY, DELETE_API_KEY, DERIVE_API_KEY, GET_API_KEYS, GET_LAST_TRADE_PRICE, GET_ORDER, GET_ORDER_BOOK, LARGE_ORDERS, MARKET_ORDER_HISTORY, MID_POINT, OPEN_ORDERS, ORDER_HISTORY, POST_ORDER, PRICE, TIME, TRADE_HISTORY
 from .clob_types import ApiCreds, FilterParams, LimitOrderArgs, MarketOrderArgs, RequestArgs
 from .exceptions import PolyException
 from .http_helpers.helpers import add_query_params, delete, get, post
@@ -267,6 +267,17 @@ class ClobClient:
         request_args = RequestArgs(method="GET", request_path=ORDER_HISTORY)
         headers = create_level_2_headers(self.signer, self.creds, request_args)
         url = add_query_params("{}{}".format(self.host, ORDER_HISTORY), params)
+        return get(url, headers=headers)
+
+    def get_market_order_history(self, params: FilterParams = None):
+        """
+        Fetches market order history for a user
+        Requires Level 2 Authentication
+        """
+        self.assert_level_2_auth()
+        request_args = RequestArgs(method="GET", request_path=MARKET_ORDER_HISTORY)
+        headers = create_level_2_headers(self.signer, self.creds, request_args)
+        url = add_query_params("{}{}".format(self.host, MARKET_ORDER_HISTORY), params)
         return get(url, headers=headers)
     
     def get_last_trade_price(self, token_id):
