@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="py_clob_client",
-    version="0.0.24",
+    version="0.0.25",
     author="Jonathan Amenechi",
     author_email="jonathanamenechi@gmail.com",
     description="Python client for the Polymarket CLOB",
