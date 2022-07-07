@@ -19,57 +19,22 @@ def main():
 
     # Limit order
     client.post_order(client.create_limit_order(LimitOrderArgs(
-        price=0.50,
-        size=100.0,
-        side=BUY,
-        token_id=no_token
-    )))
-    client.post_order(client.create_limit_order(LimitOrderArgs(
-        price=0.50,
-        size=100.0,
-        side=BUY,
-        token_id=no_token
-    )))
-    client.post_order(client.create_limit_order(LimitOrderArgs(
         price=0.40,
-        size=100.0,
-        side=BUY,
+        size=1000.0,
+        side=SELL,
         token_id=no_token
     )))
     client.post_order(client.create_limit_order(LimitOrderArgs(
-        price=0.40,
-        size=100.0,
-        side=BUY,
+        price=0.45,
+        size=250.0,
+        side=SELL,
         token_id=no_token
     )))
-
-    # FOK, error expected
-    fok_order_args = MarketOrderArgs(
-        size=500.0,
-        side=SELL,
-        token_id=no_token,
-        time_in_force="FOK",
-    )
-    fok_mkt_order = client.create_market_order(fok_order_args)
-    print("FOK market order")
-    print(client.post_order(fok_mkt_order))
-
-    # Create a IOC market sell that will fail because the slippage check
-    ioc_slippage_check_order = MarketOrderArgs(
-        size=500.0,
-        side=SELL,
-        token_id=no_token,
-        worst_price=0.50,
-        time_in_force="IOC",
-    )
-    ioc_slippage_check_order = client.create_market_order(ioc_slippage_check_order)
-    print("IOC market order")
-    print(client.post_order(ioc_slippage_check_order))
 
     # IOC, match expected
     ioc_order_args = MarketOrderArgs(
-        size=250.0,
-        side=SELL,
+        size=500.0,
+        side=BUY,
         token_id=no_token,
         worst_price=0.45,
         time_in_force="IOC",
