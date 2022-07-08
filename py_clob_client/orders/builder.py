@@ -79,7 +79,7 @@ class OrderBuilder:
             taker_asset_id = int(order_args.token_id)
 
             if time_in_force == "FOK":
-                maker_amount = to_token_decimals(round_down(order_args.size / worst_price, 2))
+                maker_amount = to_token_decimals(round_down(order_args.size * worst_price, 2))
                 min_amt_received = to_token_decimals(round_down(order_args.size, 2))
             else:
                 maker_amount = to_token_decimals(round_down(order_args.size, 2))
