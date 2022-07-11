@@ -68,19 +68,27 @@ class OrderBuilder:
     def create_market_order(self, order_args: MarketOrderArgs):
         """
         """
+        time_in_force = order_args.time_in_force
+        if time_in_force is None:
+            time_in_force = "FOK"
+            
         if order_args.side == BUY:
             maker_asset = self.contract_config.get_collateral()
             taker_asset = self.contract_config.get_conditional()
             maker_asset_id = None
             taker_asset_id = int(order_args.token_id)
 
-            maker_amount = to_token_decimals(round_down(order_args.size, 2))
+            if time_in_force == "IOC":
+                maker_amount = to_token_decimals(round_down(order_args.size * worst_price, 2))
+                min_amt_received = to_token_decimals(round_down(order_args.size, 2))
+            else:
+                maker_amount = to_token_decimals(round_down(order_args.size, 2))
 
-            worst_price = order_args.worst_price
-            min_amt_received = 0
-            if worst_price is not None:
-                # Calculate minimum amount received from worst price
-                min_amt_received = to_token_decimals(round_down(order_args.size / worst_price, 2))
+                worst_price = order_args.worst_price
+                min_amt_received = 0
+                if worst_price is not None:
+                    # Calculate minimum amount received from worst price
+                    min_amt_received = to_token_decimals(round_down(order_args.size / worst_price, 2))
         else:
             maker_asset = self.contract_config.get_conditional()
             taker_asset = self.contract_config.get_collateral()
@@ -94,9 +102,6 @@ class OrderBuilder:
                 # Calculate minimum amount received from worst price
                 min_amt_received = to_token_decimals(round_down(order_args.size * worst_price, 2))
 
-        time_in_force = order_args.time_in_force
-        if time_in_force is None:
-            time_in_force = "FOK"
 
         data = MarketOrderData(
                 exchange_address=self.contract_config.get_exchange(),
