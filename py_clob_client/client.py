@@ -27,7 +27,7 @@ class ClobClient:
         3) Level 2: Requires the host, chain_id, a private key, and Credentials.
                     Allows access to all endpoints
         """
-        self.host = host
+        self.host = host[0:-1] if host.endswith("/") else host
         self.signer = Signer(key, chain_id) if key else None
         self.creds = creds
         self.mode = self._get_client_mode()
