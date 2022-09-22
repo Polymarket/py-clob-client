@@ -8,6 +8,9 @@ from .constants import BUY
 from ..signer import Signer
 from ..clob_types import LimitOrderArgs, MarketOrderArgs
 
+# TODO(REC): re write
+# TODO(REC): tests
+
 
 class OrderBuilder:
     def __init__(self, signer: Signer, sig_type=None, funder=None):

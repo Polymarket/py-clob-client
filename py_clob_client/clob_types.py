@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import Any
 
+from .constants import ZERO_ADDRESS
+
 
 @dataclass
 class ApiCreds:
@@ -17,20 +19,46 @@ class RequestArgs:
 
 
 @dataclass
-class LimitOrderArgs:
+class OrderArgs:
+    token_id: str
+    """
+    TokenID of the Conditional token asset being traded
+    """
+
     price: float
-    size: float
-    side: str
-    token_id: str
+    """
+    Price used to create the order
+    """
 
-
-@dataclass
-class MarketOrderArgs:
     size: float
-    side: str
-    token_id: str
-    worst_price: float = None
-    time_in_force: str = "FOK"
+    """
+    Size in terms of the ConditionalToken
+    """
+
+    side: str  # TODO(REC): should be int?
+    """
+    Side of the order
+    """
+
+    fee_rate_bps: int = 0
+    """
+    Fee rate, in basis points, charged to the order maker, charged on proceeds
+    """
+
+    nonce: int = 0
+    """
+    Nonce used for onchain cancellations
+    """
+
+    expiration: int = 0
+    """
+    Timestamp after which the order is expired.
+    """
+
+    taker: str = ZERO_ADDRESS
+    """
+    Address of the order taker. The zero address is used to indicate a public order
+    """
 
 
 @dataclass

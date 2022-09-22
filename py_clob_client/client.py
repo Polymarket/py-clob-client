@@ -1,8 +1,8 @@
 import logging
 
-from .orders.builder import OrderBuilder
+from .order_builder.builder import OrderBuilder
 
-from .headers import create_level_1_headers, create_level_2_headers
+from .headers.headers import create_level_1_headers, create_level_2_headers
 from .signer import Signer
 
 from .endpoints import (
@@ -16,7 +16,6 @@ from .endpoints import (
     GET_ORDER,
     GET_ORDER_BOOK,
     LARGE_ORDERS,
-    MARKET_ORDER_HISTORY,
     MID_POINT,
     OPEN_ORDERS,
     ORDER_HISTORY,
@@ -28,8 +27,7 @@ from .endpoints import (
 from .clob_types import (
     ApiCreds,
     FilterParams,
-    LimitOrderArgs,
-    MarketOrderArgs,
+    OrderArgs,
     RequestArgs,
 )
 from .exceptions import PolyException
@@ -187,22 +185,14 @@ class ClobClient:
         url = add_query_params("{}{}".format(self.host, LARGE_ORDERS), params)
         return get(url)
 
-    def create_limit_order(self, order_args: LimitOrderArgs):
+    def create_order(self, order_args: OrderArgs):
         """
-        Creates and signs a limit order
+        Creates and signs an order
         Level 2 Auth required
         """
         self.assert_level_2_auth()
 
-        return self.builder.create_limit_order(order_args)
-
-    def create_market_order(self, order_args: MarketOrderArgs):
-        """
-        Creates and signs a market order
-        Level 2 Auth required
-        """
-        self.assert_level_2_auth()
-        return self.builder.create_market_order(order_args)
+        return self.builder.create_order(order_args)
 
     def post_order(self, order):
         """
@@ -217,19 +207,12 @@ class ClobClient:
         )
         return post("{}{}".format(self.host, POST_ORDER), headers=headers, data=body)
 
-    def create_and_post_limit_order(self, order_args: LimitOrderArgs):
+    def create_and_post_order(self, order_args: OrderArgs):
         """
-        Utility function to create and publish a limit order
+        Utility function to create and publish an order
         """
-        lim = self.create_limit_order(order_args)
-        return self.post_order(lim)
-
-    def create_and_post_market_order(self, order_args: MarketOrderArgs):
-        """
-        Utility function to create and publish a market order
-        """
-        mkt = self.create_market_order(order_args)
-        return self.post_order(mkt)
+        ord = self.create_order(order_args)
+        return self.post_order(ord)
 
     def cancel(self, order_id):
         """
@@ -301,17 +284,6 @@ class ClobClient:
         request_args = RequestArgs(method="GET", request_path=ORDER_HISTORY)
         headers = create_level_2_headers(self.signer, self.creds, request_args)
         url = add_query_params("{}{}".format(self.host, ORDER_HISTORY), params)
-        return get(url, headers=headers)
-
-    def get_market_order_history(self, params: FilterParams = None):
-        """
-        Fetches market order history for a user
-        Requires Level 2 Authentication
-        """
-        self.assert_level_2_auth()
-        request_args = RequestArgs(method="GET", request_path=MARKET_ORDER_HISTORY)
-        headers = create_level_2_headers(self.signer, self.creds, request_args)
-        url = add_query_params("{}{}".format(self.host, MARKET_ORDER_HISTORY), params)
         return get(url, headers=headers)
 
     def get_last_trade_price(self, token_id):

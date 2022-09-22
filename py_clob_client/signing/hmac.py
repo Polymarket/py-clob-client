@@ -19,4 +19,4 @@ def build_hmac_signature(
     h = hmac.new(base64_secret, bytes(message, "utf-8"), hashlib.sha256)
 
     # ensure base64 encoded
-    return base64.urlsafe_b64encode(h.digest())
+    return (base64.urlsafe_b64encode(h.digest())).decode("utf-8")
