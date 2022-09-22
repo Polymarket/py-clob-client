@@ -1,6 +1,7 @@
 from datetime import datetime
 from unittest import TestCase
 from py_clob_client.clob_types import ApiCreds, RequestArgs
+from py_clob_client.constants import MUMBAI
 from py_clob_client.headers.headers import (
     POLY_ADDRESS,
     POLY_API_KEY,
@@ -15,7 +16,7 @@ from py_clob_client.signer import Signer
 
 # publicly known private key
 private_key = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
-chain_id = 80001
+chain_id = MUMBAI
 signer = Signer(private_key=private_key, chain_id=chain_id)
 
 creds = ApiCreds(
