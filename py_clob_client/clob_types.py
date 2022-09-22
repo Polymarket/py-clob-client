@@ -35,7 +35,7 @@ class OrderArgs:
     Size in terms of the ConditionalToken
     """
 
-    side: str  # TODO(REC): should be int?
+    side: str
     """
     Side of the order
     """

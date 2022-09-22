@@ -1,14 +1,13 @@
-from py_order_utils.builders import LimitOrderBuilder, MarketOrderBuilder
-from py_order_utils.model import EOA, LimitOrderData, MarketOrderData
+from py_order_utils.builders import OrderBuilder
+from py_order_utils.model import EOA, OrderData, SignedOrder
 from py_order_utils.config import get_contract_config
 
-from .helpers import round_down, to_token_decimals
+from .helpers import to_token_decimals
 from .constants import BUY
 
 from ..signer import Signer
-from ..clob_types import LimitOrderArgs, MarketOrderArgs
+from ..clob_types import OrderArgs
 
-# TODO(REC): re write
 # TODO(REC): tests
 
 
@@ -24,106 +23,38 @@ class OrderBuilder:
         # Defaults to the address of the signer
         self.funder = funder if funder is not None else self.signer.address
         self.contract_config = self._get_contract_config(self.signer.get_chain_id())
-        self.limit_order_builder = LimitOrderBuilder(
-            self.contract_config.exchange, self.signer.chain_id, self.signer
-        )
-        self.market_order_builder = MarketOrderBuilder(
+        self.order_builder = OrderBuilder(
             self.contract_config.exchange, self.signer.chain_id, self.signer
         )
 
     def _get_contract_config(self, chain_id: int):
         return get_contract_config(chain_id)
 
-    def create_limit_order(self, order_args: LimitOrderArgs):
+    def create_order(self, order_args: OrderArgs) -> SignedOrder:
         """
-        Creates and signs a limit order
+        Creates and signs an order
         """
         if order_args.side == BUY:
-            maker_asset = self.contract_config.get_collateral()
-            taker_asset = self.contract_config.get_conditional()
-            maker_asset_id = None
-            taker_asset_id = int(order_args.token_id)
-
+            side = 0
             maker_amount = to_token_decimals(order_args.price * order_args.size)
             taker_amount = to_token_decimals(order_args.size)
         else:
-            maker_asset = self.contract_config.get_conditional()
-            taker_asset = self.contract_config.get_collateral()
-            maker_asset_id = int(order_args.token_id)
-            taker_asset_id = None
-
+            side = 1
             maker_amount = to_token_decimals(order_args.size)
             taker_amount = to_token_decimals(order_args.price * order_args.size)
 
-        data = LimitOrderData(
-            exchange_address=self.contract_config.get_exchange(),
-            maker_asset_address=maker_asset,
-            maker_asset_id=maker_asset_id,
-            taker_asset_address=taker_asset,
-            taker_asset_id=taker_asset_id,
-            maker_address=self.funder,
-            taker_address=self.contract_config.get_executor(),
-            maker_amount=maker_amount,
-            taker_amount=taker_amount,
+        data = OrderData(
+            maker=self.funder,
+            taker=order_args.taker,
+            tokenId=order_args.token_id,
+            makerAmount=maker_amount,
+            takerAmount=taker_amount,
+            side=side,
+            feeRateBps=str(order_args.fee_rate_bps),
+            nonce=str(order_args.nonce),
             signer=self.signer.address,
-            sig_type=self.sig_type,
+            expiration=str(order_args.expiration),
+            signatureType=self.sig_type,
         )
 
-        return self.limit_order_builder.create_limit_order(data)
-
-    def create_market_order(self, order_args: MarketOrderArgs):
-        """ """
-        time_in_force = order_args.time_in_force
-        if time_in_force is None:
-            time_in_force = "FOK"
-
-        if order_args.side == BUY:
-            maker_asset = self.contract_config.get_collateral()
-            taker_asset = self.contract_config.get_conditional()
-            maker_asset_id = None
-            taker_asset_id = int(order_args.token_id)
-
-            if time_in_force == "IOC":
-                maker_amount = to_token_decimals(
-                    round_down(order_args.size * worst_price, 2)
-                )
-                min_amt_received = to_token_decimals(round_down(order_args.size, 2))
-            else:
-                maker_amount = to_token_decimals(round_down(order_args.size, 2))
-
-                worst_price = order_args.worst_price
-                min_amt_received = 0
-                if worst_price is not None:
-                    # Calculate minimum amount received from worst price
-                    min_amt_received = to_token_decimals(
-                        round_down(order_args.size / worst_price, 2)
-                    )
-        else:
-            maker_asset = self.contract_config.get_conditional()
-            taker_asset = self.contract_config.get_collateral()
-            maker_asset_id = int(order_args.token_id)
-            taker_asset_id = None
-
-            maker_amount = to_token_decimals(round_down(order_args.size, 2))
-            worst_price = order_args.worst_price
-            min_amt_received = 0
-            if worst_price is not None:
-                # Calculate minimum amount received from worst price
-                min_amt_received = to_token_decimals(
-                    round_down(order_args.size * worst_price, 2)
-                )
-
-        data = MarketOrderData(
-            exchange_address=self.contract_config.get_exchange(),
-            maker_asset_address=maker_asset,
-            maker_asset_id=maker_asset_id,
-            taker_asset_address=taker_asset,
-            taker_asset_id=taker_asset_id,
-            maker_address=self.funder,
-            maker_amount=maker_amount,
-            signer=self.signer.address,
-            sig_type=self.sig_type,
-            min_amount_received=min_amt_received,
-            time_in_force=time_in_force,
-        )
-        return self.market_order_builder.create_market_order(data)
+        return self.order_builder.build_signed_order(data)
