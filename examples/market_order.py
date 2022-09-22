@@ -9,10 +9,15 @@ from py_clob_client.orders.constants import BUY, SELL
 
 load_dotenv()
 
+
 def main():
     host = "http://localhost:8080"
     key = os.getenv("PK")
-    creds = ApiCreds(api_key=os.getenv("CLOB_API_KEY"), api_secret=os.getenv("CLOB_SECRET"), api_passphrase=os.getenv("CLOB_PASS_PHRASE"))
+    creds = ApiCreds(
+        api_key=os.getenv("CLOB_API_KEY"),
+        api_secret=os.getenv("CLOB_SECRET"),
+        api_passphrase=os.getenv("CLOB_PASS_PHRASE"),
+    )
     chain_id = 80001
     client = ClobClient(host, key=key, chain_id=chain_id, creds=creds)
 
@@ -20,7 +25,7 @@ def main():
     order_args = MarketOrderArgs(
         size=100.0,
         side=SELL,
-        token_id="16678291189211314787145083999015737376658799626183230671758641503291735614088"
+        token_id="16678291189211314787145083999015737376658799626183230671758641503291735614088",
     )
     mkt_order = client.create_market_order(order_args)
     resp = client.post_order(mkt_order)

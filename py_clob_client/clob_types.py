@@ -8,11 +8,13 @@ class ApiCreds:
     api_secret: str
     api_passphrase: str
 
+
 @dataclass
 class RequestArgs:
     method: str
     request_path: str
     body: Any = None
+
 
 @dataclass
 class LimitOrderArgs:
@@ -20,6 +22,7 @@ class LimitOrderArgs:
     size: float
     side: str
     token_id: str
+
 
 @dataclass
 class MarketOrderArgs:
@@ -37,4 +40,3 @@ class FilterParams:
     start_ts: int = None
     end_ts: int = None
     min_value: str = None
-

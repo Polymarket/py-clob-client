@@ -1,11 +1,10 @@
-
 from eth_account import Account
 
 
 class Signer:
     def __init__(self, private_key: str, chain_id: int):
-        assert(private_key is not None and chain_id is not None)
-        
+        assert private_key is not None and chain_id is not None
+
         self.private_key = private_key
         self.account = Account.from_key(private_key)
         self.chain_id = chain_id

@@ -5,6 +5,7 @@ from py_clob_client.client import ClobClient
 
 load_dotenv()
 
+
 def main():
     host = "http://localhost:8080"
     key = os.getenv("PK")

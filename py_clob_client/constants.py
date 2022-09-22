@@ -1,4 +1,3 @@
-
 # Access levels
 L0 = 0
 L1 = 1
@@ -14,4 +13,3 @@ Be sure to store them safely!
 L1_AUTH_UNAVAILABLE = "A private key is needed to interact with this endpoint!"
 
 L2_AUTH_UNAVAILABLE = "API Credentials are needed to interact with this endpoint!"
-
