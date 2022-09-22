@@ -15,3 +15,6 @@ L1_AUTH_UNAVAILABLE = "A private key is needed to interact with this endpoint!"
 L2_AUTH_UNAVAILABLE = "API Credentials are needed to interact with this endpoint!"
 
 ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
+
+MUMBAI = 80001
+POLYGON = 137

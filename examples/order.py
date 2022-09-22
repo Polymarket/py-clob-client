@@ -1,10 +1,10 @@
 import os
 
 from py_clob_client.client import ClobClient
-from py_clob_client.clob_types import ApiCreds, MarketOrderArgs
+from py_clob_client.clob_types import ApiCreds, OrderArgs
 from dotenv import load_dotenv
 
-from py_clob_client.orders.constants import BUY
+from py_clob_client.order_builder.constants import BUY
 
 
 load_dotenv()
@@ -21,15 +21,15 @@ def main():
     chain_id = 80001
     client = ClobClient(host, key=key, chain_id=chain_id, creds=creds)
 
-    # Create and sign a market order selling 100 YES tokens, with a worst price check
-    order_args = MarketOrderArgs(
+    # Create and sign a limit order buying 100 YES tokens for 0.50c each
+    order_args = OrderArgs(
+        price=0.50,
         size=100.0,
         side=BUY,
         token_id="16678291189211314787145083999015737376658799626183230671758641503291735614088",
-        worst_price=0.60,
     )
-    mkt_order = client.create_market_order(order_args)
-    resp = client.post_order(mkt_order)
+    signed_order = client.create_order(order_args)
+    resp = client.post_order(signed_order)
     print(resp)
     print("Done!")
 
