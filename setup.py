@@ -8,8 +8,8 @@ setuptools.setup(
     version="0.1.0",
     author="Polymarket Engineering",
     author_email="engineering@polymarket.com",
-    maintainer="Polymarket Engineering"
-    maintainer_email="engineering@polymarket.com"
+    maintainer="Polymarket Engineering",
+    maintainer_email="engineering@polymarket.com",
     description="Python client for the Polymarket CLOB",
     long_description=long_description,
     long_description_content_type="text/markdown",
