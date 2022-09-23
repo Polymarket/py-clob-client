@@ -14,7 +14,7 @@ def get_clob_auth_domain(chain_id: int):
 
 def sign_clob_auth_message(signer: Signer, timestamp: int, nonce: int) -> str:
     clob_auth_msg = ClobAuth(
-        address=signer.address,
+        address=signer.address(),
         timestamp=str(timestamp),
         nonce=nonce,
         message=MSG_TO_SIGN,

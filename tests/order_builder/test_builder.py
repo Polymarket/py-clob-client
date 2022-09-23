@@ -1,4 +1,5 @@
 from unittest import TestCase
+
 from py_clob_client.clob_types import OrderArgs
 from py_clob_client.constants import MUMBAI
 from py_clob_client.order_builder.constants import BUY, SELL
@@ -29,59 +30,60 @@ class TestOrderBuilder(TestCase):
             )
         )
 
+        self.assertTrue(isinstance(signed_order.order["salt"], int))
         self.assertIsNotNone(signed_order)
-        self.assertIsNotNone(signed_order.salt)
         self.assertEqual(
-            signed_order.maker,
+            signed_order.order["maker"],
             "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
         )
         self.assertEqual(
-            signed_order.signer,
+            signed_order.order["signer"],
             "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
         )
         self.assertEqual(
-            signed_order.taker,
+            signed_order.order["taker"],
             "0x0000000000000000000000000000000000000000",
         )
         self.assertEqual(
-            signed_order.tokenId,
-            "123",
+            signed_order.order["tokenId"],
+            123,
         )
         self.assertEqual(
-            signed_order.makerAmount,
-            "11782400",
+            signed_order.order["makerAmount"],
+            11782400,
         )
         self.assertEqual(
-            signed_order.takerAmount,
-            "21040000",
+            signed_order.order["takerAmount"],
+            21040000,
         )
         self.assertEqual(
-            signed_order.side,
+            signed_order.order["side"],
             0,
         )
         self.assertEqual(
-            signed_order.expiration,
-            "50000",
+            signed_order.order["expiration"],
+            50000,
         )
         self.assertEqual(
-            signed_order.nonce,
-            "123",
+            signed_order.order["nonce"],
+            123,
         )
         self.assertEqual(
-            signed_order.feeRateBps,
-            "111",
+            signed_order.order["feeRateBps"],
+            111,
         )
         self.assertEqual(
-            signed_order.signatureType,
+            signed_order.order["signatureType"],
             EOA,
         )
         self.assertIsNotNone(signed_order.signature)
         self.assertEqual(
-            int(signed_order.makerAmount) / int(signed_order.takerAmount),
+            int(signed_order.order["makerAmount"])
+            / int(signed_order.order["takerAmount"]),
             0.56,
         )
 
-    def test_create_order_buy(self):
+    def test_create_order_sell(self):
         builder = OrderBuilder(signer, sig_type=POLY_GNOSIS_SAFE)
 
         signed_order = builder.create_order(
@@ -96,54 +98,55 @@ class TestOrderBuilder(TestCase):
             )
         )
 
+        self.assertTrue(isinstance(signed_order.order["salt"], int))
         self.assertIsNotNone(signed_order)
-        self.assertIsNotNone(signed_order.salt)
         self.assertEqual(
-            signed_order.maker,
+            signed_order.order["maker"],
             "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
         )
         self.assertEqual(
-            signed_order.signer,
+            signed_order.order["signer"],
             "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
         )
         self.assertEqual(
-            signed_order.taker,
+            signed_order.order["taker"],
             "0x0000000000000000000000000000000000000000",
         )
         self.assertEqual(
-            signed_order.tokenId,
-            "123",
+            signed_order.order["tokenId"],
+            123,
         )
         self.assertEqual(
-            signed_order.makerAmount,
-            "21040000",
+            signed_order.order["makerAmount"],
+            21040000,
         )
         self.assertEqual(
-            signed_order.takerAmount,
-            "11782400",
+            signed_order.order["takerAmount"],
+            11782400,
         )
         self.assertEqual(
-            signed_order.side,
+            signed_order.order["side"],
             1,
         )
         self.assertEqual(
-            signed_order.expiration,
-            "50000",
+            signed_order.order["expiration"],
+            50000,
         )
         self.assertEqual(
-            signed_order.nonce,
-            "123",
+            signed_order.order["nonce"],
+            123,
         )
         self.assertEqual(
-            signed_order.feeRateBps,
-            "111",
+            signed_order.order["feeRateBps"],
+            111,
         )
         self.assertEqual(
-            signed_order.signatureType,
+            signed_order.order["signatureType"],
             POLY_GNOSIS_SAFE,
         )
         self.assertIsNotNone(signed_order.signature)
         self.assertEqual(
-            int(signed_order.takerAmount) / int(signed_order.makerAmount),
+            int(signed_order.order["takerAmount"])
+            / int(signed_order.order["makerAmount"]),
             0.56,
         )

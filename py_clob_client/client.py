@@ -74,7 +74,7 @@ class ClobClient:
         """
         Returns the public address of the signer
         """
-        return self.signer.address if self.signer else None
+        return self.signer.address() if self.signer else None
 
     def get_collateral_address(self):
         """

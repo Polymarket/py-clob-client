@@ -24,7 +24,7 @@ def create_level_1_headers(signer: Signer, nonce: int = None):
 
     signature = sign_clob_auth_message(signer, timestamp, n)
     headers = {
-        POLY_ADDRESS: signer.address,
+        POLY_ADDRESS: signer.address(),
         POLY_SIGNATURE: signature,
         POLY_TIMESTAMP: str(timestamp),
         POLY_NONCE: str(n),
@@ -48,7 +48,7 @@ def create_level_2_headers(signer: Signer, creds: ApiCreds, request_args: Reques
     )
 
     return {
-        POLY_ADDRESS: signer.address,
+        POLY_ADDRESS: signer.address(),
         POLY_SIGNATURE: hmac_sig,
         POLY_TIMESTAMP: str(timestamp),
         POLY_API_KEY: creds.api_key,

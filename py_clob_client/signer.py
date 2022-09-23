@@ -9,7 +9,6 @@ class Signer:
         self.account = Account.from_key(private_key)
         self.chain_id = chain_id
 
-    @property
     def address(self):
         return self.account.address
 

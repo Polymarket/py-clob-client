@@ -31,7 +31,7 @@ class TestHeaders(TestCase):
         # no nonce
         l1_headers = create_level_1_headers(signer)
         self.assertIsNotNone(l1_headers)
-        self.assertEqual(l1_headers[POLY_ADDRESS], signer.address)
+        self.assertEqual(l1_headers[POLY_ADDRESS], signer.address())
         self.assertIsNotNone(l1_headers[POLY_SIGNATURE])
         self.assertIsNotNone(l1_headers[POLY_TIMESTAMP])
         self.assertTrue(
@@ -42,7 +42,7 @@ class TestHeaders(TestCase):
         # nonce
         l1_headers = create_level_1_headers(signer, nonce=1012)
         self.assertIsNotNone(l1_headers)
-        self.assertEqual(l1_headers[POLY_ADDRESS], signer.address)
+        self.assertEqual(l1_headers[POLY_ADDRESS], signer.address())
         self.assertIsNotNone(l1_headers[POLY_SIGNATURE])
         self.assertIsNotNone(l1_headers[POLY_TIMESTAMP])
         self.assertTrue(
@@ -56,7 +56,7 @@ class TestHeaders(TestCase):
             signer, creds, request_args=RequestArgs(method="get", request_path="/order")
         )
         self.assertIsNotNone(l2_headers)
-        self.assertEqual(l2_headers[POLY_ADDRESS], signer.address)
+        self.assertEqual(l2_headers[POLY_ADDRESS], signer.address())
         self.assertIsNotNone(l2_headers[POLY_SIGNATURE])
         self.assertIsNotNone(l2_headers[POLY_TIMESTAMP])
         self.assertTrue(
@@ -74,7 +74,7 @@ class TestHeaders(TestCase):
             ),
         )
         self.assertIsNotNone(l2_headers)
-        self.assertEqual(l2_headers[POLY_ADDRESS], signer.address)
+        self.assertEqual(l2_headers[POLY_ADDRESS], signer.address())
         self.assertIsNotNone(l2_headers[POLY_SIGNATURE])
         self.assertIsNotNone(l2_headers[POLY_TIMESTAMP])
         self.assertTrue(
