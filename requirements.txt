@@ -31,7 +31,7 @@ parsimonious==0.8.1
 pluggy==1.0.0
 protobuf==3.19.4
 py==1.11.0
-py-order-utils>=0.0.22
+py-order-utils>=0.1.0
 pycryptodome==3.14.0
 pyparsing==3.0.7
 pyrsistent==0.18.1
@@ -48,3 +48,4 @@ varint==1.0.2
 web3==5.27.0
 websockets==9.1
 yarl==1.7.2
+black==22.1.0
