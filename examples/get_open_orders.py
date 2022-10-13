@@ -21,7 +21,7 @@ def main():
 
     resp = client.get_open_orders(
         FilterParams(
-            max=1,
+            limit=1,
             market="16678291189211314787145083999015737376658799626183230671758641503291735614088",
         )
     )

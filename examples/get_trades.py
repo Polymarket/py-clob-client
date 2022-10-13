@@ -21,9 +21,9 @@ def main():
     chain_id = MUMBAI
     client = ClobClient(host, key=key, chain_id=chain_id, creds=creds)
 
-    resp = client.get_trade_history(
+    resp = client.get_trades(
         FilterParams(
-            max=1,
+            limit=1,
             market="16678291189211314787145083999015737376658799626183230671758641503291735614088",
         )
     )

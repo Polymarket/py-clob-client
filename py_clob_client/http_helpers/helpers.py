@@ -55,10 +55,16 @@ def add_query_params(base_url: str, params: FilterParams = None) -> str:
         url = url + "?"
         if params.market:
             url = build_query_params(url, "market", params.market)
-        if params.max:
-            url = build_query_params(url, "max", params.max)
-        if params.start_ts:
-            url = build_query_params(url, "startTs", params.start_ts)
-        if params.end_ts:
-            url = build_query_params(url, "endTs", params.end_ts)
+        if params.limit:
+            url = build_query_params(url, "limit", params.limit)
+        if params.before:
+            url = build_query_params(url, "before", params.before)
+        if params.after:
+            url = build_query_params(url, "after", params.after)
+        if params.maker:
+            url = build_query_params(url, "maker", params.maker)
+        if params.taker:
+            url = build_query_params(url, "taker", params.taker)
+        if params.id:
+            url = build_query_params(url, "id", params.id)
     return url
