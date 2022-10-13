@@ -19,9 +19,9 @@ class TestHelpers(TestCase):
     def test_add_query_params(self):
         url = add_query_params(
             "http://tracker",
-            FilterParams(market="10000", max=250, start_ts=1450000, end_ts=1460000),
+            FilterParams(market="10000", limit=250, after=1450000, before=1460000),
         )
         self.assertIsNotNone(url)
         self.assertEqual(
-            url, "http://tracker?market=10000&max=250&startTs=1450000&endTs=1460000"
+            url, "http://tracker?market=10000&limit=250&after=1450000&before=1460000"
         )

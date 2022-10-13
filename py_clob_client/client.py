@@ -15,14 +15,12 @@ from .endpoints import (
     GET_LAST_TRADE_PRICE,
     GET_ORDER,
     GET_ORDER_BOOK,
-    LARGE_ORDERS,
     MID_POINT,
-    OPEN_ORDERS,
-    ORDER_HISTORY,
+    ORDERS,
     POST_ORDER,
     PRICE,
     TIME,
-    TRADE_HISTORY,
+    TRADES,
 )
 from .clob_types import (
     ApiCreds,
@@ -178,13 +176,6 @@ class ClobClient:
         """
         return get("{}{}?price={}&side={}".format(self.host, PRICE, tokenID, side))
 
-    def get_large_orders(self, params: FilterParams = None):
-        """
-        Gets large orders
-        """
-        url = add_query_params("{}{}".format(self.host, LARGE_ORDERS), params)
-        return get(url)
-
     def create_order(self, order_args: OrderArgs):
         """
         Creates and signs an order
@@ -236,15 +227,15 @@ class ClobClient:
         headers = create_level_2_headers(self.signer, self.creds, request_args)
         return delete("{}{}".format(self.host, CANCEL_ALL), headers=headers)
 
-    def get_open_orders(self, params: FilterParams = None):
+    def get_orders(self, params: FilterParams = None):
         """
-        Gets open orders for the API key
+        Gets orders for the API key
         Requires Level 2 authentication
         """
         self.assert_level_2_auth()
-        request_args = RequestArgs(method="GET", request_path=OPEN_ORDERS)
+        request_args = RequestArgs(method="GET", request_path=ORDERS)
         headers = create_level_2_headers(self.signer, self.creds, request_args)
-        url = add_query_params("{}{}".format(self.host, OPEN_ORDERS), params)
+        url = add_query_params("{}{}".format(self.host, ORDERS), params)
         return get(url, headers=headers)
 
     def get_order_book(self, token_id):
@@ -264,26 +255,15 @@ class ClobClient:
         headers = create_level_2_headers(self.signer, self.creds, request_args)
         return get("{}{}".format(self.host, endpoint), headers=headers)
 
-    def get_trade_history(self, params: FilterParams = None):
+    def get_trades(self, params: FilterParams = None):
         """
         Fetches the trade history for a user
         Requires Level 2 authentication
         """
         self.assert_level_2_auth()
-        request_args = RequestArgs(method="GET", request_path=TRADE_HISTORY)
+        request_args = RequestArgs(method="GET", request_path=TRADES)
         headers = create_level_2_headers(self.signer, self.creds, request_args)
-        url = add_query_params("{}{}".format(self.host, TRADE_HISTORY), params)
-        return get(url, headers=headers)
-
-    def get_order_history(self, params: FilterParams = None):
-        """
-        Fetches order history for a user
-        Requires Level 2 Authentication
-        """
-        self.assert_level_2_auth()
-        request_args = RequestArgs(method="GET", request_path=ORDER_HISTORY)
-        headers = create_level_2_headers(self.signer, self.creds, request_args)
-        url = add_query_params("{}{}".format(self.host, ORDER_HISTORY), params)
+        url = add_query_params("{}{}".format(self.host, TRADES), params) 
         return get(url, headers=headers)
 
     def get_last_trade_price(self, token_id):

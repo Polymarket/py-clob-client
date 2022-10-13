@@ -64,7 +64,10 @@ class OrderArgs:
 @dataclass
 class FilterParams:
     market: str = None
-    max: int = None
-    start_ts: int = None
-    end_ts: int = None
-    min_value: str = None
+    maker: str = None
+    taker: str = None
+    id: str = None
+    limit: int = None
+    before: int = None
+    after: int = None
+    owner: str = None
