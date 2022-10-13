@@ -67,4 +67,6 @@ def add_query_params(base_url: str, params: FilterParams = None) -> str:
             url = build_query_params(url, "taker", params.taker)
         if params.id:
             url = build_query_params(url, "id", params.id)
+        if params.owner:
+            url = build_query_params(url, "owner", params.owner)
     return url

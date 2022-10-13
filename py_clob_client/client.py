@@ -16,7 +16,7 @@ from .endpoints import (
     GET_ORDER,
     GET_ORDER_BOOK,
     MID_POINT,
-    OPEN_ORDERS,
+    ORDERS,
     POST_ORDER,
     PRICE,
     TIME,
@@ -227,15 +227,15 @@ class ClobClient:
         headers = create_level_2_headers(self.signer, self.creds, request_args)
         return delete("{}{}".format(self.host, CANCEL_ALL), headers=headers)
 
-    def get_open_orders(self, params: FilterParams = None):
+    def get_orders(self, params: FilterParams = None):
         """
-        Gets open orders for the API key
+        Gets orders for the API key
         Requires Level 2 authentication
         """
         self.assert_level_2_auth()
-        request_args = RequestArgs(method="GET", request_path=OPEN_ORDERS)
+        request_args = RequestArgs(method="GET", request_path=ORDERS)
         headers = create_level_2_headers(self.signer, self.creds, request_args)
-        url = add_query_params("{}{}".format(self.host, OPEN_ORDERS), params)
+        url = add_query_params("{}{}".format(self.host, ORDERS), params)
         return get(url, headers=headers)
 
     def get_order_book(self, token_id):

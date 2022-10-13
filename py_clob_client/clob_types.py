@@ -70,3 +70,4 @@ class FilterParams:
     limit: int = None
     before: int = None
     after: int = None
+    owner: str = None
