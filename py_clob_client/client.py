@@ -190,7 +190,7 @@ class ClobClient:
         Posts the order
         """
         self.assert_level_2_auth()
-        body = order.dict()
+        body = {"order": order.dict(), "owner": self.creds.api_key, "orderType": "GTC"}
         headers = create_level_2_headers(
             self.signer,
             self.creds,
