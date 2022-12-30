@@ -164,17 +164,17 @@ class ClobClient:
         headers = create_level_2_headers(self.signer, self.creds, request_args)
         return delete("{}{}".format(self.host, DELETE_API_KEY), headers=headers)
 
-    def get_midpoint(self, tokenID):
+    def get_midpoint(self, token_id):
         """
         Get the mid market price for the given market
         """
-        return get("{}{}?market={}".format(self.host, MID_POINT, tokenID))
+        return get("{}{}?token_id={}".format(self.host, MID_POINT, token_id))
 
-    def get_price(self, tokenID, side):
+    def get_price(self, token_id, side):
         """
         Get the market price for the given market
         """
-        return get("{}{}?price={}&side={}".format(self.host, PRICE, tokenID, side))
+        return get("{}{}?token_id={}&side={}".format(self.host, PRICE, token_id, side))
 
     def create_order(self, order_args: OrderArgs):
         """
@@ -190,7 +190,7 @@ class ClobClient:
         Posts the order
         """
         self.assert_level_2_auth()
-        body = order.dict()
+        body = {"order": order.dict(), "owner": self.creds.api_key, "orderType": "GTC"}
         headers = create_level_2_headers(
             self.signer,
             self.creds,
@@ -242,7 +242,7 @@ class ClobClient:
         """
         Fetches the orderbook for the token_id
         """
-        return get("{}{}?market={}".format(self.host, GET_ORDER_BOOK, token_id))
+        return get("{}{}?token_id={}".format(self.host, GET_ORDER_BOOK, token_id))
 
     def get_order(self, order_id):
         """
@@ -270,7 +270,7 @@ class ClobClient:
         """
         Fetches the last trade price token_id
         """
-        return get("{}{}?market={}".format(self.host, GET_LAST_TRADE_PRICE, token_id))
+        return get("{}{}?token_id={}".format(self.host, GET_LAST_TRADE_PRICE, token_id))
 
     def assert_level_1_auth(self):
         """

@@ -24,6 +24,7 @@ def main():
     resp = client.get_trades(
         FilterParams(
             limit=1,
+            taker=client.get_address(),
             market="16678291189211314787145083999015737376658799626183230671758641503291735614088",
         )
     )
