@@ -270,7 +270,7 @@ class ClobClient:
         """
         Fetches the last trade price token_id
         """
-        return get("{}{}?market={}".format(self.host, GET_LAST_TRADE_PRICE, token_id))
+        return get("{}{}?token_id={}".format(self.host, GET_LAST_TRADE_PRICE, token_id))
 
     def assert_level_1_auth(self):
         """
