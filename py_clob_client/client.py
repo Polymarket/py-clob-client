@@ -263,7 +263,7 @@ class ClobClient:
         self.assert_level_2_auth()
         request_args = RequestArgs(method="GET", request_path=TRADES)
         headers = create_level_2_headers(self.signer, self.creds, request_args)
-        url = add_query_params("{}{}".format(self.host, TRADES), params) 
+        url = add_query_params("{}{}".format(self.host, TRADES), params)
         return get(url, headers=headers)
 
     def get_last_trade_price(self, token_id):

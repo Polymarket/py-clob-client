@@ -2,7 +2,7 @@ from py_order_utils.builders import OrderBuilder as UtilsOrderBuild
 from py_order_utils.model import EOA, OrderData, SignedOrder
 from py_order_utils.config import get_contract_config
 
-from .helpers import to_token_decimals
+from .helpers import to_token_decimals, round_down, round_normal
 from .constants import BUY
 
 from ..signer import Signer
@@ -34,12 +34,22 @@ class OrderBuilder:
         """
         if order_args.side == BUY:
             side = 0
-            maker_amount = to_token_decimals(order_args.price * order_args.size)
-            taker_amount = to_token_decimals(order_args.size)
+
+            raw_taker_amt = round_down(order_args.size, 2)
+            raw_price = round_normal(order_args.price, 2)
+            raw_maker_amt = round_down(round_normal(raw_taker_amt * raw_price, 8), 4)
+
+            maker_amount = to_token_decimals(raw_maker_amt)
+            taker_amount = to_token_decimals(raw_taker_amt)
         else:
             side = 1
-            maker_amount = to_token_decimals(order_args.size)
-            taker_amount = to_token_decimals(order_args.price * order_args.size)
+
+            raw_maker_amt = round_down(order_args.size, 2)
+            raw_price = round_normal(order_args.price, 2)
+            raw_taker_amt = round_down(round_normal(raw_maker_amt * raw_price, 8), 4)
+
+            maker_amount = to_token_decimals(raw_maker_amt)
+            taker_amount = to_token_decimals(raw_taker_amt)
 
         data = OrderData(
             maker=self.funder,
