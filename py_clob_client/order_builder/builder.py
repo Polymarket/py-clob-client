@@ -2,7 +2,13 @@ from py_order_utils.builders import OrderBuilder as UtilsOrderBuild
 from py_order_utils.model import EOA, OrderData, SignedOrder
 from py_order_utils.config import get_contract_config
 
-from .helpers import to_token_decimals, round_down, round_normal, decimal_places
+from .helpers import (
+    to_token_decimals,
+    round_down,
+    round_normal,
+    decimal_places,
+    round_up,
+)
 from .constants import BUY
 
 from ..signer import Signer
@@ -40,7 +46,9 @@ class OrderBuilder:
 
             raw_maker_amt = raw_taker_amt * raw_price
             if decimal_places(raw_maker_amt.__str__()) > 4:
-                raw_maker_amt = round_down(round_normal(raw_maker_amt, 8), 4)
+                raw_maker_amt = round_up(raw_maker_amt, 8)
+                if decimal_places(raw_maker_amt.__str__()) > 4:
+                    raw_maker_amt = round_down(raw_maker_amt, 4)
 
             maker_amount = to_token_decimals(raw_maker_amt)
             taker_amount = to_token_decimals(raw_taker_amt)
@@ -52,7 +60,9 @@ class OrderBuilder:
 
             raw_taker_amt = raw_maker_amt * raw_price
             if decimal_places(raw_taker_amt.__str__()) > 4:
-                raw_taker_amt = round_down(round_normal(raw_taker_amt, 8), 4)
+                raw_taker_amt = round_up(raw_taker_amt, 8)
+                if decimal_places(raw_taker_amt.__str__()) > 4:
+                    raw_taker_amt = round_down(raw_taker_amt, 4)
 
             maker_amount = to_token_decimals(raw_maker_amt)
             taker_amount = to_token_decimals(raw_taker_amt)

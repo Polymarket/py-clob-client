@@ -1,4 +1,4 @@
-from math import floor
+from math import floor, ceil
 from decimal import Decimal
 
 
@@ -8,6 +8,10 @@ def round_down(x: float, sig_digits: int) -> float:
 
 def round_normal(x: float, sig_digits: int) -> float:
     return round(x * (10**sig_digits)) / (10**sig_digits)
+
+
+def round_up(x: float, sig_digits: int) -> float:
+    return ceil(x * (10**sig_digits)) / (10**sig_digits)
 
 
 def to_token_decimals(x: float) -> int:
