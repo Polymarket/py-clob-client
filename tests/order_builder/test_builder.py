@@ -90,6 +90,42 @@ class TestOrderBuilder(TestCase):
             82820000,
         )
 
+        # BUY
+        signed_order = builder.create_order(
+            order_args=OrderArgs(
+                token_id="123",
+                price=0.78,
+                size=12.8205,
+                side=BUY,
+            )
+        )
+        self.assertEqual(
+            signed_order.order["makerAmount"],
+            9999600,
+        )
+        self.assertEqual(
+            signed_order.order["takerAmount"],
+            12820000,
+        )
+
+        # SELL
+        signed_order = builder.create_order(
+            order_args=OrderArgs(
+                token_id="123",
+                price=0.78,
+                size=12.8205,
+                side=SELL,
+            )
+        )
+        self.assertEqual(
+            signed_order.order["makerAmount"],
+            12820000,
+        )
+        self.assertEqual(
+            signed_order.order["takerAmount"],
+            9999600,
+        )
+
     def test_create_order_buy(self):
         builder = OrderBuilder(signer)
 
