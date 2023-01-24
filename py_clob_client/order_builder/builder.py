@@ -9,7 +9,7 @@ from .helpers import (
     decimal_places,
     round_up,
 )
-from .constants import BUY
+from .constants import BUY, SELL
 
 from ..signer import Signer
 from ..clob_types import OrderArgs
@@ -52,7 +52,7 @@ class OrderBuilder:
 
             maker_amount = to_token_decimals(raw_maker_amt)
             taker_amount = to_token_decimals(raw_taker_amt)
-        else:
+        elif order_args.side == SELL:
             side = 1
 
             raw_maker_amt = round_down(order_args.size, 2)
@@ -66,6 +66,8 @@ class OrderBuilder:
 
             maker_amount = to_token_decimals(raw_maker_amt)
             taker_amount = to_token_decimals(raw_taker_amt)
+        else:
+            raise ValueError(f"order_args.side must be '{BUY}' or '{SELL}'")
 
         data = OrderData(
             maker=self.funder,
