@@ -1,5 +1,11 @@
 from py_order_utils.builders import OrderBuilder as UtilsOrderBuild
-from py_order_utils.model import EOA, OrderData, SignedOrder
+from py_order_utils.model import (
+    EOA,
+    OrderData,
+    SignedOrder,
+    BUY as UtilsBuy,
+    SELL as UtilsSell,
+)
 from py_order_utils.config import get_contract_config
 
 from .helpers import (
@@ -39,7 +45,7 @@ class OrderBuilder:
         Creates and signs an order
         """
         if order_args.side == BUY:
-            side = 0
+            side = UtilsBuy
 
             raw_taker_amt = round_down(order_args.size, 2)
             raw_price = round_normal(order_args.price, 2)
@@ -53,7 +59,7 @@ class OrderBuilder:
             maker_amount = to_token_decimals(raw_maker_amt)
             taker_amount = to_token_decimals(raw_taker_amt)
         else:
-            side = 1
+            side = UtilsSell
 
             raw_maker_amt = round_down(order_args.size, 2)
             raw_price = round_normal(order_args.price, 2)
