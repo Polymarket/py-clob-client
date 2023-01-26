@@ -95,13 +95,6 @@ class ClobClient:
         if self.contract_config:
             return self.contract_config.get_exchange()
 
-    def get_executor_address(self):
-        """
-        Returns the executor address
-        """
-        if self.contract_config:
-            return self.contract_config.get_executor()
-
     def get_ok(self):
         """
         Health check: Confirms that the server is up
