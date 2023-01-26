@@ -31,7 +31,9 @@ from .clob_types import (
 from .exceptions import PolyException
 from .http_helpers.helpers import add_query_params, delete, get, post
 from py_order_utils.config import get_contract_config
+from py_order_utils.model import BUY as UtilsBuy
 from .constants import L0, L1, L1_AUTH_UNAVAILABLE, L2, L2_AUTH_UNAVAILABLE
+from .order_builder.constants import BUY, SELL
 
 
 class ClobClient:
@@ -183,7 +185,13 @@ class ClobClient:
         Posts the order
         """
         self.assert_level_2_auth()
+
+        if order.side == UtilsBuy:
+            order.side = BUY
+        else:
+            order.side = SELL
         body = {"order": order.dict(), "owner": self.creds.api_key, "orderType": "GTC"}
+
         headers = create_level_2_headers(
             self.signer,
             self.creds,
