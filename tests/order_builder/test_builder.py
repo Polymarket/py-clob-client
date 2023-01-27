@@ -279,3 +279,137 @@ class TestOrderBuilder(TestCase):
             / int(signed_order.order["makerAmount"]),
             0.56,
         )
+
+    def test_dict_order_buy(self):
+        builder = OrderBuilder(signer)
+
+        signed_order = builder.create_order(
+            order_args=OrderArgs(
+                token_id="123",
+                price=0.56,
+                size=21.04,
+                side=BUY,
+                fee_rate_bps=111,
+                nonce=123,
+                expiration=50000,
+            )
+        )
+
+        self.assertIsNotNone(signed_order)
+
+        signed_order_dict = signed_order.dict()
+
+        self.assertIsNotNone(signed_order_dict)
+        self.assertTrue(isinstance(signed_order_dict["salt"], int))
+        self.assertEqual(
+            signed_order_dict["maker"],
+            "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        )
+        self.assertEqual(
+            signed_order_dict["signer"],
+            "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        )
+        self.assertEqual(
+            signed_order_dict["taker"],
+            "0x0000000000000000000000000000000000000000",
+        )
+        self.assertEqual(
+            signed_order_dict["tokenId"],
+            "123",
+        )
+        self.assertEqual(
+            signed_order_dict["makerAmount"],
+            "11782400",
+        )
+        self.assertEqual(
+            signed_order_dict["takerAmount"],
+            "21040000",
+        )
+        self.assertEqual(
+            signed_order_dict["side"],
+            BUY,
+        )
+        self.assertEqual(
+            signed_order_dict["expiration"],
+            "50000",
+        )
+        self.assertEqual(
+            signed_order_dict["nonce"],
+            "123",
+        )
+        self.assertEqual(
+            signed_order_dict["feeRateBps"],
+            "111",
+        )
+        self.assertEqual(
+            signed_order_dict["signatureType"],
+            EOA,
+        )
+        self.assertIsNotNone(signed_order_dict["signature"])
+
+    def test_dict_order_sell(self):
+        builder = OrderBuilder(signer, sig_type=POLY_GNOSIS_SAFE)
+
+        signed_order = builder.create_order(
+            order_args=OrderArgs(
+                token_id="123",
+                price=0.56,
+                size=21.04,
+                side=SELL,
+                fee_rate_bps=111,
+                nonce=123,
+                expiration=50000,
+            )
+        )
+
+        self.assertIsNotNone(signed_order)
+
+        signed_order_dict = signed_order.dict()
+
+        self.assertIsNotNone(signed_order_dict)
+        self.assertTrue(isinstance(signed_order_dict["salt"], int))
+        self.assertEqual(
+            signed_order_dict["maker"],
+            "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        )
+        self.assertEqual(
+            signed_order_dict["signer"],
+            "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        )
+        self.assertEqual(
+            signed_order_dict["taker"],
+            "0x0000000000000000000000000000000000000000",
+        )
+        self.assertEqual(
+            signed_order_dict["tokenId"],
+            "123",
+        )
+        self.assertEqual(
+            signed_order_dict["makerAmount"],
+            "21040000",
+        )
+        self.assertEqual(
+            signed_order_dict["takerAmount"],
+            "11782400",
+        )
+        self.assertEqual(
+            signed_order_dict["side"],
+            SELL,
+        )
+        self.assertEqual(
+            signed_order_dict["expiration"],
+            "50000",
+        )
+        self.assertEqual(
+            signed_order_dict["nonce"],
+            "123",
+        )
+        self.assertEqual(
+            signed_order_dict["feeRateBps"],
+            "111",
+        )
+        self.assertEqual(
+            signed_order_dict["signatureType"],
+            POLY_GNOSIS_SAFE,
+        )
+        self.assertIsNotNone(signed_order_dict["signature"])
