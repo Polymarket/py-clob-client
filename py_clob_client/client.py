@@ -185,13 +185,7 @@ class ClobClient:
         Posts the order
         """
         self.assert_level_2_auth()
-
-        if order.side == UtilsBuy:
-            order.side = BUY
-        else:
-            order.side = SELL
         body = {"order": order.dict(), "owner": self.creds.api_key, "orderType": "GTC"}
-
         headers = create_level_2_headers(
             self.signer,
             self.creds,
