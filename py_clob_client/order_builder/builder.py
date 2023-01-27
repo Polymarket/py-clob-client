@@ -69,6 +69,8 @@ class OrderBuilder:
             taker_amount = to_token_decimals(raw_taker_amt)
 
             return UtilsSell, maker_amount, taker_amount
+        else:
+            raise ValueError(f"order_args.side must be '{BUY}' or '{SELL}'")
 
     def create_order(self, order_args: OrderArgs) -> SignedOrder:
         """
