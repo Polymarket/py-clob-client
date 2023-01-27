@@ -15,7 +15,10 @@ def round_up(x: float, sig_digits: int) -> float:
 
 
 def to_token_decimals(x: float) -> int:
-    return int((10**6) * x)
+    f = (10**6) * x
+    if decimal_places(f) > 0:
+        f = round_normal(f, 0)
+    return int(f)
 
 
 def decimal_places(x: float) -> int:

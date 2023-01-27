@@ -6,6 +6,7 @@ from py_clob_client.order_builder.constants import BUY, SELL
 
 from py_clob_client.signer import Signer
 from py_clob_client.order_builder.builder import OrderBuilder
+from py_clob_client.order_builder.helpers import decimal_places
 from py_order_utils.model import POLY_GNOSIS_SAFE, EOA
 
 # publicly known private key
@@ -15,6 +16,38 @@ signer = Signer(private_key=private_key, chain_id=chain_id)
 
 
 class TestOrderBuilder(TestCase):
+    def test_get_order_amounts_buy(self):
+        builder = OrderBuilder(signer)
+
+        delta = 0.01
+        size = 0.01
+        while size <= 100:
+            price = 0.01
+            while price <= 1:
+                side, maker, taker = builder.get_order_amounts(BUY, size, price)
+                self.assertEqual(side, 0)
+                self.assertEqual(decimal_places(maker), 0)
+                self.assertEqual(decimal_places(taker), 0)
+                price = price + delta
+
+            size = size + delta
+
+    def test_get_order_amounts_sell(self):
+        builder = OrderBuilder(signer)
+
+        delta = 0.01
+        size = 0.01
+        while size <= 100:
+            price = 0.01
+            while price <= 1:
+                side, maker, taker = builder.get_order_amounts(SELL, size, price)
+                self.assertEqual(side, 1)
+                self.assertEqual(decimal_places(maker), 0)
+                self.assertEqual(decimal_places(taker), 0)
+                price = price + delta
+
+            size = size + delta
+
     def test_create_order_decimal_accuracy(self):
         builder = OrderBuilder(signer)
 
@@ -142,6 +175,24 @@ class TestOrderBuilder(TestCase):
         self.assertEqual(
             signed_order.order["takerAmount"],
             949997100,
+        )
+
+        # SELL
+        signed_order = builder.create_order(
+            order_args=OrderArgs(
+                token_id="123",
+                price=0.43,
+                size=19.1,
+                side=SELL,
+            )
+        )
+        self.assertEqual(
+            signed_order.order["makerAmount"],
+            19100000,
+        )
+        self.assertEqual(
+            signed_order.order["takerAmount"],
+            8213000,
         )
 
     def test_create_order_buy(self):
