@@ -1,6 +1,7 @@
 import logging
 
 from .order_builder.builder import OrderBuilder
+from .clob_types import ApiCreds
 
 from .headers.headers import create_level_1_headers, create_level_2_headers
 from .signer import Signer
@@ -111,7 +112,7 @@ class ClobClient:
         """
         return get("{}{}".format(self.host, TIME))
 
-    def create_api_key(self, nonce: int = None):
+    def create_api_key(self, nonce: int = None) -> ApiCreds:
         """
         Creates a new CLOB API key for the given
         """
@@ -120,11 +121,16 @@ class ClobClient:
         endpoint = "{}{}".format(self.host, CREATE_API_KEY)
         headers = create_level_1_headers(self.signer, nonce)
 
-        creds = post(endpoint, headers=headers)
-        self.logger.info(creds)
+        creds_raw = post(endpoint, headers=headers)
+        try:
+            creds = ApiCreds(api_key=creds_raw["apiKey"], api_secret=creds_raw["secret"], api_passphrase=creds_raw["passphrase"])
+            self.logger.info(creds)
+        except:
+            self.logger.error("Couldn't parse created CLOB creds")
+            return None
         return creds
 
-    def derive_api_key(self, nonce: int = None):
+    def derive_api_key(self, nonce: int = None) -> ApiCreds:
         """
         Derives an already existing CLOB API key for the given address and nonce
         """
@@ -133,9 +139,30 @@ class ClobClient:
         endpoint = "{}{}".format(self.host, DERIVE_API_KEY)
         headers = create_level_1_headers(self.signer, nonce)
 
-        creds = get(endpoint, headers=headers)
-        self.logger.info(creds)
+        creds_raw = get(endpoint, headers=headers)
+        try:
+            creds = ApiCreds(api_key=creds_raw["apiKey"], api_secret=creds_raw["secret"], api_passphrase=creds_raw["passphrase"])
+            self.logger.info(creds)
+        except:
+            self.logger.error("Couldn't parse derived CLOB creds")
+            return None
         return creds
+
+    def create_or_derive_api_creds(self, nonce: int = None) -> ApiCreds:
+        """
+        Creates API creds if not already created for nonce, otherwise derives them
+        """
+        try:
+            return self.create_api_key(nonce)
+        except:
+            return self.derive_api_key(nonce)
+
+    def set_api_creds(self, creds: ApiCreds):
+        """
+        Sets client api creds
+        """
+        self.creds = creds
+        self.mode = self._get_client_mode()
 
     def get_api_keys(self):
         """
