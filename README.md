@@ -23,6 +23,8 @@ The correct token allowances must be set before orders can be placed. The follow
 | `0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174` | `0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E` |        allow the exchange contract to transfer user's usdc        |
 | `0x4D97DCd97eC945f40cF65F87097ACe5EA0476045` | `0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E` | allow the exchange contract to transfer user's conditional tokens |
 
+See [this gist](https://gist.github.com/L-Kov/18d976850078bf1131c139e4150a922d) for a an example of how to set these allowances for an account using python. 
+
 ### Usage
 
 ```py
