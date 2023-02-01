@@ -71,3 +71,8 @@ class FilterParams:
     before: int = None
     after: int = None
     owner: str = None
+
+
+@dataclass
+class TradeNotificationParams:
+    index: int = None

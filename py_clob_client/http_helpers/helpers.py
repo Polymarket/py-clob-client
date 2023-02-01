@@ -1,6 +1,6 @@
 import requests
 
-from py_clob_client.clob_types import FilterParams
+from py_clob_client.clob_types import FilterParams, TradeNotificationParams
 
 from ..exceptions import PolyApiException
 
@@ -69,4 +69,18 @@ def add_query_params(base_url: str, params: FilterParams = None) -> str:
             url = build_query_params(url, "id", params.id)
         if params.owner:
             url = build_query_params(url, "owner", params.owner)
+    return url
+
+
+def add_trade_notifications_query_params(
+    base_url: str, params: TradeNotificationParams = None
+) -> str:
+    """
+    Adds query parameters to a url
+    """
+    url = base_url
+    if params:
+        url = url + "?"
+        if params.index:
+            url = build_query_params(url, "index", params.index)
     return url
