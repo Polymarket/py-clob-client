@@ -76,6 +76,11 @@ class FilterParams:
 
 
 @dataclass
+class TradeNotificationParams:
+    index: int = None
+
+
+@dataclass
 class OrderSummary:
     price: str = None
     size: str = None
