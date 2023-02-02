@@ -22,15 +22,24 @@ from .endpoints import (
     PRICE,
     TIME,
     TRADES,
+    GET_TRADE_NOTIFICATIONS,
+    DROP_TRADE_NOTIFICATIONS,
 )
 from .clob_types import (
     ApiCreds,
     FilterParams,
     OrderArgs,
     RequestArgs,
+    TradeNotificationParams,
 )
 from .exceptions import PolyException
-from .http_helpers.helpers import add_query_params, delete, get, post
+from .http_helpers.helpers import (
+    add_query_params,
+    delete,
+    get,
+    post,
+    add_trade_notifications_query_params,
+)
 from py_order_utils.config import get_contract_config
 from py_order_utils.model import BUY as UtilsBuy
 from .constants import L0, L1, L1_AUTH_UNAVAILABLE, L2, L2_AUTH_UNAVAILABLE
@@ -123,7 +132,11 @@ class ClobClient:
 
         creds_raw = post(endpoint, headers=headers)
         try:
-            creds = ApiCreds(api_key=creds_raw["apiKey"], api_secret=creds_raw["secret"], api_passphrase=creds_raw["passphrase"])
+            creds = ApiCreds(
+                api_key=creds_raw["apiKey"],
+                api_secret=creds_raw["secret"],
+                api_passphrase=creds_raw["passphrase"],
+            )
             self.logger.info(creds)
         except:
             self.logger.error("Couldn't parse created CLOB creds")
@@ -141,7 +154,11 @@ class ClobClient:
 
         creds_raw = get(endpoint, headers=headers)
         try:
-            creds = ApiCreds(api_key=creds_raw["apiKey"], api_secret=creds_raw["secret"], api_passphrase=creds_raw["passphrase"])
+            creds = ApiCreds(
+                api_key=creds_raw["apiKey"],
+                api_secret=creds_raw["secret"],
+                api_passphrase=creds_raw["passphrase"],
+            )
             self.logger.info(creds)
         except:
             self.logger.error("Couldn't parse derived CLOB creds")
@@ -314,3 +331,31 @@ class ClobClient:
         if self.signer is not None:
             return L1
         return L0
+
+    def get_trade_notifications(self, params: TradeNotificationParams = None):
+        """
+        Fetches the trade notifications for a user
+        Requires Level 2 authentication
+        """
+        self.assert_level_2_auth()
+        request_args = RequestArgs(method="GET", request_path=GET_TRADE_NOTIFICATIONS)
+        headers = create_level_2_headers(self.signer, self.creds, request_args)
+        url = add_trade_notifications_query_params(
+            "{}{}".format(self.host, GET_TRADE_NOTIFICATIONS), params
+        )
+        return get(url, headers=headers)
+
+    def drop_trade_notifications(self, params: TradeNotificationParams = None):
+        """
+        Drops the trade notifications for a user
+        Requires Level 2 authentication
+        """
+        self.assert_level_2_auth()
+        request_args = RequestArgs(
+            method="DELETE", request_path=DROP_TRADE_NOTIFICATIONS
+        )
+        headers = create_level_2_headers(self.signer, self.creds, request_args)
+        url = add_trade_notifications_query_params(
+            "{}{}".format(self.host, DROP_TRADE_NOTIFICATIONS), params
+        )
+        return delete(url, headers=headers)
