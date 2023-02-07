@@ -8,6 +8,8 @@ from .signer import Signer
 
 from .endpoints import (
     CANCEL,
+    CANCEL_ORDERS,
+    CANCEL_MARKET_ORDERS,
     CANCEL_ALL,
     CREATE_API_KEY,
     DELETE_API_KEY,
@@ -256,6 +258,22 @@ class ClobClient:
         headers = create_level_2_headers(self.signer, self.creds, request_args)
         return delete("{}{}".format(self.host, CANCEL), headers=headers, data=body)
 
+    def cancel_orders(self, order_ids):
+        """
+        Cancels orders
+        Level 2 Auth required
+        """
+        self.assert_level_2_auth()
+        body = order_ids
+
+        request_args = RequestArgs(
+            method="DELETE", request_path=CANCEL_ORDERS, body=body
+        )
+        headers = create_level_2_headers(self.signer, self.creds, request_args)
+        return delete(
+            "{}{}".format(self.host, CANCEL_ORDERS), headers=headers, data=body
+        )
+
     def cancel_all(self):
         """
         Cancels all available orders for the user
@@ -265,6 +283,22 @@ class ClobClient:
         request_args = RequestArgs(method="DELETE", request_path=CANCEL_ALL)
         headers = create_level_2_headers(self.signer, self.creds, request_args)
         return delete("{}{}".format(self.host, CANCEL_ALL), headers=headers)
+
+    def cancel_market_orders(self, market: str = None, asset_id: str = None):
+        """
+        Cancels orders
+        Level 2 Auth required
+        """
+        self.assert_level_2_auth()
+        body = {"market": market, "asset_id": asset_id}
+
+        request_args = RequestArgs(
+            method="DELETE", request_path=CANCEL_MARKET_ORDERS, body=body
+        )
+        headers = create_level_2_headers(self.signer, self.creds, request_args)
+        return delete(
+            "{}{}".format(self.host, CANCEL_MARKET_ORDERS), headers=headers, data=body
+        )
 
     def get_orders(self, params: FilterParams = None):
         """
