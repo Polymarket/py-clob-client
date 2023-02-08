@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 from typing import Any
+from dataclasses import dataclass, asdict
+from json import dumps
 
 from .constants import ZERO_ADDRESS
 
@@ -76,3 +78,34 @@ class FilterParams:
 @dataclass
 class TradeNotificationParams:
     index: int = None
+
+
+@dataclass
+class OrderSummary:
+    price: str = None
+    size: str = None
+
+    @property
+    def __dict__(self):
+        return asdict(self)
+
+    @property
+    def json(self):
+        return dumps(self.__dict__)
+
+
+@dataclass
+class OrderBookSummary:
+    market: str = None
+    asset_id: str = None
+    bids: list[OrderSummary] = None
+    asks: list[OrderSummary] = None
+    hash: str = None
+
+    @property
+    def __dict__(self):
+        return asdict(self)
+
+    @property
+    def json(self):
+        return dumps(self.__dict__, separators=(",", ":"))

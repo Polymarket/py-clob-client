@@ -33,6 +33,7 @@ from .clob_types import (
     OrderArgs,
     RequestArgs,
     TradeNotificationParams,
+    OrderBookSummary,
 )
 from .exceptions import PolyException
 from .http_helpers.helpers import (
@@ -43,9 +44,8 @@ from .http_helpers.helpers import (
     add_trade_notifications_query_params,
 )
 from py_order_utils.config import get_contract_config
-from py_order_utils.model import BUY as UtilsBuy
 from .constants import L0, L1, L1_AUTH_UNAVAILABLE, L2, L2_AUTH_UNAVAILABLE
-from .order_builder.constants import BUY, SELL
+from .utilities import parse_raw_orderbook_summary, generate_orderbook_summary_hash
 
 
 class ClobClient:
@@ -311,11 +311,18 @@ class ClobClient:
         url = add_query_params("{}{}".format(self.host, ORDERS), params)
         return get(url, headers=headers)
 
-    def get_order_book(self, token_id):
+    def get_order_book(self, token_id) -> OrderBookSummary:
         """
         Fetches the orderbook for the token_id
         """
-        return get("{}{}?token_id={}".format(self.host, GET_ORDER_BOOK, token_id))
+        raw_obs = get("{}{}?token_id={}".format(self.host, GET_ORDER_BOOK, token_id))
+        return parse_raw_orderbook_summary(raw_obs)
+
+    def get_order_book_hash(self, orderbook: OrderBookSummary) -> str:
+        """
+        Calculates the hash for the given orderbook
+        """
+        return generate_orderbook_summary_hash(orderbook)
 
     def get_order(self, order_id):
         """
