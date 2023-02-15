@@ -37,3 +37,4 @@ class TestHelpers(TestCase):
         )
         self.assertIsNotNone(url)
         self.assertEqual(url, "http://tracker?index=12345")
+
