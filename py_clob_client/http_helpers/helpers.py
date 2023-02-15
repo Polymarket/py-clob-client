@@ -1,4 +1,5 @@
 import requests
+import pkg_resources
 
 from py_clob_client.clob_types import FilterParams, TradeNotificationParams
 
@@ -10,8 +11,25 @@ DELETE = "DELETE"
 PUT = "PUT"
 
 
+def overloadHeaders(method: str, headers: dict) -> dict:
+    if headers is None:
+        headers = dict()
+    headers["User-Agent"] = "py_clob_client"
+
+    headers["Accept"] = "*/*"
+    headers["Connection"] = "keep-alive"
+    headers["Content-Type"] = "application/json"
+
+    if method == GET:
+        headers["Accept-Encoding"] = "gzip"
+
+    return headers
+
+
 def request(endpoint: str, method: str, headers=None, data=None):
     try:
+        headers = overloadHeaders(method, headers)
+        print(headers)
         resp = requests.request(
             method=method, url=endpoint, headers=headers, json=data if data else None
         )
