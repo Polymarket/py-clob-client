@@ -139,7 +139,6 @@ class ClobClient:
                 api_secret=creds_raw["secret"],
                 api_passphrase=creds_raw["passphrase"],
             )
-            self.logger.info(creds)
         except:
             self.logger.error("Couldn't parse created CLOB creds")
             return None
@@ -161,7 +160,6 @@ class ClobClient:
                 api_secret=creds_raw["secret"],
                 api_passphrase=creds_raw["passphrase"],
             )
-            self.logger.info(creds)
         except:
             self.logger.error("Couldn't parse derived CLOB creds")
             return None
