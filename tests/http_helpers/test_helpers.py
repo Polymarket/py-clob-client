@@ -1,10 +1,16 @@
 from unittest import TestCase
-from py_clob_client.clob_types import FilterParams, TradeNotificationParams
+from py_clob_client.clob_types import (
+    FilterParams,
+    TradeNotificationParams,
+    BalanceAllowanceParams,
+    AssetType,
+)
 
 from py_clob_client.http_helpers.helpers import (
     build_query_params,
     add_query_params,
     add_trade_notifications_query_params,
+    add_balance_allowance_params_to_url,
 )
 
 
@@ -38,3 +44,17 @@ class TestHelpers(TestCase):
         self.assertIsNotNone(url)
         self.assertEqual(url, "http://tracker?index=12345")
 
+    def test_add_balance_allowance_params_to_url(self):
+        url = add_balance_allowance_params_to_url(
+            "http://tracker",
+            BalanceAllowanceParams(asset_type=AssetType.COLLATERAL),
+        )
+        self.assertIsNotNone(url)
+        self.assertEqual(url, "http://tracker?asset_type=COLLATERAL")
+
+        url = add_balance_allowance_params_to_url(
+            "http://tracker",
+            BalanceAllowanceParams(asset_type=AssetType.CONDITIONAL, token_id="222"),
+        )
+        self.assertIsNotNone(url)
+        self.assertEqual(url, "http://tracker?asset_type=CONDITIONAL&token_id=222")
