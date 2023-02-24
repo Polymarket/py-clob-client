@@ -1,7 +1,10 @@
 import requests
-import pkg_resources
 
-from py_clob_client.clob_types import FilterParams, TradeNotificationParams
+from py_clob_client.clob_types import (
+    FilterParams,
+    TradeNotificationParams,
+    BalanceAllowanceParams,
+)
 
 from ..exceptions import PolyApiException
 
@@ -100,4 +103,20 @@ def add_trade_notifications_query_params(
         url = url + "?"
         if params.index:
             url = build_query_params(url, "index", params.index)
+    return url
+
+
+def add_balance_allowance_params_to_url(
+    base_url: str, params: BalanceAllowanceParams = None
+) -> str:
+    """
+    Adds query parameters to a url
+    """
+    url = base_url
+    if params:
+        url = url + "?"
+        if params.asset_type:
+            url = build_query_params(url, "asset_type", params.asset_type.__str__())
+        if params.token_id:
+            url = build_query_params(url, "token_id", params.token_id)
     return url

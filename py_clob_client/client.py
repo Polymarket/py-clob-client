@@ -26,6 +26,7 @@ from .endpoints import (
     TRADES,
     GET_TRADE_NOTIFICATIONS,
     DROP_TRADE_NOTIFICATIONS,
+    GET_BALANCE_ALLOWANCE,
 )
 from .clob_types import (
     ApiCreds,
@@ -34,6 +35,7 @@ from .clob_types import (
     RequestArgs,
     TradeNotificationParams,
     OrderBookSummary,
+    BalanceAllowanceParams,
 )
 from .exceptions import PolyException
 from .http_helpers.helpers import (
@@ -42,6 +44,7 @@ from .http_helpers.helpers import (
     get,
     post,
     add_trade_notifications_query_params,
+    add_balance_allowance_params_to_url,
 )
 from py_order_utils.config import get_contract_config
 from .constants import L0, L1, L1_AUTH_UNAVAILABLE, L2, L2_AUTH_UNAVAILABLE
@@ -398,3 +401,16 @@ class ClobClient:
             "{}{}".format(self.host, DROP_TRADE_NOTIFICATIONS), params
         )
         return delete(url, headers=headers)
+
+    def get_balance_allowance(self, params: BalanceAllowanceParams = None):
+        """
+        Fetches the balance & allowance for a user
+        Requires Level 2 authentication
+        """
+        self.assert_level_2_auth()
+        request_args = RequestArgs(method="GET", request_path=GET_BALANCE_ALLOWANCE)
+        headers = create_level_2_headers(self.signer, self.creds, request_args)
+        url = add_balance_allowance_params_to_url(
+            "{}{}".format(self.host, GET_BALANCE_ALLOWANCE), params
+        )
+        return get(url, headers=headers)

@@ -109,3 +109,14 @@ class OrderBookSummary:
     @property
     def json(self):
         return dumps(self.__dict__, separators=(",", ":"))
+
+
+class AssetType(enumerate):
+    COLLATERAL = "COLLATERAL"
+    CONDITIONAL = "CONDITIONAL"
+
+
+@dataclass
+class BalanceAllowanceParams:
+    asset_type: AssetType = None
+    token_id: str = None
