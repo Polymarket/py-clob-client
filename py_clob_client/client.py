@@ -1,7 +1,7 @@
 import logging
 
 from .order_builder.builder import OrderBuilder
-from .clob_types import ApiCreds
+from .clob_types import ApiCreds, OrderType
 
 from .headers.headers import create_level_1_headers, create_level_2_headers
 from .signer import Signer
@@ -48,7 +48,11 @@ from .http_helpers.helpers import (
 )
 from py_order_utils.config import get_contract_config
 from .constants import L0, L1, L1_AUTH_UNAVAILABLE, L2, L2_AUTH_UNAVAILABLE
-from .utilities import parse_raw_orderbook_summary, generate_orderbook_summary_hash
+from .utilities import (
+    parse_raw_orderbook_summary,
+    generate_orderbook_summary_hash,
+    order_to_json,
+)
 
 
 class ClobClient:
@@ -227,12 +231,12 @@ class ClobClient:
 
         return self.builder.create_order(order_args)
 
-    def post_order(self, order):
+    def post_order(self, order, orderType: OrderType = OrderType.GTC):
         """
         Posts the order
         """
         self.assert_level_2_auth()
-        body = {"order": order.dict(), "owner": self.creds.api_key, "orderType": "GTC"}
+        body = order_to_json(order, self.creds.api_key, orderType)
         headers = create_level_2_headers(
             self.signer,
             self.creds,

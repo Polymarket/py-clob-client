@@ -120,3 +120,10 @@ class AssetType(enumerate):
 class BalanceAllowanceParams:
     asset_type: AssetType = None
     token_id: str = None
+
+
+class OrderType(enumerate):
+    GTC = "GTC"
+    # TODO: add support for FOK orders
+    FOK = "FOK"
+    GTD = "GTD"
