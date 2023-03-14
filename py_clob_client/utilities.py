@@ -29,3 +29,7 @@ def generate_orderbook_summary_hash(orderbook: OrderBookSummary) -> str:
     hash = hashlib.sha1(str(orderbook.json).encode("utf-8")).hexdigest()
     orderbook.hash = hash
     return hash
+
+
+def order_to_json(order, owner, orderType) -> dict:
+    return {"order": order.dict(), "owner": owner, "orderType": orderType}
