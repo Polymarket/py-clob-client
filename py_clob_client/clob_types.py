@@ -127,3 +127,8 @@ class OrderType(enumerate):
     # TODO: add support for FOK orders
     FOK = "FOK"
     GTD = "GTD"
+
+
+@dataclass
+class OrderScoringParams:
+    orderId: str
