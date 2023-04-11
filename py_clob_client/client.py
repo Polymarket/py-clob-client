@@ -28,6 +28,7 @@ from .endpoints import (
     DROP_TRADE_NOTIFICATIONS,
     GET_BALANCE_ALLOWANCE,
     IS_ORDER_SCORING,
+    GET_TICK_SIZE,
 )
 from .clob_types import (
     ApiCreds,
@@ -38,6 +39,7 @@ from .clob_types import (
     OrderBookSummary,
     BalanceAllowanceParams,
     OrderScoringParams,
+    TickSize,
 )
 from .exceptions import PolyException
 from .http_helpers.helpers import (
@@ -90,6 +92,7 @@ class ClobClient:
             self.builder = OrderBuilder(
                 self.signer, sig_type=signature_type, funder=funder
             )
+        self.__tick_sizes = {}
         self.logger = logging.getLogger(self.__class__.__name__)
 
     def get_address(self):
@@ -225,6 +228,15 @@ class ClobClient:
         """
         return get("{}{}?token_id={}&side={}".format(self.host, PRICE, token_id, side))
 
+    def get_tick_size(self, token_id: str) -> TickSize:
+        if token_id in self.__tick_sizes:
+            return self.__tick_sizes[token_id]
+
+        result = get("{}{}?token_id={}".format(self.host, GET_TICK_SIZE, token_id))
+        self.__tick_sizes[token_id] = result["minimum_tick_size"]
+
+        return self.__tick_sizes[token_id]
+
     def create_order(self, order_args: OrderArgs):
         """
         Creates and signs an order
@@ -232,7 +244,8 @@ class ClobClient:
         """
         self.assert_level_2_auth()
 
-        return self.builder.create_order(order_args)
+        tick_size = self.get_tick_size(order_args.token_id)
+        return self.builder.create_order(order_args, tick_size)
 
     def post_order(self, order, orderType: OrderType = OrderType.GTC):
         """

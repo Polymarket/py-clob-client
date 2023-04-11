@@ -18,7 +18,15 @@ from .helpers import (
 from .constants import BUY, SELL
 
 from ..signer import Signer
-from ..clob_types import OrderArgs
+from ..clob_types import OrderArgs, TickSize, RoundConfig
+from typing import Tuple
+
+ROUNDING_CONFIG: Tuple[TickSize, RoundConfig] = {
+    "0.1": RoundConfig(price=1, size=2, amount=3),
+    "0.01": RoundConfig(price=2, size=2, amount=4),
+    "0.001": RoundConfig(price=3, size=2, amount=5),
+    "0.0001": RoundConfig(price=4, size=2, amount=6),
+}
 
 
 class OrderBuilder:
@@ -40,30 +48,32 @@ class OrderBuilder:
     def _get_contract_config(self, chain_id: int):
         return get_contract_config(chain_id)
 
-    def get_order_amounts(self, side: str, size: float, price: float):
-        raw_price = round_normal(price, 2)
+    def get_order_amounts(
+        self, side: str, size: float, price: float, round_config: RoundConfig
+    ):
+        raw_price = round_normal(price, round_config.price)
 
         if side == BUY:
-            raw_taker_amt = round_down(size, 2)
+            raw_taker_amt = round_down(size, round_config.size)
 
             raw_maker_amt = raw_taker_amt * raw_price
-            if decimal_places(raw_maker_amt) > 4:
-                raw_maker_amt = round_up(raw_maker_amt, 8)
-                if decimal_places(raw_maker_amt) > 4:
-                    raw_maker_amt = round_down(raw_maker_amt, 4)
+            if decimal_places(raw_maker_amt) > round_config.amount:
+                raw_maker_amt = round_up(raw_maker_amt, round_config.amount + 4)
+                if decimal_places(raw_maker_amt) > round_config.amount:
+                    raw_maker_amt = round_down(raw_maker_amt, round_config.amount)
 
             maker_amount = to_token_decimals(raw_maker_amt)
             taker_amount = to_token_decimals(raw_taker_amt)
 
             return UtilsBuy, maker_amount, taker_amount
         elif side == SELL:
-            raw_maker_amt = round_down(size, 2)
+            raw_maker_amt = round_down(size, round_config.size)
 
             raw_taker_amt = raw_maker_amt * raw_price
-            if decimal_places(raw_taker_amt) > 4:
-                raw_taker_amt = round_up(raw_taker_amt, 8)
-                if decimal_places(raw_taker_amt) > 4:
-                    raw_taker_amt = round_down(raw_taker_amt, 4)
+            if decimal_places(raw_taker_amt) > round_config.amount:
+                raw_taker_amt = round_up(raw_taker_amt, round_config.amount + 4)
+                if decimal_places(raw_taker_amt) > round_config.amount:
+                    raw_taker_amt = round_down(raw_taker_amt, round_config.amount)
 
             maker_amount = to_token_decimals(raw_maker_amt)
             taker_amount = to_token_decimals(raw_taker_amt)
@@ -72,12 +82,15 @@ class OrderBuilder:
         else:
             raise ValueError(f"order_args.side must be '{BUY}' or '{SELL}'")
 
-    def create_order(self, order_args: OrderArgs) -> SignedOrder:
+    def create_order(self, order_args: OrderArgs, tick_size: TickSize) -> SignedOrder:
         """
         Creates and signs an order
         """
         side, maker_amount, taker_amount = self.get_order_amounts(
-            order_args.side, order_args.size, order_args.price
+            order_args.side,
+            order_args.size,
+            order_args.price,
+            ROUNDING_CONFIG[tick_size],
         )
 
         data = OrderData(

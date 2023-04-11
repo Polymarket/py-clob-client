@@ -19,7 +19,9 @@ def main():
     chain_id = MUMBAI
     client = ClobClient(host, key=key, chain_id=chain_id, creds=creds)
 
-    resp = client.get_order("0xf5667d8509bdc78ac43676fe2c980da1365c471ee92153820c89c488fc15d539")
+    resp = client.get_order(
+        "0xf5667d8509bdc78ac43676fe2c980da1365c471ee92153820c89c488fc15d539"
+    )
     print(resp)
     print("Done!")
 
