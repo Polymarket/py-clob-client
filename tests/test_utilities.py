@@ -9,6 +9,7 @@ from py_clob_client.utilities import (
     parse_raw_orderbook_summary,
     generate_orderbook_summary_hash,
     order_to_json,
+    is_tick_size_smaller,
 )
 
 
@@ -814,3 +815,28 @@ class TestUtilities(TestCase):
         self.assertEqual(json_order["order"]["side"], "SELL")
         self.assertEqual(json_order["order"]["signatureType"], 0)
         self.assertIsNotNone(json_order["order"]["signature"])
+
+    def test_is_tick_size_smaller(self):
+        # 0.1
+        self.assertFalse(is_tick_size_smaller("0.1", "0.1"))
+        self.assertFalse(is_tick_size_smaller("0.1", "0.01"))
+        self.assertFalse(is_tick_size_smaller("0.1", "0.001"))
+        self.assertFalse(is_tick_size_smaller("0.1", "0.0001"))
+
+        # 0.01
+        self.assertTrue(is_tick_size_smaller("0.01", "0.1"))
+        self.assertFalse(is_tick_size_smaller("0.01", "0.01"))
+        self.assertFalse(is_tick_size_smaller("0.01", "0.001"))
+        self.assertFalse(is_tick_size_smaller("0.01", "0.0001"))
+
+        # 0.001
+        self.assertTrue(is_tick_size_smaller("0.001", "0.1"))
+        self.assertTrue(is_tick_size_smaller("0.001", "0.01"))
+        self.assertFalse(is_tick_size_smaller("0.001", "0.001"))
+        self.assertFalse(is_tick_size_smaller("0.001", "0.0001"))
+
+        # 0.0001
+        self.assertTrue(is_tick_size_smaller("0.0001", "0.1"))
+        self.assertTrue(is_tick_size_smaller("0.0001", "0.01"))
+        self.assertTrue(is_tick_size_smaller("0.0001", "0.001"))
+        self.assertFalse(is_tick_size_smaller("0.0001", "0.0001"))

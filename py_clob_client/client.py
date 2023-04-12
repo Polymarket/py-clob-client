@@ -57,6 +57,7 @@ from .utilities import (
     parse_raw_orderbook_summary,
     generate_orderbook_summary_hash,
     order_to_json,
+    is_tick_size_smaller,
 )
 
 
@@ -237,14 +238,30 @@ class ClobClient:
 
         return self.__tick_sizes[token_id]
 
-    def create_order(self, order_args: OrderArgs):
+    def __resolve_tick_size(
+        self, token_id: str, tick_size: TickSize = None
+    ) -> TickSize:
+        min_tick_size = self.get_tick_size(token_id)
+        if tick_size is not None:
+            if is_tick_size_smaller(tick_size, min_tick_size):
+                raise Exception(
+                    "invalid tick size ("
+                    + tick_size
+                    + "), minimum for the market is "
+                    + min_tick_size,
+                )
+        else:
+            tick_size = min_tick_size
+        return tick_size
+
+    def create_order(self, order_args: OrderArgs, tick_size: TickSize = None):
         """
         Creates and signs an order
         Level 2 Auth required
         """
         self.assert_level_2_auth()
 
-        tick_size = self.get_tick_size(order_args.token_id)
+        tick_size = self.__resolve_tick_size(order_args.token_id, tick_size)
         return self.builder.create_order(order_args, tick_size)
 
     def post_order(self, order, orderType: OrderType = OrderType.GTC):
