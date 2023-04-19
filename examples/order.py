@@ -22,10 +22,10 @@ def main():
     chain_id = MUMBAI
     client = ClobClient(host, key=key, chain_id=chain_id, creds=creds)
 
-    # Create and sign a limit order buying 100 YES tokens for 0.50c each
+    # Create and sign a limit order buying 100 YES tokens for 0.0005 each
     order_args = OrderArgs(
-        price=0.50,
-        size=100.0,
+        price=0.0005,
+        size=20,
         side=BUY,
         token_id="16678291189211314787145083999015737376658799626183230671758641503291735614088",
     )

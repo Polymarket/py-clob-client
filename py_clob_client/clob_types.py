@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Any
 from dataclasses import dataclass, asdict
 from json import dumps
+from typing import Literal
 
 from .constants import ZERO_ADDRESS
 
@@ -132,3 +133,16 @@ class OrderType(enumerate):
 @dataclass
 class OrderScoringParams:
     orderId: str
+
+
+TickSize = Literal["0.1", "0.01", "0.001", "0.0001"]
+
+
+@dataclass
+class RoundConfig:
+    price: float
+    size: float
+    amount: float
+
+
+TickSizes: dict[str, TickSize]
