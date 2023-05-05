@@ -5,6 +5,7 @@ from py_clob_client.clob_types import (
     BalanceAllowanceParams,
     AssetType,
     OrderScoringParams,
+    OrdersScoringParams,
 )
 
 from py_clob_client.http_helpers.helpers import (
@@ -13,6 +14,7 @@ from py_clob_client.http_helpers.helpers import (
     add_trade_notifications_query_params,
     add_balance_allowance_params_to_url,
     add_order_scoring_params_to_url,
+    add_orders_scoring_params_to_url,
 )
 
 
@@ -68,3 +70,11 @@ class TestHelpers(TestCase):
         )
         self.assertIsNotNone(url)
         self.assertEqual(url, "http://tracker?order_id=0x0123abc")
+
+    def test_add_orders_scoring_params_to_urll(self):
+        url = add_orders_scoring_params_to_url(
+            "http://tracker",
+            OrdersScoringParams(orderIds=["0x0", "0x1", "0x2"]),
+        )
+        self.assertIsNotNone(url)
+        self.assertEqual(url, "http://tracker?order_ids=0x0,0x1,0x2")

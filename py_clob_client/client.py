@@ -29,6 +29,7 @@ from .endpoints import (
     GET_BALANCE_ALLOWANCE,
     IS_ORDER_SCORING,
     GET_TICK_SIZE,
+    ARE_ORDERS_SCORING,
 )
 from .clob_types import (
     ApiCreds,
@@ -40,6 +41,7 @@ from .clob_types import (
     BalanceAllowanceParams,
     OrderScoringParams,
     TickSize,
+    OrdersScoringParams,
 )
 from .exceptions import PolyException
 from .http_helpers.helpers import (
@@ -50,6 +52,7 @@ from .http_helpers.helpers import (
     add_trade_notifications_query_params,
     add_balance_allowance_params_to_url,
     add_order_scoring_params_to_url,
+    add_orders_scoring_params_to_url,
 )
 from py_order_utils.config import get_contract_config
 from .constants import L0, L1, L1_AUTH_UNAVAILABLE, L2, L2_AUTH_UNAVAILABLE
@@ -462,5 +465,18 @@ class ClobClient:
         headers = create_level_2_headers(self.signer, self.creds, request_args)
         url = add_order_scoring_params_to_url(
             "{}{}".format(self.host, IS_ORDER_SCORING), params
+        )
+        return get(url, headers=headers)
+
+    def are_orders_scoring(self, params: OrdersScoringParams):
+        """
+        Check if the orders are currently scoring
+        Requires Level 2 authentication
+        """
+        self.assert_level_2_auth()
+        request_args = RequestArgs(method="GET", request_path=ARE_ORDERS_SCORING)
+        headers = create_level_2_headers(self.signer, self.creds, request_args)
+        url = add_orders_scoring_params_to_url(
+            "{}{}".format(self.host, ARE_ORDERS_SCORING), params
         )
         return get(url, headers=headers)

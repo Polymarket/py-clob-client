@@ -135,6 +135,11 @@ class OrderScoringParams:
     orderId: str
 
 
+@dataclass
+class OrdersScoringParams:
+    orderIds: list[str]
+
+
 TickSize = Literal["0.1", "0.01", "0.001", "0.0001"]
 
 
