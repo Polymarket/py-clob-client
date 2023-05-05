@@ -5,6 +5,7 @@ from py_clob_client.clob_types import (
     TradeNotificationParams,
     BalanceAllowanceParams,
     OrderScoringParams,
+    OrdersScoringParams,
 )
 
 from ..exceptions import PolyApiException
@@ -134,4 +135,18 @@ def add_order_scoring_params_to_url(
         url = url + "?"
         if params.orderId:
             url = build_query_params(url, "order_id", params.orderId)
+    return url
+
+
+def add_orders_scoring_params_to_url(
+    base_url: str, params: OrdersScoringParams = None
+) -> str:
+    """
+    Adds query parameters to a url
+    """
+    url = base_url
+    if params:
+        url = url + "?"
+        if params.orderIds:
+            url = build_query_params(url, "order_ids", ",".join(params.orderIds))
     return url
