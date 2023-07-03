@@ -21,6 +21,8 @@ def main():
 
     print(client.get_markets())
     print(client.get_simplified_markets())
+    print(client.get_sampling_markets())
+    print(client.get_sampling_simplified_markets())
     print(client.get_market("condition_id"))
 
     print("Done!")

@@ -33,6 +33,8 @@ from .endpoints import (
     GET_SIMPLIFIED_MARKETS,
     GET_MARKETS,
     GET_MARKET,
+    GET_SAMPLING_SIMPLIFIED_MARKETS,
+    GET_SAMPLING_MARKETS,
 )
 from .clob_types import (
     ApiCreds,
@@ -483,6 +485,24 @@ class ClobClient:
             "{}{}".format(self.host, ARE_ORDERS_SCORING), params
         )
         return get(url, headers=headers)
+
+    def get_sampling_markets(self, next_cursor="MA=="):
+        """
+        Get the current sampling markets
+        """
+        return get(
+            "{}{}?next_cursor={}".format(self.host, GET_SAMPLING_MARKETS, next_cursor)
+        )
+
+    def get_sampling_simplified_markets(self, next_cursor="MA=="):
+        """
+        Get the current sampling simplified markets
+        """
+        return get(
+            "{}{}?next_cursor={}".format(
+                self.host, GET_SAMPLING_SIMPLIFIED_MARKETS, next_cursor
+            )
+        )
 
     def get_markets(self, next_cursor="MA=="):
         """
