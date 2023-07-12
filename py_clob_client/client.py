@@ -35,6 +35,7 @@ from .endpoints import (
     GET_MARKET,
     GET_SAMPLING_SIMPLIFIED_MARKETS,
     GET_SAMPLING_MARKETS,
+    GET_MARKET_TRADES_EVENTS,
 )
 from .clob_types import (
     ApiCreds,
@@ -523,3 +524,9 @@ class ClobClient:
         Get a market by condition_id
         """
         return get("{}{}{}".format(self.host, GET_MARKET, condition_id))
+
+    def get_market_trades_events(self, condition_id):
+        """
+        Get the market's trades events by condition id
+        """
+        return get("{}{}{}".format(self.host, GET_MARKET_TRADES_EVENTS, condition_id))
