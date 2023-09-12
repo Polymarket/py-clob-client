@@ -77,8 +77,8 @@ class FilterParams:
 
 
 @dataclass
-class TradeNotificationParams:
-    index: int = None
+class DropNotificationParams:
+    ids: list[str] = None
 
 
 @dataclass

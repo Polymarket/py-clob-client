@@ -1,7 +1,7 @@
 from unittest import TestCase
 from py_clob_client.clob_types import (
     FilterParams,
-    TradeNotificationParams,
+    DropNotificationParams,
     BalanceAllowanceParams,
     AssetType,
     OrderScoringParams,
@@ -11,7 +11,7 @@ from py_clob_client.clob_types import (
 from py_clob_client.http_helpers.helpers import (
     build_query_params,
     add_query_params,
-    add_trade_notifications_query_params,
+    drop_notifications_query_params,
     add_balance_allowance_params_to_url,
     add_order_scoring_params_to_url,
     add_orders_scoring_params_to_url,
@@ -40,13 +40,13 @@ class TestHelpers(TestCase):
             url, "http://tracker?market=10000&limit=250&after=1450000&before=1460000"
         )
 
-    def test_add_trade_notifications_query_params(self):
-        url = add_trade_notifications_query_params(
+    def test_drop_notifications_query_params(self):
+        url = drop_notifications_query_params(
             "http://tracker",
-            TradeNotificationParams(index=12345),
+            DropNotificationParams(ids=["1", "2", "3"]),
         )
         self.assertIsNotNone(url)
-        self.assertEqual(url, "http://tracker?index=12345")
+        self.assertEqual(url, "http://tracker?ids=1,2,3")
 
     def test_add_balance_allowance_params_to_url(self):
         url = add_balance_allowance_params_to_url(

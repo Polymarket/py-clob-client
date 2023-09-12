@@ -2,7 +2,7 @@ import requests
 
 from py_clob_client.clob_types import (
     FilterParams,
-    TradeNotificationParams,
+    DropNotificationParams,
     BalanceAllowanceParams,
     OrderScoringParams,
     OrdersScoringParams,
@@ -94,8 +94,8 @@ def add_query_params(base_url: str, params: FilterParams = None) -> str:
     return url
 
 
-def add_trade_notifications_query_params(
-    base_url: str, params: TradeNotificationParams = None
+def drop_notifications_query_params(
+    base_url: str, params: DropNotificationParams = None
 ) -> str:
     """
     Adds query parameters to a url
@@ -103,8 +103,8 @@ def add_trade_notifications_query_params(
     url = base_url
     if params:
         url = url + "?"
-        if params.index:
-            url = build_query_params(url, "index", params.index)
+        if params.ids:
+            url = build_query_params(url, "ids", ",".join(params.ids))
     return url
 
 
