@@ -428,7 +428,9 @@ class ClobClient:
         self.assert_level_2_auth()
         request_args = RequestArgs(method="GET", request_path=GET_NOTIFICATIONS)
         headers = create_level_2_headers(self.signer, self.creds, request_args)
-        url = "{}{}".format(self.host, GET_NOTIFICATIONS)
+        url = "{}{}?signature_type=".format(
+            self.host, GET_NOTIFICATIONS, self.builder.sig_type
+        )
         return get(url, headers=headers)
 
     def drop_notifications(self, params: DropNotificationParams = None):
