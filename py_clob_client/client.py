@@ -24,8 +24,8 @@ from .endpoints import (
     PRICE,
     TIME,
     TRADES,
-    GET_TRADE_NOTIFICATIONS,
-    DROP_TRADE_NOTIFICATIONS,
+    GET_NOTIFICATIONS,
+    DROP_NOTIFICATIONS,
     GET_BALANCE_ALLOWANCE,
     IS_ORDER_SCORING,
     GET_TICK_SIZE,
@@ -42,7 +42,7 @@ from .clob_types import (
     FilterParams,
     OrderArgs,
     RequestArgs,
-    TradeNotificationParams,
+    DropNotificationParams,
     OrderBookSummary,
     BalanceAllowanceParams,
     OrderScoringParams,
@@ -55,7 +55,7 @@ from .http_helpers.helpers import (
     delete,
     get,
     post,
-    add_trade_notifications_query_params,
+    drop_notifications_query_params,
     add_balance_allowance_params_to_url,
     add_order_scoring_params_to_url,
     add_orders_scoring_params_to_url,
@@ -420,31 +420,29 @@ class ClobClient:
             return L1
         return L0
 
-    def get_trade_notifications(self, params: TradeNotificationParams = None):
+    def get_notifications(self):
         """
-        Fetches the trade notifications for a user
+        Fetches the notifications for a user
         Requires Level 2 authentication
         """
         self.assert_level_2_auth()
-        request_args = RequestArgs(method="GET", request_path=GET_TRADE_NOTIFICATIONS)
+        request_args = RequestArgs(method="GET", request_path=GET_NOTIFICATIONS)
         headers = create_level_2_headers(self.signer, self.creds, request_args)
-        url = add_trade_notifications_query_params(
-            "{}{}".format(self.host, GET_TRADE_NOTIFICATIONS), params
+        url = "{}{}?signature_type=".format(
+            self.host, GET_NOTIFICATIONS, self.builder.sig_type
         )
         return get(url, headers=headers)
 
-    def drop_trade_notifications(self, params: TradeNotificationParams = None):
+    def drop_notifications(self, params: DropNotificationParams = None):
         """
-        Drops the trade notifications for a user
+        Drops the notifications for a user
         Requires Level 2 authentication
         """
         self.assert_level_2_auth()
-        request_args = RequestArgs(
-            method="DELETE", request_path=DROP_TRADE_NOTIFICATIONS
-        )
+        request_args = RequestArgs(method="DELETE", request_path=DROP_NOTIFICATIONS)
         headers = create_level_2_headers(self.signer, self.creds, request_args)
-        url = add_trade_notifications_query_params(
-            "{}{}".format(self.host, DROP_TRADE_NOTIFICATIONS), params
+        url = drop_notifications_query_params(
+            "{}{}".format(self.host, DROP_NOTIFICATIONS), params
         )
         return delete(url, headers=headers)
 

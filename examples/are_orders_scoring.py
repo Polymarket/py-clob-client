@@ -19,7 +19,7 @@ def main():
     chain_id = MUMBAI
     client = ClobClient(host, key=key, chain_id=chain_id, creds=creds)
 
-    scoring = client.are_order_scoring(
+    scoring = client.are_orders_scoring(
         OrdersScoringParams(
             orderIds=[
                 "0xb816482a5187a3d3db49cbaf6fe3ddf24f53e6c712b5a4bf5e01d0ec7b11dabc"
