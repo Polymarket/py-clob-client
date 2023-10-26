@@ -1,7 +1,8 @@
 import logging
+from typing import Optional
 
 from .order_builder.builder import OrderBuilder
-from .clob_types import ApiCreds, OrderType
+from .model.clob import ApiCreds, OrderType, PartialOrderOptions
 
 from .headers.headers import create_level_1_headers, create_level_2_headers
 from .signer import Signer
@@ -37,7 +38,7 @@ from .endpoints import (
     GET_SAMPLING_MARKETS,
     GET_MARKET_TRADES_EVENTS,
 )
-from .clob_types import (
+from .model.clob import (
     ApiCreds,
     FilterParams,
     OrderArgs,
@@ -47,6 +48,7 @@ from .clob_types import (
     BalanceAllowanceParams,
     OrderScoringParams,
     TickSize,
+    OrderOptions,
     OrdersScoringParams,
 )
 from .exceptions import PolyException
@@ -79,6 +81,7 @@ class ClobClient:
         creds: ApiCreds = None,
         signature_type: int = None,
         funder: str = None,
+        neg_risk: bool = False,
     ):
         """
         Initializes the clob client
@@ -96,8 +99,8 @@ class ClobClient:
         self.signer = Signer(key, chain_id) if key else None
         self.creds = creds
         self.mode = self._get_client_mode()
-        if chain_id:
-            self.contract_config = get_contract_config(chain_id)
+        # if chain_id:
+        #     self.contract_config = get_contract_config(chain_id, neg_risk)
         if self.signer:
             self.builder = OrderBuilder(
                 self.signer, sig_type=signature_type, funder=funder
@@ -248,7 +251,7 @@ class ClobClient:
         return self.__tick_sizes[token_id]
 
     def __resolve_tick_size(
-        self, token_id: str, tick_size: TickSize = None
+        self, token_id: str, tick_size: Optional[TickSize] = None
     ) -> TickSize:
         min_tick_size = self.get_tick_size(token_id)
         if tick_size is not None:
@@ -263,15 +266,29 @@ class ClobClient:
             tick_size = min_tick_size
         return tick_size
 
-    def create_order(self, order_args: OrderArgs, tick_size: TickSize = None):
+    def create_order(
+        self, order_args: OrderArgs, options: Optional[PartialOrderOptions] = None
+    ):
         """
         Creates and signs an order
-        Level 2 Auth required
+        Level 1 Auth required
         """
-        self.assert_level_2_auth()
+        self.assert_level_1_auth()
 
-        tick_size = self.__resolve_tick_size(order_args.token_id, tick_size)
-        return self.builder.create_order(order_args, tick_size)
+        # add resolve_order_options, or similar
+        tick_size = self.__resolve_tick_size(
+            order_args.token_id,
+            options.tick_size if options else None,
+        )
+        neg_risk = options.neg_risk if options else False
+
+        return self.builder.create_order(
+            order_args,
+            OrderOptions(
+                tick_size=tick_size,
+                neg_risk=neg_risk,
+            ),
+        )
 
     def post_order(self, order, orderType: OrderType = OrderType.GTC):
         """

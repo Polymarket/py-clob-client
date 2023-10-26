@@ -1,4 +1,5 @@
-from py_order_utils.builders import OrderBuilder as UtilsOrderBuild
+from py_order_utils.builders import OrderBuilder as UtilsOrderBuilder
+from py_order_utils.signer import Signer as UtilsSigner
 from py_order_utils.model import (
     EOA,
     OrderData,
@@ -6,7 +7,6 @@ from py_order_utils.model import (
     BUY as UtilsBuy,
     SELL as UtilsSell,
 )
-from py_order_utils.config import get_contract_config
 
 from .helpers import (
     to_token_decimals,
@@ -16,12 +16,12 @@ from .helpers import (
     round_up,
 )
 from .constants import BUY, SELL
-
+from ..config import get_contract_config
 from ..signer import Signer
-from ..clob_types import OrderArgs, TickSize, RoundConfig
+from ..model.clob import OrderArgs, OrderOptions, TickSize, RoundConfig
 from typing import Tuple
 
-ROUNDING_CONFIG: Tuple[TickSize, RoundConfig] = {
+ROUNDING_CONFIG: dict[TickSize, RoundConfig] = {
     "0.1": RoundConfig(price=1, size=2, amount=3),
     "0.01": RoundConfig(price=2, size=2, amount=4),
     "0.001": RoundConfig(price=3, size=2, amount=5),
@@ -41,9 +41,9 @@ class OrderBuilder:
         # Defaults to the address of the signer
         self.funder = funder if funder is not None else self.signer.address()
         self.contract_config = self._get_contract_config(self.signer.get_chain_id())
-        self.order_builder = UtilsOrderBuild(
-            self.contract_config.exchange, self.signer.get_chain_id(), self.signer
-        )
+        # self.order_builder = UtilsOrderBuild(
+        #     self.contract_config.exchange, self.signer.get_chain_id(), self.signer
+        # )
 
     def _get_contract_config(self, chain_id: int):
         return get_contract_config(chain_id)
@@ -82,7 +82,7 @@ class OrderBuilder:
         else:
             raise ValueError(f"order_args.side must be '{BUY}' or '{SELL}'")
 
-    def create_order(self, order_args: OrderArgs, tick_size: TickSize) -> SignedOrder:
+    def create_order(self, order_args: OrderArgs, options: OrderOptions) -> SignedOrder:
         """
         Creates and signs an order
         """
@@ -90,15 +90,15 @@ class OrderBuilder:
             order_args.side,
             order_args.size,
             order_args.price,
-            ROUNDING_CONFIG[tick_size],
+            ROUNDING_CONFIG[options.tick_size],
         )
 
         data = OrderData(
             maker=self.funder,
             taker=order_args.taker,
             tokenId=order_args.token_id,
-            makerAmount=maker_amount,
-            takerAmount=taker_amount,
+            makerAmount=str(maker_amount),
+            takerAmount=str(taker_amount),
             side=side,
             feeRateBps=str(order_args.fee_rate_bps),
             nonce=str(order_args.nonce),
@@ -107,4 +107,14 @@ class OrderBuilder:
             signatureType=self.sig_type,
         )
 
-        return self.order_builder.build_signed_order(data)
+        contract_config = get_contract_config(
+            self.signer.get_chain_id(), options.neg_risk
+        )
+
+        order_builder = UtilsOrderBuilder(
+            contract_config.exchange,
+            self.signer.get_chain_id(),
+            UtilsSigner(key=self.signer.private_key),
+        )
+
+        return order_builder.build_signed_order(data)

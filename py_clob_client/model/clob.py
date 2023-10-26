@@ -2,9 +2,9 @@ from dataclasses import dataclass
 from typing import Any
 from dataclasses import dataclass, asdict
 from json import dumps
-from typing import Literal
+from typing import Literal, Optional
 
-from .constants import ZERO_ADDRESS
+from ..constants import ZERO_ADDRESS
 
 
 @dataclass
@@ -144,6 +144,18 @@ TickSize = Literal["0.1", "0.01", "0.001", "0.0001"]
 
 
 @dataclass
+class OrderOptions:
+    tick_size: TickSize
+    neg_risk: bool
+
+
+@dataclass
+class PartialOrderOptions:
+    tick_size: Optional[TickSize] = None
+    neg_risk: bool = False
+
+
+@dataclass
 class RoundConfig:
     price: float
     size: float
@@ -151,3 +163,25 @@ class RoundConfig:
 
 
 TickSizes: dict[str, TickSize]
+
+
+@dataclass
+class ContractConfig:
+    """
+    Contract Configuration
+    """
+
+    exchange: str
+    """
+    The exchange contract responsible for matching orders
+    """
+
+    collateral: str
+    """
+    The ERC20 token used as collateral for the exchange's markets
+    """
+
+    conditional_tokens: str
+    """
+    The ERC1155 conditional tokens contract
+    """
