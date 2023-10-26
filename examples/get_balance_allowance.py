@@ -1,7 +1,7 @@
 import os
 
 from py_clob_client.client import ClobClient
-from py_clob_client.clob_types import ApiCreds, BalanceAllowanceParams, AssetType
+from py_clob_client.model.clob import ApiCreds, BalanceAllowanceParams, AssetType
 from dotenv import load_dotenv
 from py_clob_client.constants import MUMBAI
 

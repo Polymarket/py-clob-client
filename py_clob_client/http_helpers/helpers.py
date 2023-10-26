@@ -1,6 +1,6 @@
 import requests
 
-from py_clob_client.clob_types import (
+from py_clob_client.model.clob import (
     FilterParams,
     DropNotificationParams,
     BalanceAllowanceParams,

@@ -1,4 +1,4 @@
-from py_clob_client.model.clob import (
+from .clob import (
     ApiCreds,
     RequestArgs,
     OrderArgs,
@@ -12,9 +12,8 @@ from py_clob_client.model.clob import (
     OrderScoringParams,
     OrdersScoringParams,
     TickSize,
-    OrderOptions,
-    PartialOrderOptions,
+    CreateOrderOptions,
+    PartialCreateOrderOptions,
     RoundConfig,
-    TickSizes,
     ContractConfig,
 )

@@ -2,7 +2,7 @@ import logging
 from typing import Optional
 
 from .order_builder.builder import OrderBuilder
-from .model.clob import ApiCreds, OrderType, PartialOrderOptions
+from .model.clob import ApiCreds, OrderType, PartialCreateOrderOptions
 
 from .headers.headers import create_level_1_headers, create_level_2_headers
 from .signer import Signer
@@ -48,7 +48,7 @@ from .model.clob import (
     BalanceAllowanceParams,
     OrderScoringParams,
     TickSize,
-    OrderOptions,
+    CreateOrderOptions,
     OrdersScoringParams,
 )
 from .exceptions import PolyException
@@ -81,7 +81,6 @@ class ClobClient:
         creds: ApiCreds = None,
         signature_type: int = None,
         funder: str = None,
-        neg_risk: bool = False,
     ):
         """
         Initializes the clob client
@@ -267,7 +266,7 @@ class ClobClient:
         return tick_size
 
     def create_order(
-        self, order_args: OrderArgs, options: Optional[PartialOrderOptions] = None
+        self, order_args: OrderArgs, options: Optional[PartialCreateOrderOptions] = None
     ):
         """
         Creates and signs an order
@@ -284,7 +283,7 @@ class ClobClient:
 
         return self.builder.create_order(
             order_args,
-            OrderOptions(
+            CreateOrderOptions(
                 tick_size=tick_size,
                 neg_risk=neg_risk,
             ),

@@ -18,7 +18,7 @@ from .helpers import (
 from .constants import BUY, SELL
 from ..config import get_contract_config
 from ..signer import Signer
-from ..model.clob import OrderArgs, OrderOptions, TickSize, RoundConfig
+from ..model.clob import OrderArgs, CreateOrderOptions, TickSize, RoundConfig
 from typing import Tuple
 
 ROUNDING_CONFIG: dict[TickSize, RoundConfig] = {
@@ -82,7 +82,9 @@ class OrderBuilder:
         else:
             raise ValueError(f"order_args.side must be '{BUY}' or '{SELL}'")
 
-    def create_order(self, order_args: OrderArgs, options: OrderOptions) -> SignedOrder:
+    def create_order(
+        self, order_args: OrderArgs, options: CreateOrderOptions
+    ) -> SignedOrder:
         """
         Creates and signs an order
         """

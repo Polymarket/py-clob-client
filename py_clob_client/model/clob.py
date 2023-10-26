@@ -144,13 +144,13 @@ TickSize = Literal["0.1", "0.01", "0.001", "0.0001"]
 
 
 @dataclass
-class OrderOptions:
+class CreateOrderOptions:
     tick_size: TickSize
-    neg_risk: bool
+    neg_risk: bool = False
 
 
 @dataclass
-class PartialOrderOptions:
+class PartialCreateOrderOptions:
     tick_size: Optional[TickSize] = None
     neg_risk: bool = False
 
@@ -160,9 +160,6 @@ class RoundConfig:
     price: float
     size: float
     amount: float
-
-
-TickSizes: dict[str, TickSize]
 
 
 @dataclass

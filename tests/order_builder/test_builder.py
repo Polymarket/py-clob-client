@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from py_clob_client.clob_types import OrderArgs
+from py_clob_client.model.clob import OrderArgs, CreateOrderOptions
 from py_clob_client.constants import MUMBAI
 from py_clob_client.order_builder.constants import BUY, SELL
 
@@ -203,7 +203,7 @@ class TestOrderBuilder(TestCase):
                 size=15,
                 side=BUY,
             ),
-            tick_size="0.01",
+            options=CreateOrderOptions(tick_size="0.01"),
         )
         self.assertEqual(
             signed_order.order["makerAmount"],
@@ -222,7 +222,7 @@ class TestOrderBuilder(TestCase):
                 size=15,
                 side=SELL,
             ),
-            tick_size="0.01",
+            options=CreateOrderOptions(tick_size="0.01"),
         )
         self.assertEqual(
             signed_order.order["makerAmount"],
@@ -241,7 +241,7 @@ class TestOrderBuilder(TestCase):
                 size=101,
                 side=BUY,
             ),
-            tick_size="0.01",
+            options=CreateOrderOptions(tick_size="0.01"),
         )
         self.assertEqual(
             signed_order.order["makerAmount"],
@@ -260,7 +260,7 @@ class TestOrderBuilder(TestCase):
                 size=101,
                 side=SELL,
             ),
-            tick_size="0.01",
+            options=CreateOrderOptions(tick_size="0.01"),
         )
         self.assertEqual(
             signed_order.order["makerAmount"],
@@ -279,7 +279,7 @@ class TestOrderBuilder(TestCase):
                 size=12.8205,
                 side=BUY,
             ),
-            tick_size="0.01",
+            options=CreateOrderOptions(tick_size="0.01"),
         )
         self.assertEqual(
             signed_order.order["makerAmount"],
@@ -298,7 +298,7 @@ class TestOrderBuilder(TestCase):
                 size=12.8205,
                 side=SELL,
             ),
-            tick_size="0.01",
+            options=CreateOrderOptions(tick_size="0.01"),
         )
         self.assertEqual(
             signed_order.order["makerAmount"],
@@ -317,7 +317,7 @@ class TestOrderBuilder(TestCase):
                 size=2435.89,
                 side=SELL,
             ),
-            tick_size="0.01",
+            options=CreateOrderOptions(tick_size="0.01"),
         )
         self.assertEqual(
             signed_order.order["makerAmount"],
@@ -336,7 +336,7 @@ class TestOrderBuilder(TestCase):
                 size=19.1,
                 side=SELL,
             ),
-            tick_size="0.01",
+            options=CreateOrderOptions(tick_size="0.01"),
         )
         self.assertEqual(
             signed_order.order["makerAmount"],
@@ -355,7 +355,7 @@ class TestOrderBuilder(TestCase):
                 size=18233.33,
                 side=BUY,
             ),
-            tick_size="0.01",
+            options=CreateOrderOptions(tick_size="0.01"),
         )
         self.assertEqual(
             signed_order.order["makerAmount"],
@@ -382,7 +382,7 @@ class TestOrderBuilder(TestCase):
                 nonce=123,
                 expiration=50000,
             ),
-            tick_size="0.1",
+            options=CreateOrderOptions(tick_size="0.1"),
         )
 
         self.assertTrue(isinstance(signed_order.order["salt"], int))
@@ -451,7 +451,7 @@ class TestOrderBuilder(TestCase):
                 nonce=123,
                 expiration=50000,
             ),
-            tick_size="0.01",
+            options=CreateOrderOptions(tick_size="0.01"),
         )
 
         self.assertTrue(isinstance(signed_order.order["salt"], int))
@@ -520,7 +520,7 @@ class TestOrderBuilder(TestCase):
                 nonce=123,
                 expiration=50000,
             ),
-            tick_size="0.001",
+            options=CreateOrderOptions(tick_size="0.001"),
         )
 
         self.assertTrue(isinstance(signed_order.order["salt"], int))
@@ -576,7 +576,7 @@ class TestOrderBuilder(TestCase):
             0.056,
         )
 
-    def test_create_order_buy_0_001(self):
+    def test_create_order_buy_0_0001(self):
         builder = OrderBuilder(signer)
 
         signed_order = builder.create_order(
@@ -589,7 +589,7 @@ class TestOrderBuilder(TestCase):
                 nonce=123,
                 expiration=50000,
             ),
-            tick_size="0.0001",
+            options=CreateOrderOptions(tick_size="0.0001"),
         )
 
         self.assertTrue(isinstance(signed_order.order["salt"], int))
@@ -658,7 +658,7 @@ class TestOrderBuilder(TestCase):
                 nonce=123,
                 expiration=50000,
             ),
-            tick_size="0.1",
+            options=CreateOrderOptions(tick_size="0.1"),
         )
 
         self.assertTrue(isinstance(signed_order.order["salt"], int))
@@ -727,7 +727,7 @@ class TestOrderBuilder(TestCase):
                 nonce=123,
                 expiration=50000,
             ),
-            tick_size="0.01",
+            options=CreateOrderOptions(tick_size="0.01"),
         )
 
         self.assertTrue(isinstance(signed_order.order["salt"], int))
@@ -796,7 +796,7 @@ class TestOrderBuilder(TestCase):
                 nonce=123,
                 expiration=50000,
             ),
-            tick_size="0.001",
+            options=CreateOrderOptions(tick_size="0.001"),
         )
 
         self.assertTrue(isinstance(signed_order.order["salt"], int))
@@ -865,7 +865,7 @@ class TestOrderBuilder(TestCase):
                 nonce=123,
                 expiration=50000,
             ),
-            tick_size="0.0001",
+            options=CreateOrderOptions(tick_size="0.0001"),
         )
 
         self.assertTrue(isinstance(signed_order.order["salt"], int))
@@ -934,7 +934,7 @@ class TestOrderBuilder(TestCase):
                 nonce=123,
                 expiration=50000,
             ),
-            tick_size="0.01",
+            options=CreateOrderOptions(tick_size="0.01"),
         )
 
         self.assertIsNotNone(signed_order)
@@ -1002,7 +1002,7 @@ class TestOrderBuilder(TestCase):
                 nonce=123,
                 expiration=50000,
             ),
-            tick_size="0.01",
+            options=CreateOrderOptions(tick_size="0.01"),
         )
 
         self.assertIsNotNone(signed_order)
