@@ -1,4 +1,4 @@
-from .model import ContractConfig
+from .clob_types import ContractConfig
 
 
 def get_contract_config(chainID: int, neg_risk: bool = False) -> ContractConfig:

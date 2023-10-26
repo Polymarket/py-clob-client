@@ -4,7 +4,7 @@ from dataclasses import dataclass, asdict
 from json import dumps
 from typing import Literal, Optional
 
-from ..constants import ZERO_ADDRESS
+from .constants import ZERO_ADDRESS
 
 
 @dataclass

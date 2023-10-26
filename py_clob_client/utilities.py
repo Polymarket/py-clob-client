@@ -1,6 +1,6 @@
 import hashlib
 
-from .model.clob import OrderBookSummary, OrderSummary, TickSize
+from .clob_types import OrderBookSummary, OrderSummary, TickSize
 
 
 def parse_raw_orderbook_summary(raw_obs: any) -> OrderBookSummary:

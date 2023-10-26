@@ -1,6 +1,6 @@
 from datetime import datetime
 from unittest import TestCase
-from py_clob_client.model.clob import ApiCreds, RequestArgs
+from py_clob_client.clob_types import ApiCreds, RequestArgs
 from py_clob_client.constants import MUMBAI
 from py_clob_client.headers.headers import (
     POLY_ADDRESS,

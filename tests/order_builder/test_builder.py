@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from py_clob_client.model.clob import OrderArgs, CreateOrderOptions
+from py_clob_client.clob_types import OrderArgs, CreateOrderOptions
 from py_clob_client.constants import MUMBAI
 from py_clob_client.order_builder.constants import BUY, SELL
 

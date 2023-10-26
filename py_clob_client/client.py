@@ -2,7 +2,7 @@ import logging
 from typing import Optional
 
 from .order_builder.builder import OrderBuilder
-from .model.clob import ApiCreds, OrderType, PartialCreateOrderOptions
+from .clob_types import ApiCreds, OrderType, PartialCreateOrderOptions
 
 from .headers.headers import create_level_1_headers, create_level_2_headers
 from .signer import Signer
@@ -38,7 +38,7 @@ from .endpoints import (
     GET_SAMPLING_MARKETS,
     GET_MARKET_TRADES_EVENTS,
 )
-from .model.clob import (
+from .clob_types import (
     ApiCreds,
     FilterParams,
     OrderArgs,

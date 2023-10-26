@@ -1,4 +1,4 @@
-from ..model.clob import ApiCreds, RequestArgs
+from ..clob_types import ApiCreds, RequestArgs
 from ..signing.hmac import build_hmac_signature
 from ..signer import Signer
 from ..signing.eip712 import sign_clob_auth_message
