@@ -19,7 +19,6 @@ from .constants import BUY, SELL
 from ..config import get_contract_config
 from ..signer import Signer
 from ..clob_types import OrderArgs, CreateOrderOptions, TickSize, RoundConfig
-from typing import Tuple
 
 ROUNDING_CONFIG: dict[TickSize, RoundConfig] = {
     "0.1": RoundConfig(price=1, size=2, amount=3),
