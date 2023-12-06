@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 
 from .order_builder.builder import OrderBuilder
 from .headers.headers import create_level_1_headers, create_level_2_headers
