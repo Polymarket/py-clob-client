@@ -251,7 +251,7 @@ class ClobClient:
         return self.__tick_sizes[token_id]
 
     def __resolve_tick_size(
-        self, token_id: str, tick_size: Optional[TickSize] = None
+        self, token_id: str, tick_size: TickSize = None
     ) -> TickSize:
         min_tick_size = self.get_tick_size(token_id)
         if tick_size is not None:
