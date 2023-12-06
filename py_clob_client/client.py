@@ -2,8 +2,6 @@ import logging
 from typing import Optional
 
 from .order_builder.builder import OrderBuilder
-from .clob_types import ApiCreds, OrderType, PartialCreateOrderOptions
-
 from .headers.headers import create_level_1_headers, create_level_2_headers
 from .signer import Signer
 
@@ -50,6 +48,8 @@ from .clob_types import (
     TickSize,
     CreateOrderOptions,
     OrdersScoringParams,
+    OrderType,
+    PartialCreateOrderOptions,
 )
 from .exceptions import PolyException
 from .http_helpers.helpers import (
@@ -62,7 +62,8 @@ from .http_helpers.helpers import (
     add_order_scoring_params_to_url,
     add_orders_scoring_params_to_url,
 )
-from py_order_utils.config import get_contract_config
+
+# from py_order_utils.config import get_contract_config
 from .constants import L0, L1, L1_AUTH_UNAVAILABLE, L2, L2_AUTH_UNAVAILABLE
 from .utilities import (
     parse_raw_orderbook_summary,
@@ -266,7 +267,7 @@ class ClobClient:
         return tick_size
 
     def create_order(
-        self, order_args: OrderArgs, options: Optional[PartialCreateOrderOptions] = None
+        self, order_args: OrderArgs, options: PartialCreateOrderOptions = None
     ):
         """
         Creates and signs an order
@@ -302,11 +303,13 @@ class ClobClient:
         )
         return post("{}{}".format(self.host, POST_ORDER), headers=headers, data=body)
 
-    def create_and_post_order(self, order_args: OrderArgs):
+    def create_and_post_order(
+        self, order_args: OrderArgs, options: PartialCreateOrderOptions = None
+    ):
         """
         Utility function to create and publish an order
         """
-        ord = self.create_order(order_args)
+        ord = self.create_order(order_args, options)
         return self.post_order(ord)
 
     def cancel(self, order_id):
