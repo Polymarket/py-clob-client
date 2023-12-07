@@ -62,7 +62,6 @@ from .http_helpers.helpers import (
     add_order_scoring_params_to_url,
     add_orders_scoring_params_to_url,
 )
-from py_order_utils.config import get_contract_config
 from .constants import L0, L1, L1_AUTH_UNAVAILABLE, L2, L2_AUTH_UNAVAILABLE
 from .utilities import (
     parse_raw_orderbook_summary,
@@ -98,8 +97,6 @@ class ClobClient:
         self.signer = Signer(key, chain_id) if key else None
         self.creds = creds
         self.mode = self._get_client_mode()
-        # if chain_id:
-        #     self.contract_config = get_contract_config(chain_id, neg_risk)
         if self.signer:
             self.builder = OrderBuilder(
                 self.signer, sig_type=signature_type, funder=funder

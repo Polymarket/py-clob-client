@@ -19,7 +19,6 @@ from .constants import BUY, SELL
 from ..config import get_contract_config
 from ..signer import Signer
 from ..clob_types import OrderArgs, CreateOrderOptions, TickSize, RoundConfig
-from typing import Tuple
 
 ROUNDING_CONFIG: dict[TickSize, RoundConfig] = {
     "0.1": RoundConfig(price=1, size=2, amount=3),
@@ -40,13 +39,6 @@ class OrderBuilder:
         # Used for Polymarket proxy wallets and other smart contract wallets
         # Defaults to the address of the signer
         self.funder = funder if funder is not None else self.signer.address()
-        self.contract_config = self._get_contract_config(self.signer.get_chain_id())
-        # self.order_builder = UtilsOrderBuild(
-        #     self.contract_config.exchange, self.signer.get_chain_id(), self.signer
-        # )
-
-    def _get_contract_config(self, chain_id: int):
-        return get_contract_config(chain_id)
 
     def get_order_amounts(
         self, side: str, size: float, price: float, round_config: RoundConfig

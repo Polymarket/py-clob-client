@@ -820,6 +820,670 @@ class TestUtilities(TestCase):
         self.assertEqual(json_order["order"]["signatureType"], 0)
         self.assertIsNotNone(json_order["order"]["signature"])
 
+    def test_order_to_json_0_1_neg_risk(self):
+        # publicly known private key
+        private_key = (
+            "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+        )
+        chain_id = MUMBAI
+        signer = Signer(private_key=private_key, chain_id=chain_id)
+        owner = "aaa-bbb-ccc"
+        builder = OrderBuilder(signer)
+
+        # GTC BUY
+        json_order = order_to_json(
+            order=builder.create_order(
+                order_args=OrderArgs(
+                    token_id="100",
+                    price=0.5,
+                    size=100,
+                    side=BUY,
+                ),
+                options=CreateOrderOptions(tick_size="0.1", neg_risk=True),
+            ),
+            owner=owner,
+            orderType=OrderType.GTC,
+        )
+
+        self.assertIsNotNone(json_order)
+        self.assertEqual(json_order["orderType"], "GTC")
+        self.assertEqual(json_order["owner"], owner)
+        self.assertIsNotNone(json_order["order"])
+        self.assertIsNotNone(json_order["order"]["salt"])
+        self.assertEqual(
+            json_order["order"]["maker"], "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        )
+        self.assertEqual(
+            json_order["order"]["signer"], "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        )
+        self.assertEqual(
+            json_order["order"]["taker"], "0x0000000000000000000000000000000000000000"
+        )
+        self.assertEqual(json_order["order"]["tokenId"], "100")
+        self.assertEqual(json_order["order"]["makerAmount"], "50000000")
+        self.assertEqual(json_order["order"]["takerAmount"], "100000000")
+        self.assertEqual(json_order["order"]["expiration"], "0")
+        self.assertEqual(json_order["order"]["nonce"], "0")
+        self.assertEqual(json_order["order"]["feeRateBps"], "0")
+        self.assertEqual(json_order["order"]["side"], "BUY")
+        self.assertEqual(json_order["order"]["signatureType"], 0)
+        self.assertIsNotNone(json_order["order"]["signature"])
+
+        # GTC SELL
+        json_order = order_to_json(
+            order=builder.create_order(
+                order_args=OrderArgs(
+                    token_id="100",
+                    price=0.5,
+                    size=100,
+                    side=SELL,
+                ),
+                options=CreateOrderOptions(tick_size="0.1", neg_risk=True),
+            ),
+            owner=owner,
+            orderType=OrderType.GTC,
+        )
+
+        self.assertIsNotNone(json_order)
+        self.assertEqual(json_order["orderType"], "GTC")
+        self.assertEqual(json_order["owner"], owner)
+        self.assertIsNotNone(json_order["order"])
+        self.assertIsNotNone(json_order["order"]["salt"])
+        self.assertEqual(
+            json_order["order"]["maker"], "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        )
+        self.assertEqual(
+            json_order["order"]["signer"], "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        )
+        self.assertEqual(
+            json_order["order"]["taker"], "0x0000000000000000000000000000000000000000"
+        )
+        self.assertEqual(json_order["order"]["tokenId"], "100")
+        self.assertEqual(json_order["order"]["makerAmount"], "100000000")
+        self.assertEqual(json_order["order"]["takerAmount"], "50000000")
+        self.assertEqual(json_order["order"]["expiration"], "0")
+        self.assertEqual(json_order["order"]["nonce"], "0")
+        self.assertEqual(json_order["order"]["feeRateBps"], "0")
+        self.assertEqual(json_order["order"]["side"], "SELL")
+        self.assertEqual(json_order["order"]["signatureType"], 0)
+        self.assertIsNotNone(json_order["order"]["signature"])
+
+        # GTD BUY
+        json_order = order_to_json(
+            order=builder.create_order(
+                order_args=OrderArgs(
+                    token_id="100",
+                    price=0.5,
+                    size=100,
+                    side=BUY,
+                ),
+                options=CreateOrderOptions(tick_size="0.1", neg_risk=True),
+            ),
+            owner=owner,
+            orderType=OrderType.GTD,
+        )
+
+        self.assertIsNotNone(json_order)
+        self.assertEqual(json_order["orderType"], "GTD")
+        self.assertEqual(json_order["owner"], owner)
+        self.assertIsNotNone(json_order["order"])
+        self.assertIsNotNone(json_order["order"]["salt"])
+        self.assertEqual(
+            json_order["order"]["maker"], "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        )
+        self.assertEqual(
+            json_order["order"]["signer"], "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        )
+        self.assertEqual(
+            json_order["order"]["taker"], "0x0000000000000000000000000000000000000000"
+        )
+        self.assertEqual(json_order["order"]["tokenId"], "100")
+        self.assertEqual(json_order["order"]["makerAmount"], "50000000")
+        self.assertEqual(json_order["order"]["takerAmount"], "100000000")
+        self.assertEqual(json_order["order"]["expiration"], "0")
+        self.assertEqual(json_order["order"]["nonce"], "0")
+        self.assertEqual(json_order["order"]["feeRateBps"], "0")
+        self.assertEqual(json_order["order"]["side"], "BUY")
+        self.assertEqual(json_order["order"]["signatureType"], 0)
+        self.assertIsNotNone(json_order["order"]["signature"])
+
+        # GTD SELL
+        json_order = order_to_json(
+            order=builder.create_order(
+                order_args=OrderArgs(
+                    token_id="100",
+                    price=0.5,
+                    size=100,
+                    side=SELL,
+                ),
+                options=CreateOrderOptions(tick_size="0.1", neg_risk=True),
+            ),
+            owner=owner,
+            orderType=OrderType.GTD,
+        )
+
+        self.assertIsNotNone(json_order)
+        self.assertEqual(json_order["orderType"], "GTD")
+        self.assertEqual(json_order["owner"], owner)
+        self.assertIsNotNone(json_order["order"])
+        self.assertIsNotNone(json_order["order"]["salt"])
+        self.assertEqual(
+            json_order["order"]["maker"], "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        )
+        self.assertEqual(
+            json_order["order"]["signer"], "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        )
+        self.assertEqual(
+            json_order["order"]["taker"], "0x0000000000000000000000000000000000000000"
+        )
+        self.assertEqual(json_order["order"]["tokenId"], "100")
+        self.assertEqual(json_order["order"]["makerAmount"], "100000000")
+        self.assertEqual(json_order["order"]["takerAmount"], "50000000")
+        self.assertEqual(json_order["order"]["expiration"], "0")
+        self.assertEqual(json_order["order"]["nonce"], "0")
+        self.assertEqual(json_order["order"]["feeRateBps"], "0")
+        self.assertEqual(json_order["order"]["side"], "SELL")
+        self.assertEqual(json_order["order"]["signatureType"], 0)
+        self.assertIsNotNone(json_order["order"]["signature"])
+
+    def test_order_to_json_0_01_neg_risk(self):
+        # publicly known private key
+        private_key = (
+            "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+        )
+        chain_id = MUMBAI
+        signer = Signer(private_key=private_key, chain_id=chain_id)
+        owner = "aaa-bbb-ccc"
+        builder = OrderBuilder(signer)
+
+        # GTC BUY
+        json_order = order_to_json(
+            order=builder.create_order(
+                order_args=OrderArgs(
+                    token_id="100",
+                    price=0.05,
+                    size=100,
+                    side=BUY,
+                ),
+                options=CreateOrderOptions(tick_size="0.01", neg_risk=True),
+            ),
+            owner=owner,
+            orderType=OrderType.GTC,
+        )
+
+        self.assertIsNotNone(json_order)
+        self.assertEqual(json_order["orderType"], "GTC")
+        self.assertEqual(json_order["owner"], owner)
+        self.assertIsNotNone(json_order["order"])
+        self.assertIsNotNone(json_order["order"]["salt"])
+        self.assertEqual(
+            json_order["order"]["maker"], "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        )
+        self.assertEqual(
+            json_order["order"]["signer"], "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        )
+        self.assertEqual(
+            json_order["order"]["taker"], "0x0000000000000000000000000000000000000000"
+        )
+        self.assertEqual(json_order["order"]["tokenId"], "100")
+        self.assertEqual(json_order["order"]["makerAmount"], "5000000")
+        self.assertEqual(json_order["order"]["takerAmount"], "100000000")
+        self.assertEqual(json_order["order"]["expiration"], "0")
+        self.assertEqual(json_order["order"]["nonce"], "0")
+        self.assertEqual(json_order["order"]["feeRateBps"], "0")
+        self.assertEqual(json_order["order"]["side"], "BUY")
+        self.assertEqual(json_order["order"]["signatureType"], 0)
+        self.assertIsNotNone(json_order["order"]["signature"])
+
+        # GTC SELL
+        json_order = order_to_json(
+            order=builder.create_order(
+                order_args=OrderArgs(
+                    token_id="100",
+                    price=0.05,
+                    size=100,
+                    side=SELL,
+                ),
+                options=CreateOrderOptions(tick_size="0.01", neg_risk=True),
+            ),
+            owner=owner,
+            orderType=OrderType.GTC,
+        )
+
+        self.assertIsNotNone(json_order)
+        self.assertEqual(json_order["orderType"], "GTC")
+        self.assertEqual(json_order["owner"], owner)
+        self.assertIsNotNone(json_order["order"])
+        self.assertIsNotNone(json_order["order"]["salt"])
+        self.assertEqual(
+            json_order["order"]["maker"], "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        )
+        self.assertEqual(
+            json_order["order"]["signer"], "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        )
+        self.assertEqual(
+            json_order["order"]["taker"], "0x0000000000000000000000000000000000000000"
+        )
+        self.assertEqual(json_order["order"]["tokenId"], "100")
+        self.assertEqual(json_order["order"]["makerAmount"], "100000000")
+        self.assertEqual(json_order["order"]["takerAmount"], "5000000")
+        self.assertEqual(json_order["order"]["expiration"], "0")
+        self.assertEqual(json_order["order"]["nonce"], "0")
+        self.assertEqual(json_order["order"]["feeRateBps"], "0")
+        self.assertEqual(json_order["order"]["side"], "SELL")
+        self.assertEqual(json_order["order"]["signatureType"], 0)
+        self.assertIsNotNone(json_order["order"]["signature"])
+
+        # GTD BUY
+        json_order = order_to_json(
+            order=builder.create_order(
+                order_args=OrderArgs(
+                    token_id="100",
+                    price=0.05,
+                    size=100,
+                    side=BUY,
+                ),
+                options=CreateOrderOptions(tick_size="0.01", neg_risk=True),
+            ),
+            owner=owner,
+            orderType=OrderType.GTD,
+        )
+
+        self.assertIsNotNone(json_order)
+        self.assertEqual(json_order["orderType"], "GTD")
+        self.assertEqual(json_order["owner"], owner)
+        self.assertIsNotNone(json_order["order"])
+        self.assertIsNotNone(json_order["order"]["salt"])
+        self.assertEqual(
+            json_order["order"]["maker"], "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        )
+        self.assertEqual(
+            json_order["order"]["signer"], "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        )
+        self.assertEqual(
+            json_order["order"]["taker"], "0x0000000000000000000000000000000000000000"
+        )
+        self.assertEqual(json_order["order"]["tokenId"], "100")
+        self.assertEqual(json_order["order"]["makerAmount"], "5000000")
+        self.assertEqual(json_order["order"]["takerAmount"], "100000000")
+        self.assertEqual(json_order["order"]["expiration"], "0")
+        self.assertEqual(json_order["order"]["nonce"], "0")
+        self.assertEqual(json_order["order"]["feeRateBps"], "0")
+        self.assertEqual(json_order["order"]["side"], "BUY")
+        self.assertEqual(json_order["order"]["signatureType"], 0)
+        self.assertIsNotNone(json_order["order"]["signature"])
+
+        # GTD SELL
+        json_order = order_to_json(
+            order=builder.create_order(
+                order_args=OrderArgs(
+                    token_id="100",
+                    price=0.05,
+                    size=100,
+                    side=SELL,
+                ),
+                options=CreateOrderOptions(tick_size="0.01", neg_risk=True),
+            ),
+            owner=owner,
+            orderType=OrderType.GTD,
+        )
+
+        self.assertIsNotNone(json_order)
+        self.assertEqual(json_order["orderType"], "GTD")
+        self.assertEqual(json_order["owner"], owner)
+        self.assertIsNotNone(json_order["order"])
+        self.assertIsNotNone(json_order["order"]["salt"])
+        self.assertEqual(
+            json_order["order"]["maker"], "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        )
+        self.assertEqual(
+            json_order["order"]["signer"], "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        )
+        self.assertEqual(
+            json_order["order"]["taker"], "0x0000000000000000000000000000000000000000"
+        )
+        self.assertEqual(json_order["order"]["tokenId"], "100")
+        self.assertEqual(json_order["order"]["makerAmount"], "100000000")
+        self.assertEqual(json_order["order"]["takerAmount"], "5000000")
+        self.assertEqual(json_order["order"]["expiration"], "0")
+        self.assertEqual(json_order["order"]["nonce"], "0")
+        self.assertEqual(json_order["order"]["feeRateBps"], "0")
+        self.assertEqual(json_order["order"]["side"], "SELL")
+        self.assertEqual(json_order["order"]["signatureType"], 0)
+        self.assertIsNotNone(json_order["order"]["signature"])
+
+    def test_order_to_json_0_001_neg_risk(self):
+        # publicly known private key
+        private_key = (
+            "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+        )
+        chain_id = MUMBAI
+        signer = Signer(private_key=private_key, chain_id=chain_id)
+        owner = "aaa-bbb-ccc"
+        builder = OrderBuilder(signer)
+
+        # GTC BUY
+        json_order = order_to_json(
+            order=builder.create_order(
+                order_args=OrderArgs(
+                    token_id="100",
+                    price=0.005,
+                    size=100,
+                    side=BUY,
+                ),
+                options=CreateOrderOptions(tick_size="0.001", neg_risk=True),
+            ),
+            owner=owner,
+            orderType=OrderType.GTC,
+        )
+
+        self.assertIsNotNone(json_order)
+        self.assertEqual(json_order["orderType"], "GTC")
+        self.assertEqual(json_order["owner"], owner)
+        self.assertIsNotNone(json_order["order"])
+        self.assertIsNotNone(json_order["order"]["salt"])
+        self.assertEqual(
+            json_order["order"]["maker"], "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        )
+        self.assertEqual(
+            json_order["order"]["signer"], "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        )
+        self.assertEqual(
+            json_order["order"]["taker"], "0x0000000000000000000000000000000000000000"
+        )
+        self.assertEqual(json_order["order"]["tokenId"], "100")
+        self.assertEqual(json_order["order"]["makerAmount"], "500000")
+        self.assertEqual(json_order["order"]["takerAmount"], "100000000")
+        self.assertEqual(json_order["order"]["expiration"], "0")
+        self.assertEqual(json_order["order"]["nonce"], "0")
+        self.assertEqual(json_order["order"]["feeRateBps"], "0")
+        self.assertEqual(json_order["order"]["side"], "BUY")
+        self.assertEqual(json_order["order"]["signatureType"], 0)
+        self.assertIsNotNone(json_order["order"]["signature"])
+
+        # GTC SELL
+        json_order = order_to_json(
+            order=builder.create_order(
+                order_args=OrderArgs(
+                    token_id="100",
+                    price=0.005,
+                    size=100,
+                    side=SELL,
+                ),
+                options=CreateOrderOptions(tick_size="0.001", neg_risk=True),
+            ),
+            owner=owner,
+            orderType=OrderType.GTC,
+        )
+
+        self.assertIsNotNone(json_order)
+        self.assertEqual(json_order["orderType"], "GTC")
+        self.assertEqual(json_order["owner"], owner)
+        self.assertIsNotNone(json_order["order"])
+        self.assertIsNotNone(json_order["order"]["salt"])
+        self.assertEqual(
+            json_order["order"]["maker"], "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        )
+        self.assertEqual(
+            json_order["order"]["signer"], "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        )
+        self.assertEqual(
+            json_order["order"]["taker"], "0x0000000000000000000000000000000000000000"
+        )
+        self.assertEqual(json_order["order"]["tokenId"], "100")
+        self.assertEqual(json_order["order"]["makerAmount"], "100000000")
+        self.assertEqual(json_order["order"]["takerAmount"], "500000")
+        self.assertEqual(json_order["order"]["expiration"], "0")
+        self.assertEqual(json_order["order"]["nonce"], "0")
+        self.assertEqual(json_order["order"]["feeRateBps"], "0")
+        self.assertEqual(json_order["order"]["side"], "SELL")
+        self.assertEqual(json_order["order"]["signatureType"], 0)
+        self.assertIsNotNone(json_order["order"]["signature"])
+
+        # GTD BUY
+        json_order = order_to_json(
+            order=builder.create_order(
+                order_args=OrderArgs(
+                    token_id="100",
+                    price=0.005,
+                    size=100,
+                    side=BUY,
+                ),
+                options=CreateOrderOptions(tick_size="0.001", neg_risk=True),
+            ),
+            owner=owner,
+            orderType=OrderType.GTD,
+        )
+
+        self.assertIsNotNone(json_order)
+        self.assertEqual(json_order["orderType"], "GTD")
+        self.assertEqual(json_order["owner"], owner)
+        self.assertIsNotNone(json_order["order"])
+        self.assertIsNotNone(json_order["order"]["salt"])
+        self.assertEqual(
+            json_order["order"]["maker"], "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        )
+        self.assertEqual(
+            json_order["order"]["signer"], "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        )
+        self.assertEqual(
+            json_order["order"]["taker"], "0x0000000000000000000000000000000000000000"
+        )
+        self.assertEqual(json_order["order"]["tokenId"], "100")
+        self.assertEqual(json_order["order"]["makerAmount"], "500000")
+        self.assertEqual(json_order["order"]["takerAmount"], "100000000")
+        self.assertEqual(json_order["order"]["expiration"], "0")
+        self.assertEqual(json_order["order"]["nonce"], "0")
+        self.assertEqual(json_order["order"]["feeRateBps"], "0")
+        self.assertEqual(json_order["order"]["side"], "BUY")
+        self.assertEqual(json_order["order"]["signatureType"], 0)
+        self.assertIsNotNone(json_order["order"]["signature"])
+
+        # GTD SELL
+        json_order = order_to_json(
+            order=builder.create_order(
+                order_args=OrderArgs(
+                    token_id="100",
+                    price=0.005,
+                    size=100,
+                    side=SELL,
+                ),
+                options=CreateOrderOptions(tick_size="0.001", neg_risk=True),
+            ),
+            owner=owner,
+            orderType=OrderType.GTD,
+        )
+
+        self.assertIsNotNone(json_order)
+        self.assertEqual(json_order["orderType"], "GTD")
+        self.assertEqual(json_order["owner"], owner)
+        self.assertIsNotNone(json_order["order"])
+        self.assertIsNotNone(json_order["order"]["salt"])
+        self.assertEqual(
+            json_order["order"]["maker"], "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        )
+        self.assertEqual(
+            json_order["order"]["signer"], "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        )
+        self.assertEqual(
+            json_order["order"]["taker"], "0x0000000000000000000000000000000000000000"
+        )
+        self.assertEqual(json_order["order"]["tokenId"], "100")
+        self.assertEqual(json_order["order"]["makerAmount"], "100000000")
+        self.assertEqual(json_order["order"]["takerAmount"], "500000")
+        self.assertEqual(json_order["order"]["expiration"], "0")
+        self.assertEqual(json_order["order"]["nonce"], "0")
+        self.assertEqual(json_order["order"]["feeRateBps"], "0")
+        self.assertEqual(json_order["order"]["side"], "SELL")
+        self.assertEqual(json_order["order"]["signatureType"], 0)
+        self.assertIsNotNone(json_order["order"]["signature"])
+
+    def test_order_to_json_0_0001_neg_risk(self):
+        # publicly known private key
+        private_key = (
+            "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+        )
+        chain_id = MUMBAI
+        signer = Signer(private_key=private_key, chain_id=chain_id)
+        owner = "aaa-bbb-ccc"
+        builder = OrderBuilder(signer)
+
+        # GTC BUY
+        json_order = order_to_json(
+            order=builder.create_order(
+                order_args=OrderArgs(
+                    token_id="100",
+                    price=0.0005,
+                    size=100,
+                    side=BUY,
+                ),
+                options=CreateOrderOptions(tick_size="0.0001", neg_risk=True),
+            ),
+            owner=owner,
+            orderType=OrderType.GTC,
+        )
+
+        self.assertIsNotNone(json_order)
+        self.assertEqual(json_order["orderType"], "GTC")
+        self.assertEqual(json_order["owner"], owner)
+        self.assertIsNotNone(json_order["order"])
+        self.assertIsNotNone(json_order["order"]["salt"])
+        self.assertEqual(
+            json_order["order"]["maker"], "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        )
+        self.assertEqual(
+            json_order["order"]["signer"], "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        )
+        self.assertEqual(
+            json_order["order"]["taker"], "0x0000000000000000000000000000000000000000"
+        )
+        self.assertEqual(json_order["order"]["tokenId"], "100")
+        self.assertEqual(json_order["order"]["makerAmount"], "50000")
+        self.assertEqual(json_order["order"]["takerAmount"], "100000000")
+        self.assertEqual(json_order["order"]["expiration"], "0")
+        self.assertEqual(json_order["order"]["nonce"], "0")
+        self.assertEqual(json_order["order"]["feeRateBps"], "0")
+        self.assertEqual(json_order["order"]["side"], "BUY")
+        self.assertEqual(json_order["order"]["signatureType"], 0)
+        self.assertIsNotNone(json_order["order"]["signature"])
+
+        # GTC SELL
+        json_order = order_to_json(
+            order=builder.create_order(
+                order_args=OrderArgs(
+                    token_id="100",
+                    price=0.0005,
+                    size=100,
+                    side=SELL,
+                ),
+                options=CreateOrderOptions(tick_size="0.0001", neg_risk=True),
+            ),
+            owner=owner,
+            orderType=OrderType.GTC,
+        )
+
+        self.assertIsNotNone(json_order)
+        self.assertEqual(json_order["orderType"], "GTC")
+        self.assertEqual(json_order["owner"], owner)
+        self.assertIsNotNone(json_order["order"])
+        self.assertIsNotNone(json_order["order"]["salt"])
+        self.assertEqual(
+            json_order["order"]["maker"], "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        )
+        self.assertEqual(
+            json_order["order"]["signer"], "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        )
+        self.assertEqual(
+            json_order["order"]["taker"], "0x0000000000000000000000000000000000000000"
+        )
+        self.assertEqual(json_order["order"]["tokenId"], "100")
+        self.assertEqual(json_order["order"]["makerAmount"], "100000000")
+        self.assertEqual(json_order["order"]["takerAmount"], "50000")
+        self.assertEqual(json_order["order"]["expiration"], "0")
+        self.assertEqual(json_order["order"]["nonce"], "0")
+        self.assertEqual(json_order["order"]["feeRateBps"], "0")
+        self.assertEqual(json_order["order"]["side"], "SELL")
+        self.assertEqual(json_order["order"]["signatureType"], 0)
+        self.assertIsNotNone(json_order["order"]["signature"])
+
+        # GTD BUY
+        json_order = order_to_json(
+            order=builder.create_order(
+                order_args=OrderArgs(
+                    token_id="100",
+                    price=0.0005,
+                    size=100,
+                    side=BUY,
+                ),
+                options=CreateOrderOptions(tick_size="0.0001", neg_risk=True),
+            ),
+            owner=owner,
+            orderType=OrderType.GTD,
+        )
+
+        self.assertIsNotNone(json_order)
+        self.assertEqual(json_order["orderType"], "GTD")
+        self.assertEqual(json_order["owner"], owner)
+        self.assertIsNotNone(json_order["order"])
+        self.assertIsNotNone(json_order["order"]["salt"])
+        self.assertEqual(
+            json_order["order"]["maker"], "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        )
+        self.assertEqual(
+            json_order["order"]["signer"], "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        )
+        self.assertEqual(
+            json_order["order"]["taker"], "0x0000000000000000000000000000000000000000"
+        )
+        self.assertEqual(json_order["order"]["tokenId"], "100")
+        self.assertEqual(json_order["order"]["makerAmount"], "50000")
+        self.assertEqual(json_order["order"]["takerAmount"], "100000000")
+        self.assertEqual(json_order["order"]["expiration"], "0")
+        self.assertEqual(json_order["order"]["nonce"], "0")
+        self.assertEqual(json_order["order"]["feeRateBps"], "0")
+        self.assertEqual(json_order["order"]["side"], "BUY")
+        self.assertEqual(json_order["order"]["signatureType"], 0)
+        self.assertIsNotNone(json_order["order"]["signature"])
+
+        # GTD SELL
+        json_order = order_to_json(
+            order=builder.create_order(
+                order_args=OrderArgs(
+                    token_id="100",
+                    price=0.0005,
+                    size=100,
+                    side=SELL,
+                ),
+                options=CreateOrderOptions(tick_size="0.0001", neg_risk=True),
+            ),
+            owner=owner,
+            orderType=OrderType.GTD,
+        )
+
+        self.assertIsNotNone(json_order)
+        self.assertEqual(json_order["orderType"], "GTD")
+        self.assertEqual(json_order["owner"], owner)
+        self.assertIsNotNone(json_order["order"])
+        self.assertIsNotNone(json_order["order"]["salt"])
+        self.assertEqual(
+            json_order["order"]["maker"], "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        )
+        self.assertEqual(
+            json_order["order"]["signer"], "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        )
+        self.assertEqual(
+            json_order["order"]["taker"], "0x0000000000000000000000000000000000000000"
+        )
+        self.assertEqual(json_order["order"]["tokenId"], "100")
+        self.assertEqual(json_order["order"]["makerAmount"], "100000000")
+        self.assertEqual(json_order["order"]["takerAmount"], "50000")
+        self.assertEqual(json_order["order"]["expiration"], "0")
+        self.assertEqual(json_order["order"]["nonce"], "0")
+        self.assertEqual(json_order["order"]["feeRateBps"], "0")
+        self.assertEqual(json_order["order"]["side"], "SELL")
+        self.assertEqual(json_order["order"]["signatureType"], 0)
+        self.assertIsNotNone(json_order["order"]["signature"])
+
     def test_is_tick_size_smaller(self):
         # 0.1
         self.assertFalse(is_tick_size_smaller("0.1", "0.1"))
