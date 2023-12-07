@@ -1,9 +1,6 @@
 import logging
-from typing import Optional
 
 from .order_builder.builder import OrderBuilder
-from .clob_types import ApiCreds, OrderType, PartialCreateOrderOptions
-
 from .headers.headers import create_level_1_headers, create_level_2_headers
 from .signer import Signer
 
@@ -50,6 +47,8 @@ from .clob_types import (
     TickSize,
     CreateOrderOptions,
     OrdersScoringParams,
+    OrderType,
+    PartialCreateOrderOptions,
 )
 from .exceptions import PolyException
 from .http_helpers.helpers import (
@@ -62,6 +61,7 @@ from .http_helpers.helpers import (
     add_order_scoring_params_to_url,
     add_orders_scoring_params_to_url,
 )
+
 from .constants import L0, L1, L1_AUTH_UNAVAILABLE, L2, L2_AUTH_UNAVAILABLE
 from .utilities import (
     parse_raw_orderbook_summary,
@@ -97,6 +97,7 @@ class ClobClient:
         self.signer = Signer(key, chain_id) if key else None
         self.creds = creds
         self.mode = self._get_client_mode()
+
         if self.signer:
             self.builder = OrderBuilder(
                 self.signer, sig_type=signature_type, funder=funder
@@ -247,7 +248,7 @@ class ClobClient:
         return self.__tick_sizes[token_id]
 
     def __resolve_tick_size(
-        self, token_id: str, tick_size: Optional[TickSize] = None
+        self, token_id: str, tick_size: TickSize = None
     ) -> TickSize:
         min_tick_size = self.get_tick_size(token_id)
         if tick_size is not None:
@@ -263,7 +264,7 @@ class ClobClient:
         return tick_size
 
     def create_order(
-        self, order_args: OrderArgs, options: Optional[PartialCreateOrderOptions] = None
+        self, order_args: OrderArgs, options: PartialCreateOrderOptions = None
     ):
         """
         Creates and signs an order
@@ -299,11 +300,13 @@ class ClobClient:
         )
         return post("{}{}".format(self.host, POST_ORDER), headers=headers, data=body)
 
-    def create_and_post_order(self, order_args: OrderArgs):
+    def create_and_post_order(
+        self, order_args: OrderArgs, options: PartialCreateOrderOptions = None
+    ):
         """
         Utility function to create and publish an order
         """
-        ord = self.create_order(order_args)
+        ord = self.create_order(order_args, options)
         return self.post_order(ord)
 
     def cancel(self, order_id):

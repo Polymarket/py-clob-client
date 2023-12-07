@@ -21,13 +21,13 @@ def get_contract_config(chainID: int, neg_risk: bool = False) -> ContractConfig:
 
     NEG_RISK_CONFIG = {
         137: ContractConfig(
-            exchange="",  # TODO
-            collateral="",  # TODO
+            exchange="0xC5d563A36AE78145C45a50134d48A1215220f80a",
+            collateral="0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
             conditional_tokens="0x4D97DCd97eC945f40cF65F87097ACe5EA0476045",
         ),
         80001: ContractConfig(
-            exchange="",  # TODO
-            collateral="",  # TODO
+            exchange="0x87d1A0DdB4C63a6301916F02090A51a7241571e4",
+            collateral="0x2e8dcfe708d44ae2e406a1c02dfe2fa13012f961",
             conditional_tokens="0x7D8610E9567d2a6C9FBf66a5A13E9Ba8bb120d43",
         ),
     }
