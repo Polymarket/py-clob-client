@@ -40,9 +40,6 @@ class OrderBuilder:
         # Defaults to the address of the signer
         self.funder = funder if funder is not None else self.signer.address()
         self.contract_config = self._get_contract_config(self.signer.get_chain_id())
-        # self.order_builder = UtilsOrderBuild(
-        #     self.contract_config.exchange, self.signer.get_chain_id(), self.signer
-        # )
 
     def _get_contract_config(self, chain_id: int):
         return get_contract_config(chain_id)
