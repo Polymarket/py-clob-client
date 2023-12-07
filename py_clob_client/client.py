@@ -1,8 +1,6 @@
 import logging
 
 from .order_builder.builder import OrderBuilder
-from .clob_types import ApiCreds, OrderType
-
 from .headers.headers import create_level_1_headers, create_level_2_headers
 from .signer import Signer
 
@@ -47,7 +45,10 @@ from .clob_types import (
     BalanceAllowanceParams,
     OrderScoringParams,
     TickSize,
+    CreateOrderOptions,
     OrdersScoringParams,
+    OrderType,
+    PartialCreateOrderOptions,
 )
 from .exceptions import PolyException
 from .http_helpers.helpers import (
@@ -60,7 +61,7 @@ from .http_helpers.helpers import (
     add_order_scoring_params_to_url,
     add_orders_scoring_params_to_url,
 )
-from py_order_utils.config import get_contract_config
+
 from .constants import L0, L1, L1_AUTH_UNAVAILABLE, L2, L2_AUTH_UNAVAILABLE
 from .utilities import (
     parse_raw_orderbook_summary,
@@ -96,8 +97,7 @@ class ClobClient:
         self.signer = Signer(key, chain_id) if key else None
         self.creds = creds
         self.mode = self._get_client_mode()
-        if chain_id:
-            self.contract_config = get_contract_config(chain_id)
+
         if self.signer:
             self.builder = OrderBuilder(
                 self.signer, sig_type=signature_type, funder=funder
@@ -263,15 +263,29 @@ class ClobClient:
             tick_size = min_tick_size
         return tick_size
 
-    def create_order(self, order_args: OrderArgs, tick_size: TickSize = None):
+    def create_order(
+        self, order_args: OrderArgs, options: PartialCreateOrderOptions = None
+    ):
         """
         Creates and signs an order
-        Level 2 Auth required
+        Level 1 Auth required
         """
-        self.assert_level_2_auth()
+        self.assert_level_1_auth()
 
-        tick_size = self.__resolve_tick_size(order_args.token_id, tick_size)
-        return self.builder.create_order(order_args, tick_size)
+        # add resolve_order_options, or similar
+        tick_size = self.__resolve_tick_size(
+            order_args.token_id,
+            options.tick_size if options else None,
+        )
+        neg_risk = options.neg_risk if options else False
+
+        return self.builder.create_order(
+            order_args,
+            CreateOrderOptions(
+                tick_size=tick_size,
+                neg_risk=neg_risk,
+            ),
+        )
 
     def post_order(self, order, orderType: OrderType = OrderType.GTC):
         """
@@ -286,11 +300,13 @@ class ClobClient:
         )
         return post("{}{}".format(self.host, POST_ORDER), headers=headers, data=body)
 
-    def create_and_post_order(self, order_args: OrderArgs):
+    def create_and_post_order(
+        self, order_args: OrderArgs, options: PartialCreateOrderOptions = None
+    ):
         """
         Utility function to create and publish an order
         """
-        ord = self.create_order(order_args)
+        ord = self.create_order(order_args, options)
         return self.post_order(ord)
 
     def cancel(self, order_id):
