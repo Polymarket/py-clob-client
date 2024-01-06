@@ -4,7 +4,7 @@
     <img src='https://img.shields.io/pypi/v/py-clob-client.svg' alt='PyPI'/>
 </a>
 
-Python client for the Polymarket CLOB. Full API documentation can be found [here](https://polymarket.github.io/slate-docs/#introduction). 
+Python client for the Polymarket CLOB. Full API documentation can be found [here](https://polymarket.github.io/slate-docs/#introduction).
 
 ### Installation
 
@@ -18,12 +18,16 @@ Intended for use with Python 3.9
 
 The correct token allowances must be set before orders can be placed. The following mainnet (Polygon) allowances should be set by the funding (maker) address. For testnet addresses and additional documentation please refer to the [API documentation](https://polymarket.github.io/slate-docs/#introduction).
 
-|                   token(s)                   |                   spender                    |                            description                            |
-| :------------------------------------------: | :------------------------------------------: | :---------------------------------------------------------------: |
-| `0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174` | `0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E` |        allow the exchange contract to transfer user's usdc        |
-| `0x4D97DCd97eC945f40cF65F87097ACe5EA0476045` | `0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E` | allow the exchange contract to transfer user's conditional tokens |
+|                   token(s)                   |                   spender                    |                                  description                                   |
+| :------------------------------------------: | :------------------------------------------: | :----------------------------------------------------------------------------: |
+| `0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174` | `0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E` |            allow the CTF Exchange contract to transfer user's usdc             |
+| `0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174` | `0xC5d563A36AE78145C45a50134d48A1215220f80a` |        allow the Neg Risk CTF Exchange contract to transfer user's usdc        |
+| `0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174` | `0xd91E80cF2E7be2e162c6513ceD06f1dD0dA35296` |          allow the Neg Risk Adapter contract to transfer user's usdc           |
+| `0x4D97DCd97eC945f40cF65F87097ACe5EA0476045` | `0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E` |     allow the CTF Exchange contract to transfer user's conditional tokens      |
+| `0x4D97DCd97eC945f40cF65F87097ACe5EA0476045` | `0xC5d563A36AE78145C45a50134d48A1215220f80a` | allow the Neg Risk CTF Exchange contract to transfer user's conditional tokens |
+| `0x4D97DCd97eC945f40cF65F87097ACe5EA0476045` | `0xd91E80cF2E7be2e162c6513ceD06f1dD0dA35296` |   allow the Neg Risk Adapter contract to transfer user's conditional tokens    |
 
-See [this gist](https://gist.github.com/L-Kov/18d976850078bf1131c139e4150a922d) for a an example of how to set these allowances for an account using python. 
+See [this gist](https://gist.github.com/poly-rodr/44313920481de58d5a3f6d1f8226bd5e) for a an example of how to set these allowances for an account using python.
 
 ### Usage
 
