@@ -34,6 +34,10 @@ from .endpoints import (
     GET_SAMPLING_SIMPLIFIED_MARKETS,
     GET_SAMPLING_MARKETS,
     GET_MARKET_TRADES_EVENTS,
+    GET_LAST_TRADES_PRICES,
+    MID_POINTS,
+    GET_ORDER_BOOKS,
+    GET_PRICES,
 )
 from .clob_types import (
     ApiCreds,
@@ -49,6 +53,7 @@ from .clob_types import (
     OrdersScoringParams,
     OrderType,
     PartialCreateOrderOptions,
+    BookParams,
 )
 from .exceptions import PolyException
 from .http_helpers.helpers import (
@@ -232,11 +237,25 @@ class ClobClient:
         """
         return get("{}{}?token_id={}".format(self.host, MID_POINT, token_id))
 
+    def get_midpoints(self, params: list[BookParams]):
+        """
+        Get the mid market prices for a set of token ids
+        """
+        body = [{"token_id": param.token_id} for param in params]
+        return get("{}{}".format(self.host, MID_POINTS), data=body)
+
     def get_price(self, token_id, side):
         """
         Get the market price for the given market
         """
         return get("{}{}?token_id={}&side={}".format(self.host, PRICE, token_id, side))
+
+    def get_price(self, params: list[BookParams]):
+        """
+        Get the market prices for a set
+        """
+        body = [{"token_id": param.token_id, "side": param.side} for param in params]
+        return get("{}{}".format(self.host, GET_PRICES), data=body)
 
     def get_tick_size(self, token_id: str) -> TickSize:
         if token_id in self.__tick_sizes:
@@ -381,6 +400,14 @@ class ClobClient:
         raw_obs = get("{}{}?token_id={}".format(self.host, GET_ORDER_BOOK, token_id))
         return parse_raw_orderbook_summary(raw_obs)
 
+    def get_order_books(self, params: list[BookParams]) -> list[OrderBookSummary]:
+        """
+        Fetches the orderbook for a set of token ids
+        """
+        body = [{"token_id": param.token_id} for param in params]
+        raw_obs = get("{}{}".format(self.host, GET_ORDER_BOOKS), data=body)
+        return [parse_raw_orderbook_summary(r) for r in raw_obs]
+
     def get_order_book_hash(self, orderbook: OrderBookSummary) -> str:
         """
         Calculates the hash for the given orderbook
@@ -414,6 +441,13 @@ class ClobClient:
         Fetches the last trade price token_id
         """
         return get("{}{}?token_id={}".format(self.host, GET_LAST_TRADE_PRICE, token_id))
+
+    def get_last_trades_prices(self, params: list[BookParams]):
+        """
+        Fetches the last trades prices for a set of token ids
+        """
+        body = [{"token_id": param.token_id} for param in params]
+        return get("{}{}".format(self.host, GET_LAST_TRADES_PRICES), data=body)
 
     def assert_level_1_auth(self):
         """

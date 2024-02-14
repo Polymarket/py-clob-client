@@ -22,6 +22,12 @@ class RequestArgs:
 
 
 @dataclass
+class BookParams:
+    token_id: str
+    side: str
+
+
+@dataclass
 class OrderArgs:
     token_id: str
     """
