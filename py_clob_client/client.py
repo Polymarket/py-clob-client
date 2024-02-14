@@ -250,7 +250,7 @@ class ClobClient:
         """
         return get("{}{}?token_id={}&side={}".format(self.host, PRICE, token_id, side))
 
-    def get_price(self, params: list[BookParams]):
+    def get_prices(self, params: list[BookParams]):
         """
         Get the market prices for a set
         """
