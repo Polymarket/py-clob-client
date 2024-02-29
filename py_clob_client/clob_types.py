@@ -24,7 +24,7 @@ class RequestArgs:
 @dataclass
 class BookParams:
     token_id: str
-    side: str = ''
+    side: str = ""
 
 
 @dataclass
