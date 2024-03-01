@@ -73,6 +73,7 @@ from .utilities import (
     generate_orderbook_summary_hash,
     order_to_json,
     is_tick_size_smaller,
+    price_valid,
 )
 
 
@@ -297,6 +298,17 @@ class ClobClient:
             options.tick_size if options else None,
         )
         neg_risk = options.neg_risk if options else False
+
+        if not price_valid(order_args.price, tick_size):
+            raise Exception(
+                "price ("
+                + order_args.price
+                + "), min: "
+                + float(tick_size)
+                + " - max: "
+                + 1
+                - float(tick_size)
+            )
 
         return self.builder.create_order(
             order_args,

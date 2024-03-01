@@ -36,3 +36,7 @@ def order_to_json(order, owner, orderType) -> dict:
 
 def is_tick_size_smaller(a: TickSize, b: TickSize) -> bool:
     return float(a) < float(b)
+
+
+def price_valid(price: float, tick_size: TickSize) -> bool:
+    return price >= float(tick_size) and price <= 1 - float(tick_size)
