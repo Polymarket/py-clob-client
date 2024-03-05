@@ -275,9 +275,9 @@ class ClobClient:
             if is_tick_size_smaller(tick_size, min_tick_size):
                 raise Exception(
                     "invalid tick size ("
-                    + tick_size
+                    + str(tick_size)
                     + "), minimum for the market is "
-                    + min_tick_size,
+                    + str(min_tick_size),
                 )
         else:
             tick_size = min_tick_size
@@ -302,12 +302,11 @@ class ClobClient:
         if not price_valid(order_args.price, tick_size):
             raise Exception(
                 "price ("
-                + order_args.price
+                + str(order_args.price)
                 + "), min: "
-                + float(tick_size)
+                + str(tick_size)
                 + " - max: "
-                + 1
-                - float(tick_size)
+                + str(1 - float(tick_size))
             )
 
         return self.builder.create_order(
