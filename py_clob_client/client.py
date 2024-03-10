@@ -3,6 +3,7 @@ import logging
 from .order_builder.builder import OrderBuilder
 from .headers.headers import create_level_1_headers, create_level_2_headers
 from .signer import Signer
+from .config import get_contract_config
 
 from .endpoints import (
     CANCEL,
@@ -100,6 +101,7 @@ class ClobClient:
                     Allows access to all endpoints
         """
         self.host = host[0:-1] if host.endswith("/") else host
+        self.chain_id = chain_id
         self.signer = Signer(key, chain_id) if key else None
         self.creds = creds
         self.mode = self._get_client_mode()
@@ -121,22 +123,25 @@ class ClobClient:
         """
         Returns the collateral token address
         """
-        if self.contract_config:
-            return self.contract_config.get_collateral()
+        contract_config = get_contract_config(self.chain_id)
+        if contract_config:
+            return contract_config.collateral
 
     def get_conditional_address(self):
         """
         Returns the conditional token address
         """
-        if self.contract_config:
-            return self.contract_config.get_conditional()
+        contract_config = get_contract_config(self.chain_id)
+        if contract_config:
+            return contract_config.conditional_tokens
 
-    def get_exchange_address(self):
+    def get_exchange_address(self, neg_risk = False):
         """
         Returns the exchange address
         """
-        if self.contract_config:
-            return self.contract_config.get_exchange()
+        contract_config = get_contract_config(self.chain_id, neg_risk)
+        if contract_config:
+            return contract_config.exchange
 
     def get_ok(self):
         """
