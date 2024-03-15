@@ -127,6 +127,7 @@ class AssetType(enumerate):
 class BalanceAllowanceParams:
     asset_type: AssetType = None
     token_id: str = None
+    signature_type: int = -1
 
 
 class OrderType(enumerate):

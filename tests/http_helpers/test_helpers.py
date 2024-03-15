@@ -51,17 +51,21 @@ class TestHelpers(TestCase):
     def test_add_balance_allowance_params_to_url(self):
         url = add_balance_allowance_params_to_url(
             "http://tracker",
-            BalanceAllowanceParams(asset_type=AssetType.COLLATERAL),
+            BalanceAllowanceParams(asset_type=AssetType.COLLATERAL, signature_type=0),
         )
         self.assertIsNotNone(url)
-        self.assertEqual(url, "http://tracker?asset_type=COLLATERAL")
+        self.assertEqual(url, "http://tracker?asset_type=COLLATERAL&signature_type=0")
 
         url = add_balance_allowance_params_to_url(
             "http://tracker",
-            BalanceAllowanceParams(asset_type=AssetType.CONDITIONAL, token_id="222"),
+            BalanceAllowanceParams(
+                asset_type=AssetType.CONDITIONAL, token_id="222", signature_type=1
+            ),
         )
         self.assertIsNotNone(url)
-        self.assertEqual(url, "http://tracker?asset_type=CONDITIONAL&token_id=222")
+        self.assertEqual(
+            url, "http://tracker?asset_type=CONDITIONAL&token_id=222&signature_type=1"
+        )
 
     def test_add_order_scoring_params_to_url(self):
         url = add_order_scoring_params_to_url(
