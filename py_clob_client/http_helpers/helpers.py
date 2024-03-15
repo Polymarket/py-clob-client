@@ -121,6 +121,8 @@ def add_balance_allowance_params_to_url(
             url = build_query_params(url, "asset_type", params.asset_type.__str__())
         if params.token_id:
             url = build_query_params(url, "token_id", params.token_id)
+        if params.signature_type is not None:
+            url = build_query_params(url, "signature_type", params.signature_type)
     return url
 
 

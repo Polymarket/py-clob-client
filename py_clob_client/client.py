@@ -135,7 +135,7 @@ class ClobClient:
         if contract_config:
             return contract_config.conditional_tokens
 
-    def get_exchange_address(self, neg_risk = False):
+    def get_exchange_address(self, neg_risk=False):
         """
         Returns the exchange address
         """
@@ -520,6 +520,8 @@ class ClobClient:
         self.assert_level_2_auth()
         request_args = RequestArgs(method="GET", request_path=GET_BALANCE_ALLOWANCE)
         headers = create_level_2_headers(self.signer, self.creds, request_args)
+        if params.signature_type == -1:
+            params.signature_type = self.builder.sig_type
         url = add_balance_allowance_params_to_url(
             "{}{}".format(self.host, GET_BALANCE_ALLOWANCE), params
         )
