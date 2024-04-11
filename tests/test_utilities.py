@@ -5,7 +5,7 @@ from py_clob_client.clob_types import (
     OrderType,
     CreateOrderOptions,
 )
-from py_clob_client.constants import MUMBAI
+from py_clob_client.constants import AMOY
 from py_clob_client.order_builder.constants import BUY, SELL
 from py_clob_client.signer import Signer
 from py_clob_client.order_builder.builder import OrderBuilder
@@ -162,7 +162,7 @@ class TestUtilities(TestCase):
         private_key = (
             "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
         )
-        chain_id = MUMBAI
+        chain_id = AMOY
         signer = Signer(private_key=private_key, chain_id=chain_id)
         owner = "aaa-bbb-ccc"
         builder = OrderBuilder(signer)
@@ -328,7 +328,7 @@ class TestUtilities(TestCase):
         private_key = (
             "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
         )
-        chain_id = MUMBAI
+        chain_id = AMOY
         signer = Signer(private_key=private_key, chain_id=chain_id)
         owner = "aaa-bbb-ccc"
         builder = OrderBuilder(signer)
@@ -494,7 +494,7 @@ class TestUtilities(TestCase):
         private_key = (
             "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
         )
-        chain_id = MUMBAI
+        chain_id = AMOY
         signer = Signer(private_key=private_key, chain_id=chain_id)
         owner = "aaa-bbb-ccc"
         builder = OrderBuilder(signer)
@@ -660,7 +660,7 @@ class TestUtilities(TestCase):
         private_key = (
             "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
         )
-        chain_id = MUMBAI
+        chain_id = AMOY
         signer = Signer(private_key=private_key, chain_id=chain_id)
         owner = "aaa-bbb-ccc"
         builder = OrderBuilder(signer)
@@ -826,7 +826,7 @@ class TestUtilities(TestCase):
         private_key = (
             "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
         )
-        chain_id = MUMBAI
+        chain_id = AMOY
         signer = Signer(private_key=private_key, chain_id=chain_id)
         owner = "aaa-bbb-ccc"
         builder = OrderBuilder(signer)
@@ -992,7 +992,7 @@ class TestUtilities(TestCase):
         private_key = (
             "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
         )
-        chain_id = MUMBAI
+        chain_id = AMOY
         signer = Signer(private_key=private_key, chain_id=chain_id)
         owner = "aaa-bbb-ccc"
         builder = OrderBuilder(signer)
@@ -1158,7 +1158,7 @@ class TestUtilities(TestCase):
         private_key = (
             "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
         )
-        chain_id = MUMBAI
+        chain_id = AMOY
         signer = Signer(private_key=private_key, chain_id=chain_id)
         owner = "aaa-bbb-ccc"
         builder = OrderBuilder(signer)
@@ -1324,7 +1324,7 @@ class TestUtilities(TestCase):
         private_key = (
             "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
         )
-        chain_id = MUMBAI
+        chain_id = AMOY
         signer = Signer(private_key=private_key, chain_id=chain_id)
         owner = "aaa-bbb-ccc"
         builder = OrderBuilder(signer)
