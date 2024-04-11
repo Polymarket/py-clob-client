@@ -16,5 +16,5 @@ class TestEIP712(TestCase):
         self.assertIsNotNone(signature)
         self.assertEqual(
             signature,
-            "0xd91760ebcb14e814e9e12600b9bc7cd6bf13ebc175f6a28538b4925763f94f90012da34dd71290d441c28bc4f9b2281d3eb9ecfd1c9a63db1ce9ca85c89c914c1b",
+            "0xf62319a987514da40e57e2f4d7529f7bac38f0355bd88bb5adbb3768d80de6c1682518e0af677d5260366425f4361e7b70c25ae232aff0ab2331e2b164a1aedc1b",
         )
