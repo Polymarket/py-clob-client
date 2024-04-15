@@ -33,8 +33,10 @@ def main():
     print(yes)
 
     no = client.get_balance_allowance(
-        params=BalanceAllowanceParams(asset_type=AssetType.CONDITIONAL),
+        params=BalanceAllowanceParams(
+            asset_type=AssetType.CONDITIONAL,
         token_id="16678291189211314787145083999015737376658799626183230671758641503291735614088",
+        )
     )
     print(no)
 
