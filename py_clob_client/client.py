@@ -268,7 +268,7 @@ class ClobClient:
             return self.__tick_sizes[token_id]
 
         result = get("{}{}?token_id={}".format(self.host, GET_TICK_SIZE, token_id))
-        self.__tick_sizes[token_id] = result["minimum_tick_size"]
+        self.__tick_sizes[token_id] = str(result["minimum_tick_size"])
 
         return self.__tick_sizes[token_id]
 
