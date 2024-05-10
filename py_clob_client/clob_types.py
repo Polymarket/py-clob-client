@@ -71,15 +71,22 @@ class OrderArgs:
 
 
 @dataclass
-class FilterParams:
-    market: str = None
-    maker: str = None
-    taker: str = None
+class TradeParams:
     id: str = None
-    limit: int = None
+    owner: str = None
+    maker_address: str = None
+    market: str = None
+    asset_id: str = None
     before: int = None
     after: int = None
+
+
+@dataclass
+class OpenOrderParams:
+    id: str = None
     owner: str = None
+    market: str = None
+    asset_id: str = None
 
 
 @dataclass

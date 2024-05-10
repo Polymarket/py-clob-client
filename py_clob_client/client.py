@@ -42,7 +42,8 @@ from .endpoints import (
 )
 from .clob_types import (
     ApiCreds,
-    FilterParams,
+    TradeParams,
+    OpenOrderParams,
     OrderArgs,
     RequestArgs,
     DropNotificationParams,
@@ -58,7 +59,8 @@ from .clob_types import (
 )
 from .exceptions import PolyException
 from .http_helpers.helpers import (
-    add_query_params,
+    add_query_trade_params,
+    add_query_open_orders_params,
     delete,
     get,
     post,
@@ -68,7 +70,7 @@ from .http_helpers.helpers import (
     add_orders_scoring_params_to_url,
 )
 
-from .constants import L0, L1, L1_AUTH_UNAVAILABLE, L2, L2_AUTH_UNAVAILABLE
+from .constants import L0, L1, L1_AUTH_UNAVAILABLE, L2, L2_AUTH_UNAVAILABLE, END_CURSOR
 from .utilities import (
     parse_raw_orderbook_summary,
     generate_orderbook_summary_hash,
@@ -398,7 +400,7 @@ class ClobClient:
             "{}{}".format(self.host, CANCEL_MARKET_ORDERS), headers=headers, data=body
         )
 
-    def get_orders(self, params: FilterParams = None):
+    def get_orders(self, params: OpenOrderParams = None, next_cursor="MA=="):
         """
         Gets orders for the API key
         Requires Level 2 authentication
@@ -406,8 +408,18 @@ class ClobClient:
         self.assert_level_2_auth()
         request_args = RequestArgs(method="GET", request_path=ORDERS)
         headers = create_level_2_headers(self.signer, self.creds, request_args)
-        url = add_query_params("{}{}".format(self.host, ORDERS), params)
-        return get(url, headers=headers)
+
+        results = []
+        next_cursor = next_cursor if next_cursor is not None else "MA=="
+        while next_cursor != END_CURSOR:
+            url = add_query_open_orders_params(
+                "{}{}".format(self.host, ORDERS), params, next_cursor
+            )
+            response = get(url, headers=headers)
+            next_cursor = response["next_cursor"]
+            results += response["data"]
+
+        return results
 
     def get_order_book(self, token_id) -> OrderBookSummary:
         """
@@ -441,7 +453,7 @@ class ClobClient:
         headers = create_level_2_headers(self.signer, self.creds, request_args)
         return get("{}{}".format(self.host, endpoint), headers=headers)
 
-    def get_trades(self, params: FilterParams = None):
+    def get_trades(self, params: TradeParams = None, next_cursor="MA=="):
         """
         Fetches the trade history for a user
         Requires Level 2 authentication
@@ -449,8 +461,18 @@ class ClobClient:
         self.assert_level_2_auth()
         request_args = RequestArgs(method="GET", request_path=TRADES)
         headers = create_level_2_headers(self.signer, self.creds, request_args)
-        url = add_query_params("{}{}".format(self.host, TRADES), params)
-        return get(url, headers=headers)
+
+        results = []
+        next_cursor = next_cursor if next_cursor is not None else "MA=="
+        while next_cursor != END_CURSOR:
+            url = add_query_trade_params(
+                "{}{}".format(self.host, TRADES), params, next_cursor
+            )
+            response = get(url, headers=headers)
+            next_cursor = response["next_cursor"]
+            results += response["data"]
+
+        return results
 
     def get_last_trade_price(self, token_id):
         """
