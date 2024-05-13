@@ -90,8 +90,6 @@ def add_query_trade_params(
             url = build_query_params(url, "maker_address", params.maker_address)
         if params.id:
             url = build_query_params(url, "id", params.id)
-        if params.owner:
-            url = build_query_params(url, "owner", params.owner)
         if next_cursor:
             url = build_query_params(url, "next_cursor", next_cursor)
     return url
@@ -112,8 +110,6 @@ def add_query_open_orders_params(
             url = build_query_params(url, "asset_id", params.asset_id)
         if params.id:
             url = build_query_params(url, "id", params.id)
-        if params.owner:
-            url = build_query_params(url, "owner", params.owner)
         if next_cursor:
             url = build_query_params(url, "next_cursor", next_cursor)
     return url

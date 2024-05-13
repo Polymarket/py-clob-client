@@ -73,7 +73,6 @@ class OrderArgs:
 @dataclass
 class TradeParams:
     id: str = None
-    owner: str = None
     maker_address: str = None
     market: str = None
     asset_id: str = None
@@ -84,7 +83,6 @@ class TradeParams:
 @dataclass
 class OpenOrderParams:
     id: str = None
-    owner: str = None
     market: str = None
     asset_id: str = None
 
