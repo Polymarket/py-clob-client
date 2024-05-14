@@ -6,7 +6,7 @@ def main():
     host = "http://localhost:8080"
     client = ClobClient(host)
 
-    resp = client.get_spreads(
+    resp = client.get_order_books(
         params=[
             BookParams(
                 token_id="71321045679252212594626385532706912750332728571942532289631379312455583992563"
