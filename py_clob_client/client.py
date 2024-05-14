@@ -67,7 +67,6 @@ from .http_helpers.helpers import (
     drop_notifications_query_params,
     add_balance_allowance_params_to_url,
     add_order_scoring_params_to_url,
-    add_orders_scoring_params_to_url,
 )
 
 from .constants import L0, L1, L1_AUTH_UNAVAILABLE, L2, L2_AUTH_UNAVAILABLE, END_CURSOR
@@ -568,12 +567,14 @@ class ClobClient:
         Requires Level 2 authentication
         """
         self.assert_level_2_auth()
-        request_args = RequestArgs(method="GET", request_path=ARE_ORDERS_SCORING)
-        headers = create_level_2_headers(self.signer, self.creds, request_args)
-        url = add_orders_scoring_params_to_url(
-            "{}{}".format(self.host, ARE_ORDERS_SCORING), params
+        body = params.orderIds
+        request_args = RequestArgs(
+            method="POST", request_path=ARE_ORDERS_SCORING, body=body
         )
-        return get(url, headers=headers)
+        headers = create_level_2_headers(self.signer, self.creds, request_args)
+        return post(
+            "{}{}".format(self.host, ARE_ORDERS_SCORING), headers=headers, data=body
+        )
 
     def get_sampling_markets(self, next_cursor="MA=="):
         """
