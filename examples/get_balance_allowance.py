@@ -27,7 +27,7 @@ def main():
     yes = client.get_balance_allowance(
         params=BalanceAllowanceParams(
             asset_type=AssetType.CONDITIONAL,
-            token_id="1343197538147866997676250008839231694243646439454152539053893078719042421992",
+            token_id="52114319501245915516055106046884209969926127482827954674443846427813813222426",
         )
     )
     print(yes)
@@ -35,7 +35,7 @@ def main():
     no = client.get_balance_allowance(
         params=BalanceAllowanceParams(
             asset_type=AssetType.CONDITIONAL,
-            token_id="16678291189211314787145083999015737376658799626183230671758641503291735614088",
+            token_id="71321045679252212594626385532706912750332728571942532289631379312455583992563",
         )
     )
     print(no)

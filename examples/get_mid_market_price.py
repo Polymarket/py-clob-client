@@ -21,7 +21,7 @@ def main():
     client = ClobClient(host, key=key, chain_id=chain_id, creds=creds)
 
     resp = client.get_midpoint(
-        "16678291189211314787145083999015737376658799626183230671758641503291735614088"
+        "71321045679252212594626385532706912750332728571942532289631379312455583992563"
     )
     # {'mid': '0.55'}
     print(resp)
