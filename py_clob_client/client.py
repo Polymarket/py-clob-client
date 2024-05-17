@@ -58,6 +58,7 @@ from .clob_types import (
     OrderType,
     PartialCreateOrderOptions,
     BookParams,
+    MarketOrderArgs,
 )
 from .exceptions import PolyException
 from .http_helpers.helpers import (
@@ -331,6 +332,44 @@ class ClobClient:
             )
 
         return self.builder.create_order(
+            order_args,
+            CreateOrderOptions(
+                tick_size=tick_size,
+                neg_risk=neg_risk,
+            ),
+        )
+
+    def create_market_order(
+        self, order_args: MarketOrderArgs, options: PartialCreateOrderOptions = None
+    ):
+        """
+        Creates and signs an order
+        Level 1 Auth required
+        """
+        self.assert_level_1_auth()
+
+        # add resolve_order_options, or similar
+        tick_size = self.__resolve_tick_size(
+            order_args.token_id,
+            options.tick_size if options else None,
+        )
+        neg_risk = options.neg_risk if options else False
+
+        if order_args.price is None or order_args.price <= 0:
+            p = self.get_price(order_args.token_id, "SELL")
+            order_args.price = float(p["price"])
+
+        if not price_valid(order_args.price, tick_size):
+            raise Exception(
+                "price ("
+                + str(order_args.price)
+                + "), min: "
+                + str(tick_size)
+                + " - max: "
+                + str(1 - float(tick_size))
+            )
+
+        return self.builder.create_market_order(
             order_args,
             CreateOrderOptions(
                 tick_size=tick_size,

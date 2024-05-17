@@ -71,6 +71,39 @@ class OrderArgs:
 
 
 @dataclass
+class MarketOrderArgs:
+    token_id: str
+    """
+    TokenID of the Conditional token asset being traded
+    """
+
+    amount: float
+    """
+    Amount in terms of Collateral
+    """
+
+    price: float = 0
+    """
+    Price used to create the order
+    """
+
+    fee_rate_bps: int = 0
+    """
+    Fee rate, in basis points, charged to the order maker, charged on proceeds
+    """
+
+    nonce: int = 0
+    """
+    Nonce used for onchain cancellations
+    """
+
+    taker: str = ZERO_ADDRESS
+    """
+    Address of the order taker. The zero address is used to indicate a public order
+    """
+
+
+@dataclass
 class TradeParams:
     id: str = None
     maker_address: str = None
@@ -137,7 +170,6 @@ class BalanceAllowanceParams:
 
 class OrderType(enumerate):
     GTC = "GTC"
-    # TODO: add support for FOK orders
     FOK = "FOK"
     GTD = "GTD"
 

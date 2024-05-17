@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from py_clob_client.clob_types import OrderArgs, CreateOrderOptions
+from py_clob_client.clob_types import OrderArgs, MarketOrderArgs, CreateOrderOptions
 from py_clob_client.constants import AMOY
 from py_clob_client.order_builder.constants import BUY, SELL
 
@@ -16,6 +16,90 @@ signer = Signer(private_key=private_key, chain_id=chain_id)
 
 
 class TestOrderBuilder(TestCase):
+    def test_get_market_order_amounts_0_1(self):
+        builder = OrderBuilder(signer)
+
+        delta_price = 0.1
+        delta_size = 0.01
+        amount = 0.01
+        while amount <= 1000:
+            price = 0.1
+            while price <= 1:
+                maker, taker = builder.get_market_order_amounts(
+                    amount, price, ROUNDING_CONFIG["0.1"]
+                )
+                self.assertEqual(decimal_places(maker), 0)
+                self.assertEqual(decimal_places(taker), 0)
+                self.assertGreaterEqual(
+                    round_normal(maker / taker, 2), round_normal(price, 2)
+                )
+                price = price + delta_price
+
+            amount = amount + delta_size
+
+    def test_get_market_order_amounts_0_01(self):
+        builder = OrderBuilder(signer)
+
+        delta_price = 0.01
+        delta_size = 0.01
+        amount = 0.01
+        while amount <= 100:
+            price = 0.01
+            while price <= 1:
+                maker, taker = builder.get_market_order_amounts(
+                    amount, price, ROUNDING_CONFIG["0.01"]
+                )
+                self.assertEqual(decimal_places(maker), 0)
+                self.assertEqual(decimal_places(taker), 0)
+                self.assertGreaterEqual(
+                    round_normal(maker / taker, 4), round_normal(price, 4)
+                )
+                price = price + delta_price
+
+            amount = amount + delta_size
+
+    def test_get_market_order_amounts_0_001(self):
+        builder = OrderBuilder(signer)
+
+        delta_price = 0.001
+        delta_size = 0.01
+        amount = 0.01
+        while amount <= 10:
+            price = 0.001
+            while price <= 1:
+                maker, taker = builder.get_market_order_amounts(
+                    amount, price, ROUNDING_CONFIG["0.001"]
+                )
+                self.assertEqual(decimal_places(maker), 0)
+                self.assertEqual(decimal_places(taker), 0)
+                self.assertGreaterEqual(
+                    round_normal(maker / taker, 6), round_normal(price, 6)
+                )
+                price = price + delta_price
+
+            amount = amount + delta_size
+
+    def test_get_market_order_amounts_0_0001(self):
+        builder = OrderBuilder(signer)
+
+        delta_price = 0.0001
+        delta_size = 0.01
+        amount = 0.01
+        while amount <= 1:
+            price = 0.0001
+            while price <= 1:
+                maker, taker = builder.get_market_order_amounts(
+                    amount, price, ROUNDING_CONFIG["0.0001"]
+                )
+                self.assertEqual(decimal_places(maker), 0)
+                self.assertEqual(decimal_places(taker), 0)
+                self.assertGreaterEqual(
+                    round_normal(maker / taker, 8), round_normal(price, 8)
+                )
+                price = price + delta_price
+
+            amount = amount + delta_size
+
     def test_get_order_amounts_buy_0_1(self):
         builder = OrderBuilder(signer)
 
@@ -1921,3 +2005,539 @@ class TestOrderBuilder(TestCase):
             POLY_GNOSIS_SAFE,
         )
         self.assertIsNotNone(signed_order_dict["signature"])
+
+    def test_create_market_order_buy_0_1(self):
+        builder = OrderBuilder(signer)
+
+        signed_order = builder.create_market_order(
+            order_args=MarketOrderArgs(
+                token_id="123",
+                price=0.5,
+                amount=100,
+                fee_rate_bps=111,
+                nonce=123,
+            ),
+            options=CreateOrderOptions(tick_size="0.1"),
+        )
+
+        self.assertTrue(isinstance(signed_order.order["salt"], int))
+        self.assertIsNotNone(signed_order)
+        self.assertEqual(
+            signed_order.order["maker"],
+            "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        )
+        self.assertEqual(
+            signed_order.order["signer"],
+            "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        )
+        self.assertEqual(
+            signed_order.order["taker"],
+            "0x0000000000000000000000000000000000000000",
+        )
+        self.assertEqual(
+            signed_order.order["tokenId"],
+            123,
+        )
+        self.assertEqual(
+            signed_order.order["makerAmount"],
+            100000000,
+        )
+        self.assertEqual(
+            signed_order.order["takerAmount"],
+            200000000,
+        )
+        self.assertEqual(
+            signed_order.order["side"],
+            0,
+        )
+        self.assertEqual(
+            signed_order.order["expiration"],
+            0,
+        )
+        self.assertEqual(
+            signed_order.order["nonce"],
+            123,
+        )
+        self.assertEqual(
+            signed_order.order["feeRateBps"],
+            111,
+        )
+        self.assertEqual(
+            signed_order.order["signatureType"],
+            EOA,
+        )
+        self.assertIsNotNone(signed_order.signature)
+        self.assertGreaterEqual(
+            float(signed_order.order["makerAmount"])
+            / float(signed_order.order["takerAmount"]),
+            0.5,
+        )
+
+    def test_create_market_order_buy_0_01(self):
+        builder = OrderBuilder(signer)
+
+        signed_order = builder.create_market_order(
+            order_args=MarketOrderArgs(
+                token_id="123",
+                price=0.56,
+                amount=100,
+                fee_rate_bps=111,
+                nonce=123,
+            ),
+            options=CreateOrderOptions(tick_size="0.01"),
+        )
+
+        self.assertTrue(isinstance(signed_order.order["salt"], int))
+        self.assertIsNotNone(signed_order)
+        self.assertEqual(
+            signed_order.order["maker"],
+            "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        )
+        self.assertEqual(
+            signed_order.order["signer"],
+            "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        )
+        self.assertEqual(
+            signed_order.order["taker"],
+            "0x0000000000000000000000000000000000000000",
+        )
+        self.assertEqual(
+            signed_order.order["tokenId"],
+            123,
+        )
+        self.assertEqual(
+            signed_order.order["makerAmount"],
+            100000000,
+        )
+        self.assertEqual(
+            signed_order.order["takerAmount"],
+            178571400,
+        )
+        self.assertEqual(
+            signed_order.order["side"],
+            0,
+        )
+        self.assertEqual(
+            signed_order.order["expiration"],
+            0,
+        )
+        self.assertEqual(
+            signed_order.order["nonce"],
+            123,
+        )
+        self.assertEqual(
+            signed_order.order["feeRateBps"],
+            111,
+        )
+        self.assertEqual(
+            signed_order.order["signatureType"],
+            EOA,
+        )
+        self.assertIsNotNone(signed_order.signature)
+        self.assertGreaterEqual(
+            float(signed_order.order["makerAmount"])
+            / float(signed_order.order["takerAmount"]),
+            0.56,
+        )
+
+    def test_create_market_order_buy_0_001(self):
+        builder = OrderBuilder(signer)
+
+        signed_order = builder.create_market_order(
+            order_args=MarketOrderArgs(
+                token_id="123",
+                price=0.056,
+                amount=100,
+                fee_rate_bps=111,
+                nonce=123,
+            ),
+            options=CreateOrderOptions(tick_size="0.001"),
+        )
+
+        self.assertTrue(isinstance(signed_order.order["salt"], int))
+        self.assertIsNotNone(signed_order)
+        self.assertEqual(
+            signed_order.order["maker"],
+            "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        )
+        self.assertEqual(
+            signed_order.order["signer"],
+            "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        )
+        self.assertEqual(
+            signed_order.order["taker"],
+            "0x0000000000000000000000000000000000000000",
+        )
+        self.assertEqual(
+            signed_order.order["tokenId"],
+            123,
+        )
+        self.assertEqual(
+            signed_order.order["makerAmount"],
+            100000000,
+        )
+        self.assertEqual(
+            signed_order.order["takerAmount"],
+            1785714280,
+        )
+        self.assertEqual(
+            signed_order.order["side"],
+            0,
+        )
+        self.assertEqual(
+            signed_order.order["expiration"],
+            0,
+        )
+        self.assertEqual(
+            signed_order.order["nonce"],
+            123,
+        )
+        self.assertEqual(
+            signed_order.order["feeRateBps"],
+            111,
+        )
+        self.assertEqual(
+            signed_order.order["signatureType"],
+            EOA,
+        )
+        self.assertIsNotNone(signed_order.signature)
+        self.assertGreaterEqual(
+            float(signed_order.order["makerAmount"])
+            / float(signed_order.order["takerAmount"]),
+            0.056,
+        )
+
+    def test_create_market_order_buy_0_0001(self):
+        builder = OrderBuilder(signer)
+
+        signed_order = builder.create_market_order(
+            order_args=MarketOrderArgs(
+                token_id="123",
+                price=0.0056,
+                amount=100,
+                fee_rate_bps=111,
+                nonce=123,
+            ),
+            options=CreateOrderOptions(tick_size="0.0001"),
+        )
+
+        self.assertTrue(isinstance(signed_order.order["salt"], int))
+        self.assertIsNotNone(signed_order)
+        self.assertEqual(
+            signed_order.order["maker"],
+            "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        )
+        self.assertEqual(
+            signed_order.order["signer"],
+            "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        )
+        self.assertEqual(
+            signed_order.order["taker"],
+            "0x0000000000000000000000000000000000000000",
+        )
+        self.assertEqual(
+            signed_order.order["tokenId"],
+            123,
+        )
+        self.assertEqual(
+            signed_order.order["makerAmount"],
+            100000000,
+        )
+        self.assertEqual(
+            signed_order.order["takerAmount"],
+            17857142857,
+        )
+        self.assertEqual(
+            signed_order.order["side"],
+            0,
+        )
+        self.assertEqual(
+            signed_order.order["expiration"],
+            0,
+        )
+        self.assertEqual(
+            signed_order.order["nonce"],
+            123,
+        )
+        self.assertEqual(
+            signed_order.order["feeRateBps"],
+            111,
+        )
+        self.assertEqual(
+            signed_order.order["signatureType"],
+            EOA,
+        )
+        self.assertIsNotNone(signed_order.signature)
+        self.assertGreaterEqual(
+            float(signed_order.order["makerAmount"])
+            / float(signed_order.order["takerAmount"]),
+            0.0056,
+        )
+
+    def test_create_market_order_buy_0_1_neg_risk(self):
+        builder = OrderBuilder(signer)
+
+        signed_order = builder.create_market_order(
+            order_args=MarketOrderArgs(
+                token_id="123",
+                price=0.5,
+                amount=100,
+                fee_rate_bps=111,
+                nonce=123,
+            ),
+            options=CreateOrderOptions(tick_size="0.1", neg_risk=True),
+        )
+
+        self.assertTrue(isinstance(signed_order.order["salt"], int))
+        self.assertIsNotNone(signed_order)
+        self.assertEqual(
+            signed_order.order["maker"],
+            "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        )
+        self.assertEqual(
+            signed_order.order["signer"],
+            "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        )
+        self.assertEqual(
+            signed_order.order["taker"],
+            "0x0000000000000000000000000000000000000000",
+        )
+        self.assertEqual(
+            signed_order.order["tokenId"],
+            123,
+        )
+        self.assertEqual(
+            signed_order.order["makerAmount"],
+            100000000,
+        )
+        self.assertEqual(
+            signed_order.order["takerAmount"],
+            200000000,
+        )
+        self.assertEqual(
+            signed_order.order["side"],
+            0,
+        )
+        self.assertEqual(
+            signed_order.order["expiration"],
+            0,
+        )
+        self.assertEqual(
+            signed_order.order["nonce"],
+            123,
+        )
+        self.assertEqual(
+            signed_order.order["feeRateBps"],
+            111,
+        )
+        self.assertEqual(
+            signed_order.order["signatureType"],
+            EOA,
+        )
+        self.assertIsNotNone(signed_order.signature)
+        self.assertGreaterEqual(
+            float(signed_order.order["makerAmount"])
+            / float(signed_order.order["takerAmount"]),
+            0.5,
+        )
+
+    def test_create_market_order_buy_0_01_neg_risk(self):
+        builder = OrderBuilder(signer)
+
+        signed_order = builder.create_market_order(
+            order_args=MarketOrderArgs(
+                token_id="123",
+                price=0.56,
+                amount=100,
+                fee_rate_bps=111,
+                nonce=123,
+            ),
+            options=CreateOrderOptions(tick_size="0.01", neg_risk=True),
+        )
+
+        self.assertTrue(isinstance(signed_order.order["salt"], int))
+        self.assertIsNotNone(signed_order)
+        self.assertEqual(
+            signed_order.order["maker"],
+            "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        )
+        self.assertEqual(
+            signed_order.order["signer"],
+            "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        )
+        self.assertEqual(
+            signed_order.order["taker"],
+            "0x0000000000000000000000000000000000000000",
+        )
+        self.assertEqual(
+            signed_order.order["tokenId"],
+            123,
+        )
+        self.assertEqual(
+            signed_order.order["makerAmount"],
+            100000000,
+        )
+        self.assertEqual(
+            signed_order.order["takerAmount"],
+            178571400,
+        )
+        self.assertEqual(
+            signed_order.order["side"],
+            0,
+        )
+        self.assertEqual(
+            signed_order.order["expiration"],
+            0,
+        )
+        self.assertEqual(
+            signed_order.order["nonce"],
+            123,
+        )
+        self.assertEqual(
+            signed_order.order["feeRateBps"],
+            111,
+        )
+        self.assertEqual(
+            signed_order.order["signatureType"],
+            EOA,
+        )
+        self.assertIsNotNone(signed_order.signature)
+        self.assertGreaterEqual(
+            float(signed_order.order["makerAmount"])
+            / float(signed_order.order["takerAmount"]),
+            0.56,
+        )
+
+    def test_create_market_order_buy_0_001_neg_risk(self):
+        builder = OrderBuilder(signer)
+
+        signed_order = builder.create_market_order(
+            order_args=MarketOrderArgs(
+                token_id="123",
+                price=0.056,
+                amount=100,
+                fee_rate_bps=111,
+                nonce=123,
+            ),
+            options=CreateOrderOptions(tick_size="0.001", neg_risk=True),
+        )
+
+        self.assertTrue(isinstance(signed_order.order["salt"], int))
+        self.assertIsNotNone(signed_order)
+        self.assertEqual(
+            signed_order.order["maker"],
+            "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        )
+        self.assertEqual(
+            signed_order.order["signer"],
+            "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        )
+        self.assertEqual(
+            signed_order.order["taker"],
+            "0x0000000000000000000000000000000000000000",
+        )
+        self.assertEqual(
+            signed_order.order["tokenId"],
+            123,
+        )
+        self.assertEqual(
+            signed_order.order["makerAmount"],
+            100000000,
+        )
+        self.assertEqual(
+            signed_order.order["takerAmount"],
+            1785714280,
+        )
+        self.assertEqual(
+            signed_order.order["side"],
+            0,
+        )
+        self.assertEqual(
+            signed_order.order["expiration"],
+            0,
+        )
+        self.assertEqual(
+            signed_order.order["nonce"],
+            123,
+        )
+        self.assertEqual(
+            signed_order.order["feeRateBps"],
+            111,
+        )
+        self.assertEqual(
+            signed_order.order["signatureType"],
+            EOA,
+        )
+        self.assertIsNotNone(signed_order.signature)
+        self.assertGreaterEqual(
+            float(signed_order.order["makerAmount"])
+            / float(signed_order.order["takerAmount"]),
+            0.056,
+        )
+
+    def test_create_market_order_buy_0_0001_neg_risk(self):
+        builder = OrderBuilder(signer)
+
+        signed_order = builder.create_market_order(
+            order_args=MarketOrderArgs(
+                token_id="123",
+                price=0.0056,
+                amount=100,
+                fee_rate_bps=111,
+                nonce=123,
+            ),
+            options=CreateOrderOptions(tick_size="0.0001", neg_risk=True),
+        )
+
+        self.assertTrue(isinstance(signed_order.order["salt"], int))
+        self.assertIsNotNone(signed_order)
+        self.assertEqual(
+            signed_order.order["maker"],
+            "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        )
+        self.assertEqual(
+            signed_order.order["signer"],
+            "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        )
+        self.assertEqual(
+            signed_order.order["taker"],
+            "0x0000000000000000000000000000000000000000",
+        )
+        self.assertEqual(
+            signed_order.order["tokenId"],
+            123,
+        )
+        self.assertEqual(
+            signed_order.order["makerAmount"],
+            100000000,
+        )
+        self.assertEqual(
+            signed_order.order["takerAmount"],
+            17857142857,
+        )
+        self.assertEqual(
+            signed_order.order["side"],
+            0,
+        )
+        self.assertEqual(
+            signed_order.order["expiration"],
+            0,
+        )
+        self.assertEqual(
+            signed_order.order["nonce"],
+            123,
+        )
+        self.assertEqual(
+            signed_order.order["feeRateBps"],
+            111,
+        )
+        self.assertEqual(
+            signed_order.order["signatureType"],
+            EOA,
+        )
+        self.assertIsNotNone(signed_order.signature)
+        self.assertGreaterEqual(
+            float(signed_order.order["makerAmount"])
+            / float(signed_order.order["takerAmount"]),
+            0.0056,
+        )
