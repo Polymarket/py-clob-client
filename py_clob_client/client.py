@@ -356,8 +356,9 @@ class ClobClient:
         neg_risk = options.neg_risk if options else False
 
         if order_args.price is None or order_args.price <= 0:
-            p = self.get_price(order_args.token_id, "SELL")
-            order_args.price = float(p["price"])
+            order_args.price = self.calculate_market_price(
+                order_args.token_id, "BUY", order_args.amount
+            )
 
         if not price_valid(order_args.price, tick_size):
             raise Exception(
@@ -673,3 +674,19 @@ class ClobClient:
         Get the market's trades events by condition id
         """
         return get("{}{}{}".format(self.host, GET_MARKET_TRADES_EVENTS, condition_id))
+
+    def calculate_market_price(self, token_id: str, side: str, amount: float) -> float:
+        """
+        Calculates the matching price considering an amount and the current orderbook
+        """
+        book = self.get_order_book(token_id)
+        if book is None:
+            raise Exception("no orderbook")
+        if side == "BUY":
+            if book.asks is None:
+                raise Exception("no match")
+            return self.builder.calculate_market_price(book.asks, amount)
+        else:
+            if book.bids is None:
+                raise Exception("no match")
+            return self.builder.calculate_market_price(book.bids, amount)

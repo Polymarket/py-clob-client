@@ -24,6 +24,7 @@ from ..clob_types import (
     TickSize,
     RoundConfig,
     MarketOrderArgs,
+    OrderSummary,
 )
 
 ROUNDING_CONFIG: dict[TickSize, RoundConfig] = {
@@ -173,3 +174,13 @@ class OrderBuilder:
         )
 
         return order_builder.build_signed_order(data)
+
+    def calculate_market_price(
+        self, positions: list[OrderSummary], amount_to_match: float
+    ) -> float:
+        sum = 0
+        for p in positions:
+            sum += float(p.size) * float(p.price)
+            if sum >= amount_to_match:
+                return float(p.price)
+        raise Exception("no match")
