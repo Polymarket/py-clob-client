@@ -1,7 +1,7 @@
 import os
 
 from py_clob_client.client import ClobClient
-from py_clob_client.clob_types import ApiCreds, FilterParams
+from py_clob_client.clob_types import ApiCreds, TradeParams
 from dotenv import load_dotenv
 from pprint import pprint
 
@@ -22,10 +22,9 @@ def main():
     client = ClobClient(host, key=key, chain_id=chain_id, creds=creds)
 
     resp = client.get_trades(
-        FilterParams(
-            limit=1,
-            taker=client.get_address(),
-            market="16678291189211314787145083999015737376658799626183230671758641503291735614088",
+        TradeParams(
+            maker_address=client.get_address(),
+            market="0x5f65177b394277fd294cd75650044e32ba009a95022d88a0c1d565897d72f8f1",
         )
     )
     pprint(resp)

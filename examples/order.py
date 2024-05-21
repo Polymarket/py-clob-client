@@ -27,7 +27,7 @@ def main():
         price=0.0005,
         size=20,
         side=BUY,
-        token_id="16678291189211314787145083999015737376658799626183230671758641503291735614088",
+        token_id="71321045679252212594626385532706912750332728571942532289631379312455583992563",
     )
     signed_order = client.create_order(order_args)
     resp = client.post_order(signed_order)

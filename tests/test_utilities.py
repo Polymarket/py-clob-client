@@ -22,7 +22,7 @@ class TestUtilities(TestCase):
     def test_parse_raw_orderbook_summary(self):
         raw_obs = {
             "market": "0xbd31dc8a20211944f6b70f31557f1001557b59905b7738480ca09bd4532f84af",
-            "asset_id": "1343197538147866997676250008839231694243646439454152539053893078719042421992",
+            "asset_id": "52114319501245915516055106046884209969926127482827954674443846427813813222426",
             "bids": [
                 {"price": "0.15", "size": "100"},
                 {"price": "0.31", "size": "148.56"},
@@ -41,7 +41,7 @@ class TestUtilities(TestCase):
         )
         self.assertEqual(
             orderbook_summary.asset_id,
-            "1343197538147866997676250008839231694243646439454152539053893078719042421992",
+            "52114319501245915516055106046884209969926127482827954674443846427813813222426",
         )
         self.assertEqual(
             orderbook_summary.hash, "9d6d9e8831a150ac4cd878f99f7b2c6d419b875f"

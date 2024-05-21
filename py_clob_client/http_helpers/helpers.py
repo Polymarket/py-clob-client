@@ -1,11 +1,12 @@
 import requests
 
 from py_clob_client.clob_types import (
-    FilterParams,
     DropNotificationParams,
     BalanceAllowanceParams,
     OrderScoringParams,
     OrdersScoringParams,
+    TradeParams,
+    OpenOrderParams,
 )
 
 from ..exceptions import PolyApiException
@@ -68,7 +69,9 @@ def build_query_params(url: str, param: str, val: str) -> str:
     return url_with_params
 
 
-def add_query_params(base_url: str, params: FilterParams = None) -> str:
+def add_query_trade_params(
+    base_url: str, params: TradeParams = None, next_cursor="MA=="
+) -> str:
     """
     Adds query parameters to a url
     """
@@ -77,20 +80,38 @@ def add_query_params(base_url: str, params: FilterParams = None) -> str:
         url = url + "?"
         if params.market:
             url = build_query_params(url, "market", params.market)
-        if params.limit:
-            url = build_query_params(url, "limit", params.limit)
+        if params.asset_id:
+            url = build_query_params(url, "asset_id", params.asset_id)
         if params.after:
             url = build_query_params(url, "after", params.after)
         if params.before:
             url = build_query_params(url, "before", params.before)
-        if params.maker:
-            url = build_query_params(url, "maker", params.maker)
-        if params.taker:
-            url = build_query_params(url, "taker", params.taker)
+        if params.maker_address:
+            url = build_query_params(url, "maker_address", params.maker_address)
         if params.id:
             url = build_query_params(url, "id", params.id)
-        if params.owner:
-            url = build_query_params(url, "owner", params.owner)
+        if next_cursor:
+            url = build_query_params(url, "next_cursor", next_cursor)
+    return url
+
+
+def add_query_open_orders_params(
+    base_url: str, params: OpenOrderParams = None, next_cursor="MA=="
+) -> str:
+    """
+    Adds query parameters to a url
+    """
+    url = base_url
+    if params:
+        url = url + "?"
+        if params.market:
+            url = build_query_params(url, "market", params.market)
+        if params.asset_id:
+            url = build_query_params(url, "asset_id", params.asset_id)
+        if params.id:
+            url = build_query_params(url, "id", params.id)
+        if next_cursor:
+            url = build_query_params(url, "next_cursor", next_cursor)
     return url
 
 

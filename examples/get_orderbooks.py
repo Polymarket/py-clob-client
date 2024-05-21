@@ -1,23 +1,12 @@
-import os
-
 from py_clob_client.client import ClobClient
 from py_clob_client.clob_types import BookParams
-from dotenv import load_dotenv
-from pprint import pprint
-
-from py_clob_client.constants import AMOY
-
-
-load_dotenv()
 
 
 def main():
     host = "http://localhost:8080"
-    key = os.getenv("PK")
-    chain_id = AMOY
-    client = ClobClient(host, key=key, chain_id=chain_id)
+    client = ClobClient(host)
 
-    resp = client.get_last_trades_prices(
+    resp = client.get_order_books(
         params=[
             BookParams(
                 token_id="71321045679252212594626385532706912750332728571942532289631379312455583992563"
@@ -27,7 +16,7 @@ def main():
             ),
         ]
     )
-    pprint(resp)
+    print(resp)
     print("Done!")
 
 

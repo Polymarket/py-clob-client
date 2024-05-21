@@ -39,10 +39,13 @@ from .endpoints import (
     MID_POINTS,
     GET_ORDER_BOOKS,
     GET_PRICES,
+    GET_SPREAD,
+    GET_SPREADS,
 )
 from .clob_types import (
     ApiCreds,
-    FilterParams,
+    TradeParams,
+    OpenOrderParams,
     OrderArgs,
     RequestArgs,
     DropNotificationParams,
@@ -55,20 +58,21 @@ from .clob_types import (
     OrderType,
     PartialCreateOrderOptions,
     BookParams,
+    MarketOrderArgs,
 )
 from .exceptions import PolyException
 from .http_helpers.helpers import (
-    add_query_params,
+    add_query_trade_params,
+    add_query_open_orders_params,
     delete,
     get,
     post,
     drop_notifications_query_params,
     add_balance_allowance_params_to_url,
     add_order_scoring_params_to_url,
-    add_orders_scoring_params_to_url,
 )
 
-from .constants import L0, L1, L1_AUTH_UNAVAILABLE, L2, L2_AUTH_UNAVAILABLE
+from .constants import L0, L1, L1_AUTH_UNAVAILABLE, L2, L2_AUTH_UNAVAILABLE, END_CURSOR
 from .utilities import (
     parse_raw_orderbook_summary,
     generate_orderbook_summary_hash,
@@ -248,7 +252,7 @@ class ClobClient:
         Get the mid market prices for a set of token ids
         """
         body = [{"token_id": param.token_id} for param in params]
-        return get("{}{}".format(self.host, MID_POINTS), data=body)
+        return post("{}{}".format(self.host, MID_POINTS), data=body)
 
     def get_price(self, token_id, side):
         """
@@ -261,7 +265,20 @@ class ClobClient:
         Get the market prices for a set
         """
         body = [{"token_id": param.token_id, "side": param.side} for param in params]
-        return get("{}{}".format(self.host, GET_PRICES), data=body)
+        return post("{}{}".format(self.host, GET_PRICES), data=body)
+
+    def get_spread(self, token_id):
+        """
+        Get the spread for the given market
+        """
+        return get("{}{}?token_id={}".format(self.host, GET_SPREAD, token_id))
+
+    def get_spreads(self, params: list[BookParams]):
+        """
+        Get the spreads for a set of token ids
+        """
+        body = [{"token_id": param.token_id} for param in params]
+        return post("{}{}".format(self.host, GET_SPREADS), data=body)
 
     def get_tick_size(self, token_id: str) -> TickSize:
         if token_id in self.__tick_sizes:
@@ -315,6 +332,45 @@ class ClobClient:
             )
 
         return self.builder.create_order(
+            order_args,
+            CreateOrderOptions(
+                tick_size=tick_size,
+                neg_risk=neg_risk,
+            ),
+        )
+
+    def create_market_order(
+        self, order_args: MarketOrderArgs, options: PartialCreateOrderOptions = None
+    ):
+        """
+        Creates and signs an order
+        Level 1 Auth required
+        """
+        self.assert_level_1_auth()
+
+        # add resolve_order_options, or similar
+        tick_size = self.__resolve_tick_size(
+            order_args.token_id,
+            options.tick_size if options else None,
+        )
+        neg_risk = options.neg_risk if options else False
+
+        if order_args.price is None or order_args.price <= 0:
+            order_args.price = self.calculate_market_price(
+                order_args.token_id, "BUY", order_args.amount
+            )
+
+        if not price_valid(order_args.price, tick_size):
+            raise Exception(
+                "price ("
+                + str(order_args.price)
+                + "), min: "
+                + str(tick_size)
+                + " - max: "
+                + str(1 - float(tick_size))
+            )
+
+        return self.builder.create_market_order(
             order_args,
             CreateOrderOptions(
                 tick_size=tick_size,
@@ -398,7 +454,7 @@ class ClobClient:
             "{}{}".format(self.host, CANCEL_MARKET_ORDERS), headers=headers, data=body
         )
 
-    def get_orders(self, params: FilterParams = None):
+    def get_orders(self, params: OpenOrderParams = None, next_cursor="MA=="):
         """
         Gets orders for the API key
         Requires Level 2 authentication
@@ -406,8 +462,18 @@ class ClobClient:
         self.assert_level_2_auth()
         request_args = RequestArgs(method="GET", request_path=ORDERS)
         headers = create_level_2_headers(self.signer, self.creds, request_args)
-        url = add_query_params("{}{}".format(self.host, ORDERS), params)
-        return get(url, headers=headers)
+
+        results = []
+        next_cursor = next_cursor if next_cursor is not None else "MA=="
+        while next_cursor != END_CURSOR:
+            url = add_query_open_orders_params(
+                "{}{}".format(self.host, ORDERS), params, next_cursor
+            )
+            response = get(url, headers=headers)
+            next_cursor = response["next_cursor"]
+            results += response["data"]
+
+        return results
 
     def get_order_book(self, token_id) -> OrderBookSummary:
         """
@@ -421,7 +487,7 @@ class ClobClient:
         Fetches the orderbook for a set of token ids
         """
         body = [{"token_id": param.token_id} for param in params]
-        raw_obs = get("{}{}".format(self.host, GET_ORDER_BOOKS), data=body)
+        raw_obs = post("{}{}".format(self.host, GET_ORDER_BOOKS), data=body)
         return [parse_raw_orderbook_summary(r) for r in raw_obs]
 
     def get_order_book_hash(self, orderbook: OrderBookSummary) -> str:
@@ -441,7 +507,7 @@ class ClobClient:
         headers = create_level_2_headers(self.signer, self.creds, request_args)
         return get("{}{}".format(self.host, endpoint), headers=headers)
 
-    def get_trades(self, params: FilterParams = None):
+    def get_trades(self, params: TradeParams = None, next_cursor="MA=="):
         """
         Fetches the trade history for a user
         Requires Level 2 authentication
@@ -449,8 +515,18 @@ class ClobClient:
         self.assert_level_2_auth()
         request_args = RequestArgs(method="GET", request_path=TRADES)
         headers = create_level_2_headers(self.signer, self.creds, request_args)
-        url = add_query_params("{}{}".format(self.host, TRADES), params)
-        return get(url, headers=headers)
+
+        results = []
+        next_cursor = next_cursor if next_cursor is not None else "MA=="
+        while next_cursor != END_CURSOR:
+            url = add_query_trade_params(
+                "{}{}".format(self.host, TRADES), params, next_cursor
+            )
+            response = get(url, headers=headers)
+            next_cursor = response["next_cursor"]
+            results += response["data"]
+
+        return results
 
     def get_last_trade_price(self, token_id):
         """
@@ -463,7 +539,7 @@ class ClobClient:
         Fetches the last trades prices for a set of token ids
         """
         body = [{"token_id": param.token_id} for param in params]
-        return get("{}{}".format(self.host, GET_LAST_TRADES_PRICES), data=body)
+        return post("{}{}".format(self.host, GET_LAST_TRADES_PRICES), data=body)
 
     def assert_level_1_auth(self):
         """
@@ -546,12 +622,14 @@ class ClobClient:
         Requires Level 2 authentication
         """
         self.assert_level_2_auth()
-        request_args = RequestArgs(method="GET", request_path=ARE_ORDERS_SCORING)
-        headers = create_level_2_headers(self.signer, self.creds, request_args)
-        url = add_orders_scoring_params_to_url(
-            "{}{}".format(self.host, ARE_ORDERS_SCORING), params
+        body = params.orderIds
+        request_args = RequestArgs(
+            method="POST", request_path=ARE_ORDERS_SCORING, body=body
         )
-        return get(url, headers=headers)
+        headers = create_level_2_headers(self.signer, self.creds, request_args)
+        return post(
+            "{}{}".format(self.host, ARE_ORDERS_SCORING), headers=headers, data=body
+        )
 
     def get_sampling_markets(self, next_cursor="MA=="):
         """
@@ -596,3 +674,19 @@ class ClobClient:
         Get the market's trades events by condition id
         """
         return get("{}{}{}".format(self.host, GET_MARKET_TRADES_EVENTS, condition_id))
+
+    def calculate_market_price(self, token_id: str, side: str, amount: float) -> float:
+        """
+        Calculates the matching price considering an amount and the current orderbook
+        """
+        book = self.get_order_book(token_id)
+        if book is None:
+            raise Exception("no orderbook")
+        if side == "BUY":
+            if book.asks is None:
+                raise Exception("no match")
+            return self.builder.calculate_market_price(book.asks, amount)
+        else:
+            if book.bids is None:
+                raise Exception("no match")
+            return self.builder.calculate_market_price(book.bids, amount)
