@@ -26,6 +26,7 @@ from .endpoints import (
     GET_NOTIFICATIONS,
     DROP_NOTIFICATIONS,
     GET_BALANCE_ALLOWANCE,
+    UPDATE_BALANCE_ALLOWANCE,
     IS_ORDER_SCORING,
     GET_TICK_SIZE,
     ARE_ORDERS_SCORING,
@@ -600,6 +601,21 @@ class ClobClient:
             params.signature_type = self.builder.sig_type
         url = add_balance_allowance_params_to_url(
             "{}{}".format(self.host, GET_BALANCE_ALLOWANCE), params
+        )
+        return get(url, headers=headers)
+
+    def update_balance_allowance(self, params: BalanceAllowanceParams = None):
+        """
+        Updates the balance & allowance for a user
+        Requires Level 2 authentication
+        """
+        self.assert_level_2_auth()
+        request_args = RequestArgs(method="GET", request_path=UPDATE_BALANCE_ALLOWANCE)
+        headers = create_level_2_headers(self.signer, self.creds, request_args)
+        if params.signature_type == -1:
+            params.signature_type = self.builder.sig_type
+        url = add_balance_allowance_params_to_url(
+            "{}{}".format(self.host, UPDATE_BALANCE_ALLOWANCE), params
         )
         return get(url, headers=headers)
 
