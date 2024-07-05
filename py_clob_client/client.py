@@ -439,7 +439,7 @@ class ClobClient:
         headers = create_level_2_headers(self.signer, self.creds, request_args)
         return delete("{}{}".format(self.host, CANCEL_ALL), headers=headers)
 
-    def cancel_market_orders(self, market: str = None, asset_id: str = None):
+    def cancel_market_orders(self, market: str = "", asset_id: str = ""):
         """
         Cancels orders
         Level 2 Auth required
