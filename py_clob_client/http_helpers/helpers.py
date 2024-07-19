@@ -40,7 +40,12 @@ def request(endpoint: str, method: str, headers=None, data=None):
         )
         if resp.status_code != 200:
             raise PolyApiException(resp)
-        return resp.json()
+
+        try:
+            return resp.json()
+        except requests.JSONDecodeError:
+            return resp.text
+
     except requests.RequestException:
         raise PolyApiException(error_msg="Request exception!")
 
