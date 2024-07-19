@@ -117,7 +117,11 @@ class ClobClient:
             self.builder = OrderBuilder(
                 self.signer, sig_type=signature_type, funder=funder
             )
+
+        # local cache
         self.__tick_sizes = {}
+        self.__neg_risk = {}
+
         self.logger = logging.getLogger(self.__class__.__name__)
 
     def get_address(self):
@@ -293,7 +297,11 @@ class ClobClient:
         return self.__tick_sizes[token_id]
 
     def get_neg_risk(self, token_id: str) -> bool:
+        if token_id in self.__neg_risk:
+            return self.__neg_risk[token_id]
+
         result = get("{}{}?token_id={}".format(self.host, GET_NEG_RISK, token_id))
+        self.__neg_risk[token_id] = result["neg_risk"]
         return result["neg_risk"]
 
     def __resolve_tick_size(
