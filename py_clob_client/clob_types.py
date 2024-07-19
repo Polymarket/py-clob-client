@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from typing import Any
 from dataclasses import dataclass, asdict
 from json import dumps
@@ -190,13 +189,13 @@ TickSize = Literal["0.1", "0.01", "0.001", "0.0001"]
 @dataclass
 class CreateOrderOptions:
     tick_size: TickSize
-    neg_risk: bool = False
+    neg_risk: bool
 
 
 @dataclass
 class PartialCreateOrderOptions:
     tick_size: Optional[TickSize] = None
-    neg_risk: bool = False
+    neg_risk: Optional[bool] = None
 
 
 @dataclass
