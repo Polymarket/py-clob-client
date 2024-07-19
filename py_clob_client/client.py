@@ -302,6 +302,7 @@ class ClobClient:
 
         result = get("{}{}?token_id={}".format(self.host, GET_NEG_RISK, token_id))
         self.__neg_risk[token_id] = result["neg_risk"]
+
         return result["neg_risk"]
 
     def __resolve_tick_size(
