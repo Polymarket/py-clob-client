@@ -396,7 +396,7 @@ class TestOrderBuilder(TestCase):
                 size=15,
                 side=BUY,
             ),
-            options=CreateOrderOptions(tick_size="0.01"),
+            options=CreateOrderOptions(tick_size="0.01", neg_risk=False),
         )
         self.assertEqual(
             signed_order.order["makerAmount"],
@@ -415,7 +415,7 @@ class TestOrderBuilder(TestCase):
                 size=15,
                 side=SELL,
             ),
-            options=CreateOrderOptions(tick_size="0.01"),
+            options=CreateOrderOptions(tick_size="0.01", neg_risk=False),
         )
         self.assertEqual(
             signed_order.order["makerAmount"],
@@ -434,7 +434,7 @@ class TestOrderBuilder(TestCase):
                 size=101,
                 side=BUY,
             ),
-            options=CreateOrderOptions(tick_size="0.01"),
+            options=CreateOrderOptions(tick_size="0.01", neg_risk=False),
         )
         self.assertEqual(
             signed_order.order["makerAmount"],
@@ -453,7 +453,7 @@ class TestOrderBuilder(TestCase):
                 size=101,
                 side=SELL,
             ),
-            options=CreateOrderOptions(tick_size="0.01"),
+            options=CreateOrderOptions(tick_size="0.01", neg_risk=False),
         )
         self.assertEqual(
             signed_order.order["makerAmount"],
@@ -472,7 +472,7 @@ class TestOrderBuilder(TestCase):
                 size=12.8205,
                 side=BUY,
             ),
-            options=CreateOrderOptions(tick_size="0.01"),
+            options=CreateOrderOptions(tick_size="0.01", neg_risk=False),
         )
         self.assertEqual(
             signed_order.order["makerAmount"],
@@ -491,7 +491,7 @@ class TestOrderBuilder(TestCase):
                 size=12.8205,
                 side=SELL,
             ),
-            options=CreateOrderOptions(tick_size="0.01"),
+            options=CreateOrderOptions(tick_size="0.01", neg_risk=False),
         )
         self.assertEqual(
             signed_order.order["makerAmount"],
@@ -510,7 +510,7 @@ class TestOrderBuilder(TestCase):
                 size=2435.89,
                 side=SELL,
             ),
-            options=CreateOrderOptions(tick_size="0.01"),
+            options=CreateOrderOptions(tick_size="0.01", neg_risk=False),
         )
         self.assertEqual(
             signed_order.order["makerAmount"],
@@ -529,7 +529,7 @@ class TestOrderBuilder(TestCase):
                 size=19.1,
                 side=SELL,
             ),
-            options=CreateOrderOptions(tick_size="0.01"),
+            options=CreateOrderOptions(tick_size="0.01", neg_risk=False),
         )
         self.assertEqual(
             signed_order.order["makerAmount"],
@@ -548,7 +548,7 @@ class TestOrderBuilder(TestCase):
                 size=18233.33,
                 side=BUY,
             ),
-            options=CreateOrderOptions(tick_size="0.01"),
+            options=CreateOrderOptions(tick_size="0.01", neg_risk=False),
         )
         self.assertEqual(
             signed_order.order["makerAmount"],
@@ -575,7 +575,7 @@ class TestOrderBuilder(TestCase):
                 nonce=123,
                 expiration=50000,
             ),
-            options=CreateOrderOptions(tick_size="0.1"),
+            options=CreateOrderOptions(tick_size="0.1", neg_risk=False),
         )
 
         self.assertTrue(isinstance(signed_order.order["salt"], int))
@@ -644,7 +644,7 @@ class TestOrderBuilder(TestCase):
                 nonce=123,
                 expiration=50000,
             ),
-            options=CreateOrderOptions(tick_size="0.01"),
+            options=CreateOrderOptions(tick_size="0.01", neg_risk=False),
         )
 
         self.assertTrue(isinstance(signed_order.order["salt"], int))
@@ -713,7 +713,7 @@ class TestOrderBuilder(TestCase):
                 nonce=123,
                 expiration=50000,
             ),
-            options=CreateOrderOptions(tick_size="0.001"),
+            options=CreateOrderOptions(tick_size="0.001", neg_risk=False),
         )
 
         self.assertTrue(isinstance(signed_order.order["salt"], int))
@@ -782,7 +782,7 @@ class TestOrderBuilder(TestCase):
                 nonce=123,
                 expiration=50000,
             ),
-            options=CreateOrderOptions(tick_size="0.0001"),
+            options=CreateOrderOptions(tick_size="0.0001", neg_risk=False),
         )
 
         self.assertTrue(isinstance(signed_order.order["salt"], int))
@@ -851,7 +851,7 @@ class TestOrderBuilder(TestCase):
                 nonce=123,
                 expiration=50000,
             ),
-            options=CreateOrderOptions(tick_size="0.1"),
+            options=CreateOrderOptions(tick_size="0.1", neg_risk=False),
         )
 
         self.assertTrue(isinstance(signed_order.order["salt"], int))
@@ -920,7 +920,7 @@ class TestOrderBuilder(TestCase):
                 nonce=123,
                 expiration=50000,
             ),
-            options=CreateOrderOptions(tick_size="0.01"),
+            options=CreateOrderOptions(tick_size="0.01", neg_risk=False),
         )
 
         self.assertTrue(isinstance(signed_order.order["salt"], int))
@@ -989,7 +989,7 @@ class TestOrderBuilder(TestCase):
                 nonce=123,
                 expiration=50000,
             ),
-            options=CreateOrderOptions(tick_size="0.001"),
+            options=CreateOrderOptions(tick_size="0.001", neg_risk=False),
         )
 
         self.assertTrue(isinstance(signed_order.order["salt"], int))
@@ -1058,7 +1058,7 @@ class TestOrderBuilder(TestCase):
                 nonce=123,
                 expiration=50000,
             ),
-            options=CreateOrderOptions(tick_size="0.0001"),
+            options=CreateOrderOptions(tick_size="0.0001", neg_risk=False),
         )
 
         self.assertTrue(isinstance(signed_order.order["salt"], int))
@@ -1992,7 +1992,7 @@ class TestOrderBuilder(TestCase):
                 nonce=123,
                 expiration=50000,
             ),
-            options=CreateOrderOptions(tick_size="0.01"),
+            options=CreateOrderOptions(tick_size="0.01", neg_risk=False),
         )
 
         self.assertIsNotNone(signed_order)
@@ -2060,7 +2060,7 @@ class TestOrderBuilder(TestCase):
                 nonce=123,
                 expiration=50000,
             ),
-            options=CreateOrderOptions(tick_size="0.01"),
+            options=CreateOrderOptions(tick_size="0.01", neg_risk=False),
         )
 
         self.assertIsNotNone(signed_order)
@@ -2126,7 +2126,7 @@ class TestOrderBuilder(TestCase):
                 fee_rate_bps=111,
                 nonce=123,
             ),
-            options=CreateOrderOptions(tick_size="0.1"),
+            options=CreateOrderOptions(tick_size="0.1", neg_risk=False),
         )
 
         self.assertTrue(isinstance(signed_order.order["salt"], int))
@@ -2193,7 +2193,7 @@ class TestOrderBuilder(TestCase):
                 fee_rate_bps=111,
                 nonce=123,
             ),
-            options=CreateOrderOptions(tick_size="0.01"),
+            options=CreateOrderOptions(tick_size="0.01", neg_risk=False),
         )
 
         self.assertTrue(isinstance(signed_order.order["salt"], int))
@@ -2260,7 +2260,7 @@ class TestOrderBuilder(TestCase):
                 fee_rate_bps=111,
                 nonce=123,
             ),
-            options=CreateOrderOptions(tick_size="0.001"),
+            options=CreateOrderOptions(tick_size="0.001", neg_risk=False),
         )
 
         self.assertTrue(isinstance(signed_order.order["salt"], int))
@@ -2327,7 +2327,7 @@ class TestOrderBuilder(TestCase):
                 fee_rate_bps=111,
                 nonce=123,
             ),
-            options=CreateOrderOptions(tick_size="0.0001"),
+            options=CreateOrderOptions(tick_size="0.0001", neg_risk=False),
         )
 
         self.assertTrue(isinstance(signed_order.order["salt"], int))
