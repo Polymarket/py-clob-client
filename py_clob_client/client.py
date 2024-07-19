@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 from .order_builder.builder import OrderBuilder
 from .headers.headers import create_level_1_headers, create_level_2_headers
@@ -29,6 +30,7 @@ from .endpoints import (
     UPDATE_BALANCE_ALLOWANCE,
     IS_ORDER_SCORING,
     GET_TICK_SIZE,
+    GET_NEG_RISK,
     ARE_ORDERS_SCORING,
     GET_SIMPLIFIED_MARKETS,
     GET_MARKETS,
@@ -290,6 +292,10 @@ class ClobClient:
 
         return self.__tick_sizes[token_id]
 
+    def get_neg_risk(self, token_id: str) -> bool:
+        result = get("{}{}?token_id={}".format(self.host, GET_NEG_RISK, token_id))
+        return result["neg_risk"]
+
     def __resolve_tick_size(
         self, token_id: str, tick_size: TickSize = None
     ) -> TickSize:
@@ -307,7 +313,7 @@ class ClobClient:
         return tick_size
 
     def create_order(
-        self, order_args: OrderArgs, options: PartialCreateOrderOptions = None
+        self, order_args: OrderArgs, options: Optional[PartialCreateOrderOptions] = None
     ):
         """
         Creates and signs an order
@@ -320,7 +326,6 @@ class ClobClient:
             order_args.token_id,
             options.tick_size if options else None,
         )
-        neg_risk = options.neg_risk if options else False
 
         if not price_valid(order_args.price, tick_size):
             raise Exception(
@@ -332,6 +337,12 @@ class ClobClient:
                 + str(1 - float(tick_size))
             )
 
+        neg_risk = (
+            options.neg_risk
+            if options and options.neg_risk
+            else self.get_neg_risk(order_args.token_id)
+        )
+
         return self.builder.create_order(
             order_args,
             CreateOrderOptions(
@@ -341,7 +352,9 @@ class ClobClient:
         )
 
     def create_market_order(
-        self, order_args: MarketOrderArgs, options: PartialCreateOrderOptions = None
+        self,
+        order_args: MarketOrderArgs,
+        options: Optional[PartialCreateOrderOptions] = None,
     ):
         """
         Creates and signs an order
@@ -354,7 +367,6 @@ class ClobClient:
             order_args.token_id,
             options.tick_size if options else None,
         )
-        neg_risk = options.neg_risk if options else False
 
         if order_args.price is None or order_args.price <= 0:
             order_args.price = self.calculate_market_price(
@@ -370,6 +382,12 @@ class ClobClient:
                 + " - max: "
                 + str(1 - float(tick_size))
             )
+
+        neg_risk = (
+            options.neg_risk
+            if options and options.neg_risk
+            else self.get_neg_risk(order_args.token_id)
+        )
 
         return self.builder.create_market_order(
             order_args,
