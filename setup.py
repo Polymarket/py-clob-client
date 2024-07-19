@@ -20,8 +20,8 @@ setuptools.setup(
         "poly_eip712_structs>=0.0.1",
         "py-order-utils>=0.3.1",
         "python-dotenv",
-        "requests"
-        ],
+        "requests",
+    ],
     project_urls={
         "Bug Tracker": "https://github.com/Polymarket/py-clob-client/issues",
     },
