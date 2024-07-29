@@ -1,5 +1,6 @@
 from poly_eip712_structs import make_domain
 from eth_utils import keccak
+from py_order_utils.utils import prepend_zx
 
 from .model import ClobAuth
 from ..signer import Signer
@@ -21,8 +22,7 @@ def sign_clob_auth_message(signer: Signer, timestamp: int, nonce: int) -> str:
         message=MSG_TO_SIGN,
     )
     chain_id = signer.get_chain_id()
-    auth_struct_hash = (
-        "0x"
-        + keccak(clob_auth_msg.signable_bytes(get_clob_auth_domain(chain_id))).hex()
+    auth_struct_hash = prepend_zx(
+        keccak(clob_auth_msg.signable_bytes(get_clob_auth_domain(chain_id))).hex()
     )
-    return "0x" + signer.sign(auth_struct_hash)
+    return prepend_zx(signer.sign(auth_struct_hash))
