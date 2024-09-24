@@ -109,11 +109,11 @@ class TestUtilities(TestCase):
         orderbook_summary = parse_raw_orderbook_summary(raw_obs)
         self.assertEqual(
             generate_orderbook_summary_hash(orderbook_summary),
-            "c6a606f8fe8f6e370d8acae9dae11705fa425489",
+            "a2e42a1dc528c65bb927faef7539ffef1b9484de",
         )
         self.assertEqual(
             orderbook_summary.hash,
-            "c6a606f8fe8f6e370d8acae9dae11705fa425489",
+            "a2e42a1dc528c65bb927faef7539ffef1b9484de",
         )
 
         raw_obs = {
@@ -127,18 +127,18 @@ class TestUtilities(TestCase):
                 {"price": "0.6", "size": "100"},
                 {"price": "0.7", "size": "100"},
             ],
-            "hash": "c6a606f8fe8f6e370d8acae9dae11705fa425489",
+            "hash": "a2e42a1dc528c65bb927faef7539ffef1b9484de",
             "timestamp": "123456789",
         }
 
         orderbook_summary = parse_raw_orderbook_summary(raw_obs)
         self.assertEqual(
             generate_orderbook_summary_hash(orderbook_summary),
-            "c6a606f8fe8f6e370d8acae9dae11705fa425489",
+            "a2e42a1dc528c65bb927faef7539ffef1b9484de",
         )
         self.assertEqual(
             orderbook_summary.hash,
-            "c6a606f8fe8f6e370d8acae9dae11705fa425489",
+            "a2e42a1dc528c65bb927faef7539ffef1b9484de",
         )
 
         raw_obs = {

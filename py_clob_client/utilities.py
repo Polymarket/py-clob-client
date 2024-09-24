@@ -18,6 +18,7 @@ def parse_raw_orderbook_summary(raw_obs: any) -> OrderBookSummary:
         bids=bids,
         asks=asks,
         hash=raw_obs["hash"],
+        timestamp=raw_obs["timestamp"],
     )
 
     return orderbookSummary
