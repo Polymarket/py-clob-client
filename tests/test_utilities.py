@@ -31,6 +31,7 @@ class TestUtilities(TestCase):
             ],
             "asks": [],
             "hash": "9d6d9e8831a150ac4cd878f99f7b2c6d419b875f",
+            "timestamp": "123456789",
         }
 
         orderbook_summary = parse_raw_orderbook_summary(raw_obs)
@@ -46,6 +47,7 @@ class TestUtilities(TestCase):
         self.assertEqual(
             orderbook_summary.hash, "9d6d9e8831a150ac4cd878f99f7b2c6d419b875f"
         )
+        self.assertEqual(orderbook_summary.timestamp, "123456789")
 
         self.assertIsNotNone(orderbook_summary.asks)
         self.assertIsNotNone(orderbook_summary.bids)
@@ -68,6 +70,7 @@ class TestUtilities(TestCase):
             "bids": [],
             "asks": [],
             "hash": "7f81a35a09e1933a96b05edb51ac4be4a6163146",
+            "timestamp": "123456789",
         }
 
         orderbook_summary = parse_raw_orderbook_summary(raw_obs)
@@ -83,6 +86,7 @@ class TestUtilities(TestCase):
         self.assertEqual(
             orderbook_summary.hash, "7f81a35a09e1933a96b05edb51ac4be4a6163146"
         )
+        self.assertEqual(orderbook_summary.timestamp, "123456789")
 
         self.assertIsNotNone(orderbook_summary.asks)
         self.assertIsNotNone(orderbook_summary.bids)
