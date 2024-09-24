@@ -103,16 +103,17 @@ class TestUtilities(TestCase):
                 {"price": "0.7", "size": "100"},
             ],
             "hash": "",
+            "timestamp": "123456789",
         }
 
         orderbook_summary = parse_raw_orderbook_summary(raw_obs)
         self.assertEqual(
             generate_orderbook_summary_hash(orderbook_summary),
-            "b8b72c72c6534d1b3a4e7fb47b81672d0e94d5a5",
+            "a2e42a1dc528c65bb927faef7539ffef1b9484de",
         )
         self.assertEqual(
             orderbook_summary.hash,
-            "b8b72c72c6534d1b3a4e7fb47b81672d0e94d5a5",
+            "a2e42a1dc528c65bb927faef7539ffef1b9484de",
         )
 
         raw_obs = {
@@ -126,17 +127,18 @@ class TestUtilities(TestCase):
                 {"price": "0.6", "size": "100"},
                 {"price": "0.7", "size": "100"},
             ],
-            "hash": "b8b72c72c6534d1b3a4e7fb47b81672d0e94d5a5",
+            "hash": "a2e42a1dc528c65bb927faef7539ffef1b9484de",
+            "timestamp": "123456789",
         }
 
         orderbook_summary = parse_raw_orderbook_summary(raw_obs)
         self.assertEqual(
             generate_orderbook_summary_hash(orderbook_summary),
-            "b8b72c72c6534d1b3a4e7fb47b81672d0e94d5a5",
+            "a2e42a1dc528c65bb927faef7539ffef1b9484de",
         )
         self.assertEqual(
             orderbook_summary.hash,
-            "b8b72c72c6534d1b3a4e7fb47b81672d0e94d5a5",
+            "a2e42a1dc528c65bb927faef7539ffef1b9484de",
         )
 
         raw_obs = {
@@ -145,16 +147,17 @@ class TestUtilities(TestCase):
             "bids": [],
             "asks": [],
             "hash": "",
+            "timestamp": "",
         }
 
         orderbook_summary = parse_raw_orderbook_summary(raw_obs)
         self.assertEqual(
             generate_orderbook_summary_hash(orderbook_summary),
-            "7f81a35a09e1933a96b05edb51ac4be4a6163146",
+            "9da2ac9109ceed8d754f9a5f7a06998d8d3aa0af",
         )
         self.assertEqual(
             orderbook_summary.hash,
-            "7f81a35a09e1933a96b05edb51ac4be4a6163146",
+            "9da2ac9109ceed8d754f9a5f7a06998d8d3aa0af",
         )
 
     def test_order_to_json_0_1(self):
