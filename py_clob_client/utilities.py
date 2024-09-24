@@ -15,10 +15,10 @@ def parse_raw_orderbook_summary(raw_obs: any) -> OrderBookSummary:
     orderbookSummary = OrderBookSummary(
         market=raw_obs["market"],
         asset_id=raw_obs["asset_id"],
+        timestamp=raw_obs["timestamp"],
         bids=bids,
         asks=asks,
         hash=raw_obs["hash"],
-        timestamp=raw_obs["timestamp"],
     )
 
     return orderbookSummary
