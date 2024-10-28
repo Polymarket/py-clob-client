@@ -420,13 +420,13 @@ class ClobClient:
         return post("{}{}".format(self.host, POST_ORDER), headers=headers, data=body, proxies=proxies)
 
     def create_and_post_order(
-        self, order_args: OrderArgs, options: PartialCreateOrderOptions = None
+        self, order_args: OrderArgs, options: PartialCreateOrderOptions = None, proxies = None
     ):
         """
         Utility function to create and publish an order
         """
         ord = self.create_order(order_args, options)
-        return self.post_order(ord)
+        return self.post_order(ord, proxies=proxies)
 
     def cancel(self, order_id):
         """
