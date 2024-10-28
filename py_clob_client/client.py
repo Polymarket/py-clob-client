@@ -406,7 +406,7 @@ class ClobClient:
             ),
         )
 
-    def post_order(self, order, orderType: OrderType = OrderType.GTC):
+    def post_order(self, order, orderType: OrderType = OrderType.GTC, proxies=None):
         """
         Posts the order
         """
@@ -417,7 +417,7 @@ class ClobClient:
             self.creds,
             RequestArgs(method="POST", request_path=POST_ORDER, body=body),
         )
-        return post("{}{}".format(self.host, POST_ORDER), headers=headers, data=body)
+        return post("{}{}".format(self.host, POST_ORDER), headers=headers, data=body, proxies=proxies)
 
     def create_and_post_order(
         self, order_args: OrderArgs, options: PartialCreateOrderOptions = None
