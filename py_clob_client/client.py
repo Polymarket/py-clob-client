@@ -616,7 +616,7 @@ class ClobClient:
         )
         return delete(url, headers=headers)
 
-    def get_balance_allowance(self, params: BalanceAllowanceParams = None):
+    def get_balance_allowance(self, params: BalanceAllowanceParams):
         """
         Fetches the balance & allowance for a user
         Requires Level 2 authentication
