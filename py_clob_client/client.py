@@ -15,6 +15,7 @@ from .endpoints import (
     DELETE_API_KEY,
     DERIVE_API_KEY,
     GET_API_KEYS,
+    CLOSED_ONLY,
     GET_LAST_TRADE_PRICE,
     GET_ORDER,
     GET_ORDER_BOOK,
@@ -236,6 +237,17 @@ class ClobClient:
         request_args = RequestArgs(method="GET", request_path=GET_API_KEYS)
         headers = create_level_2_headers(self.signer, self.creds, request_args)
         return get("{}{}".format(self.host, GET_API_KEYS), headers=headers)
+
+    def get_closed_only_mode(self):
+        """
+        Gets the closed only mode flag for thsi address
+        Level 2 Auth required
+        """
+        self.assert_level_2_auth()
+
+        request_args = RequestArgs(method="GET", request_path=CLOSED_ONLY)
+        headers = create_level_2_headers(self.signer, self.creds, request_args)
+        return get("{}{}".format(self.host, CLOSED_ONLY), headers=headers)
 
     def delete_api_key(self):
         """
