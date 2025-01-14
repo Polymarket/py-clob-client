@@ -728,8 +728,8 @@ class ClobClient:
         if side == "BUY":
             if book.asks is None:
                 raise Exception("no match")
-            return self.builder.calculate_market_price(book.asks, amount)
+            return self.builder.calculate_buy_market_price(book.asks, amount)
         else:
             if book.bids is None:
                 raise Exception("no match")
-            return self.builder.calculate_market_price(book.bids, amount)
+            return self.builder.calculate_sell_market_price(book.bids, amount)
