@@ -379,7 +379,7 @@ class ClobClient:
 
         if order_args.price is None or order_args.price <= 0:
             order_args.price = self.calculate_market_price(
-                order_args.token_id, "BUY", order_args.amount
+                order_args.token_id, order_args.side, order_args.amount
             )
 
         if not price_valid(order_args.price, tick_size):
