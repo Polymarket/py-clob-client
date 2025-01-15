@@ -1,4 +1,5 @@
 import requests
+from requests.adapters import HTTPAdapter, Retry
 
 from py_clob_client.clob_types import (
     DropNotificationParams,
@@ -34,12 +35,17 @@ def overloadHeaders(method: str, headers: dict) -> dict:
 
 def request(endpoint: str, method: str, headers=None, data=None):
     try:
+        s = requests.Session()
+        
+        retries = Retry(total=10, backoff_factor=0.2)
+        s.mount('https://', HTTPAdapter(max_retries=retries))
         headers = overloadHeaders(method, headers)
-        resp = requests.request(
-            method=method, url=endpoint, headers=headers, json=data if data else None
+        resp = s.request(
+            method=method, url=endpoint, headers=headers, json=data if data else None, timeout=25
         )
         if resp.status_code != 200:
             raise PolyApiException(resp)
+            #return PolyApiException(resp)
 
         try:
             return resp.json()
@@ -47,7 +53,8 @@ def request(endpoint: str, method: str, headers=None, data=None):
             return resp.text
 
     except requests.RequestException:
-        raise PolyApiException(error_msg="Request exception!")
+        #raise PolyApiException(error_msg="Request exception!")
+        print(PolyApiException(error_msg="Request exception!"))
 
 
 def post(endpoint, headers=None, data=None):

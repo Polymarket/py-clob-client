@@ -535,6 +535,17 @@ class ClobClient:
         headers = create_level_2_headers(self.signer, self.creds, request_args)
         return get("{}{}".format(self.host, endpoint), headers=headers)
 
+    def get_positions(self, user_id):
+        """
+        Fetches all current positions for the user_id
+        Requires Level 2 authentication
+        """
+        #self.assert_level_2_auth()
+        request_path='https://data-api.polymarket.com/positions'
+        
+        
+        return get(request_path+"?user="+user_id+"&limit=1000")
+    
     def get_trades(self, params: TradeParams = None, next_cursor="MA=="):
         """
         Fetches the trade history for a user
