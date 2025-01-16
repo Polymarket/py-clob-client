@@ -78,7 +78,13 @@ class MarketOrderArgs:
 
     amount: float
     """
-    Amount in terms of Collateral
+    BUY orders: $$$ Amount to buy
+    SELL orders: Shares to sell
+    """
+
+    side: str
+    """
+    Side of the order
     """
 
     price: float = 0
