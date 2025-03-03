@@ -418,12 +418,12 @@ class ClobClient:
             ),
         )
 
-    def post_order(self, order, orderType: OrderType = OrderType.GTC, proxies=None):
+    def post_order(self, order, order_type: OrderType = OrderType.GTC, proxies=None):
         """
         Posts the order
         """
         self.assert_level_2_auth()
-        body = order_to_json(order, self.creds.api_key, orderType)
+        body = order_to_json(order, self.creds.api_key, order_type)
         headers = create_level_2_headers(
             self.signer,
             self.creds,
@@ -432,13 +432,13 @@ class ClobClient:
         return post("{}{}".format(self.host, POST_ORDER), headers=headers, data=body, proxies=proxies)
 
     def create_and_post_order(
-        self, order_args: OrderArgs, options: PartialCreateOrderOptions = None, proxies = None
+        self, order_args: OrderArgs, options: PartialCreateOrderOptions = None, order_type: OrderType = OrderType.GTC, proxies = None
     ):
         """
         Utility function to create and publish an order
         """
         ord = self.create_order(order_args, options)
-        return self.post_order(ord, proxies=proxies)
+        return self.post_order(ord, order_type=order_type, proxies=proxies)
 
     def cancel(self, order_id):
         """
