@@ -15,6 +15,7 @@ from .endpoints import (
     DELETE_API_KEY,
     DERIVE_API_KEY,
     GET_API_KEYS,
+    CLOSED_ONLY,
     GET_LAST_TRADE_PRICE,
     GET_ORDER,
     GET_ORDER_BOOK,
@@ -237,6 +238,17 @@ class ClobClient:
         headers = create_level_2_headers(self.signer, self.creds, request_args)
         return get("{}{}".format(self.host, GET_API_KEYS), headers=headers)
 
+    def get_closed_only_mode(self):
+        """
+        Gets the closed only mode flag for thsi address
+        Level 2 Auth required
+        """
+        self.assert_level_2_auth()
+
+        request_args = RequestArgs(method="GET", request_path=CLOSED_ONLY)
+        headers = create_level_2_headers(self.signer, self.creds, request_args)
+        return get("{}{}".format(self.host, CLOSED_ONLY), headers=headers)
+
     def delete_api_key(self):
         """
         Deletes an API key
@@ -379,7 +391,7 @@ class ClobClient:
 
         if order_args.price is None or order_args.price <= 0:
             order_args.price = self.calculate_market_price(
-                order_args.token_id, "BUY", order_args.amount
+                order_args.token_id, order_args.side, order_args.amount
             )
 
         if not price_valid(order_args.price, tick_size):
@@ -728,8 +740,8 @@ class ClobClient:
         if side == "BUY":
             if book.asks is None:
                 raise Exception("no match")
-            return self.builder.calculate_market_price(book.asks, amount)
+            return self.builder.calculate_buy_market_price(book.asks, amount)
         else:
             if book.bids is None:
                 raise Exception("no match")
-            return self.builder.calculate_market_price(book.bids, amount)
+            return self.builder.calculate_sell_market_price(book.bids, amount)
