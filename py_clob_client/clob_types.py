@@ -149,9 +149,9 @@ class OrderBookSummary:
     market: str = None
     asset_id: str = None
     timestamp: str = None
+    hash: str = None
     bids: list[OrderSummary] = None
     asks: list[OrderSummary] = None
-    hash: str = None
 
     @property
     def __dict__(self):
