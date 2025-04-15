@@ -22,7 +22,7 @@ def main():
     chain_id = AMOY
     client = ClobClient(host, key=key, chain_id=chain_id, creds=creds)
 
-    # Create and sign a limit order buying 100 YES tokens for 0.0005 each
+    # Create and sign a limit order buying 20 YES tokens for 0.0005 each
     order_args = OrderArgs(
         price=0.0005,
         size=20,
