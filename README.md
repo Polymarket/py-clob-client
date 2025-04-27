@@ -27,7 +27,7 @@ The correct token allowances must be set before orders can be placed. The follow
 | `0x4D97DCd97eC945f40cF65F87097ACe5EA0476045` | `0xC5d563A36AE78145C45a50134d48A1215220f80a` | allow the Neg Risk CTF Exchange contract to transfer user's conditional tokens |
 | `0x4D97DCd97eC945f40cF65F87097ACe5EA0476045` | `0xd91E80cF2E7be2e162c6513ceD06f1dD0dA35296` |   allow the Neg Risk Adapter contract to transfer user's conditional tokens    |
 
-See [this gist](https://gist.github.com/poly-rodr/44313920481de58d5a3f6d1f8226bd5e) for a an example of how to set these allowances for an account using python.
+See [this gist](https://gist.github.com/startniksa/618f7984c7be404ce1faf8deefe59edb) for a an example of how to set these allowances for an account using python.
 
 ### Usage
 
