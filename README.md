@@ -4,7 +4,7 @@
     <img src='https://img.shields.io/pypi/v/py-clob-client.svg' alt='PyPI'/>
 </a>
 
-Python client for the Polymarket CLOB. Full API documentation can be found [here](https://polymarket.github.io/slate-docs/#introduction).
+Python client for the Polymarket CLOB. Full API documentation can be found [here](https://docs.polymarket.com).
 
 ### Installation
 
@@ -15,7 +15,7 @@ Intended for use with Python 3.9
 ### Requisites
 
 #### Allowances
-
+**Users that login to the platform with Email/Magic Link do not have to complete the below allowance steps.**
 The correct token allowances must be set before orders can be placed. The following mainnet (Polygon) allowances should be set by the funding (maker) address. For testnet addresses and additional documentation please refer to the [API documentation](https://polymarket.github.io/slate-docs/#introduction).
 
 |                   token(s)                   |                   spender                    |                                  description                                   |
@@ -58,3 +58,4 @@ print(resp)
 ```
 
 **See [examples](examples/) for more.**
+This folder contains code samples along with several Jupyter notebooks designed to help you get started. We recommend beginning with `yourFirstTrade.ipynb`, which provides a guided introduction to the platform's structure and functionality. Please see Developer Resources [Here](https://docs.polymarket.com)
