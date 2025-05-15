@@ -178,6 +178,7 @@ class OrderType(enumerate):
     GTC = "GTC"
     FOK = "FOK"
     GTD = "GTD"
+    FAK = "FAK"
 
 
 @dataclass
