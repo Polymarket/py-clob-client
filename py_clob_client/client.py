@@ -45,6 +45,7 @@ from .endpoints import (
     GET_PRICES,
     GET_SPREAD,
     GET_SPREADS,
+    GET_PRICE_HISTORY,
 )
 from .clob_types import (
     ApiCreds,
@@ -745,3 +746,16 @@ class ClobClient:
             if book.bids is None:
                 raise Exception("no match")
             return self.builder.calculate_sell_market_price(book.bids, amount)
+
+    def get_price_history_with_interval(self, token_id: str, interval: str, fidelity: str):
+        """
+        Get the price history for a given token_id with interval.
+        startTs/endTs are mutually exclusive to interval.
+        """
+        return get("{}{}?market={}&interval={}&fidelity={}".format(self.host, GET_PRICE_HISTORY, token_id, interval, fidelity))
+    
+    def get_price_history_with_timestamps(self, token_id: str, startTs: int, endTs: int, fidelity: str):
+        """
+        Get the price history for a given token_id with timestamps
+        """
+        return get("{}{}?market={}&startTs={}&endTs={}&fidelity={}".format(self.host, GET_PRICE_HISTORY, token_id, startTs, endTs, fidelity))
