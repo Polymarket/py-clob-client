@@ -15,12 +15,12 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/Polymarket/py-clob-client",
     install_requires=[
-        "eth-account>=0.13.0",
-        "eth-utils>=4.1.1",
-        "poly_eip712_structs>=0.0.1",
-        "py-order-utils>=0.3.2",
-        "python-dotenv",
-        "requests",
+        "requests>=2.28.1",
+        "web3>=5.31.1,<6.0.0",
+        "eth-typing>=2.3.0,<3.0.0",
+        "eth-account>=0.5.9",
+        "eth-utils>=1.10.0",
+        "python-dotenv>=0.20.0"
     ],
     project_urls={
         "Bug Tracker": "https://github.com/Polymarket/py-clob-client/issues",
