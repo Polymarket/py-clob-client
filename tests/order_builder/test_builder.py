@@ -49,7 +49,7 @@ class TestOrderBuilder(TestCase):
             OrderSummary(price="0.3", size="100"),
         ]
         builder = OrderBuilder(signer)
-        self.assertEqual(builder.calculate_buy_market_price(positions, 100), 0.5, OrderType.FOK)
+        self.assertEqual(builder.calculate_buy_market_price(positions, 100, OrderType.FOK), 0.5)
 
         positions = [
             OrderSummary(price="0.5", size="100"),
@@ -57,7 +57,7 @@ class TestOrderBuilder(TestCase):
             OrderSummary(price="0.3", size="100"),
         ]
         builder = OrderBuilder(signer)
-        self.assertEqual(builder.calculate_buy_market_price(positions, 100), 0.4, OrderType.FOK)
+        self.assertEqual(builder.calculate_buy_market_price(positions, 100, OrderType.FOK), 0.4)
 
         positions = [
             OrderSummary(price="0.5", size="120"),
@@ -65,7 +65,7 @@ class TestOrderBuilder(TestCase):
             OrderSummary(price="0.3", size="100"),
         ]
         builder = OrderBuilder(signer)
-        self.assertEqual(builder.calculate_buy_market_price(positions, 100), 0.5, OrderType.FOK)
+        self.assertEqual(builder.calculate_buy_market_price(positions, 100, OrderType.FOK), 0.5)
 
         positions = [
             OrderSummary(price="0.5", size="200"),
@@ -73,13 +73,13 @@ class TestOrderBuilder(TestCase):
             OrderSummary(price="0.3", size="100"),
         ]
         builder = OrderBuilder(signer)
-        self.assertEqual(builder.calculate_buy_market_price(positions, 100), 0.5, OrderType.FOK)
+        self.assertEqual(builder.calculate_buy_market_price(positions, 100, OrderType.FOK), 0.5)
 
     def test_calculate_sell_market_price_FOK(self):
         # empty
         with self.assertRaises(Exception):
             builder = OrderBuilder(signer)
-            builder.calculate_sell_market_price([], 100, OrderType.FOK)
+            builder.calculate_sell_market_price([], 100)
 
         # not enough
         with self.assertRaises(Exception):
@@ -97,7 +97,7 @@ class TestOrderBuilder(TestCase):
             OrderSummary(price="0.5", size="100"),
         ]
         builder = OrderBuilder(signer)
-        self.assertEqual(builder.calculate_sell_market_price(positions, 100), 0.5, OrderType.FOK)
+        self.assertEqual(builder.calculate_sell_market_price(positions, 100, OrderType.FOK), 0.5)
 
         positions = [
             OrderSummary(price="0.3", size="100"),
@@ -105,7 +105,7 @@ class TestOrderBuilder(TestCase):
             OrderSummary(price="0.5", size="10"),
         ]
         builder = OrderBuilder(signer)
-        self.assertEqual(builder.calculate_sell_market_price(positions, 100), 0.4, OrderType.FOK)
+        self.assertEqual(builder.calculate_sell_market_price(positions, 100, OrderType.FOK), 0.4)
 
         positions = [
             OrderSummary(price="0.3", size="100"),
@@ -113,7 +113,7 @@ class TestOrderBuilder(TestCase):
             OrderSummary(price="0.5", size="10"),
         ]
         builder = OrderBuilder(signer)
-        self.assertEqual(builder.calculate_sell_market_price(positions, 100), 0.4, OrderType.FOK)
+        self.assertEqual(builder.calculate_sell_market_price(positions, 100, OrderType.FOK), 0.4)
 
         positions = [
             OrderSummary(price="0.3", size="300"),
@@ -121,7 +121,7 @@ class TestOrderBuilder(TestCase):
             OrderSummary(price="0.5", size="100"),
         ]
         builder = OrderBuilder(signer)
-        self.assertEqual(builder.calculate_sell_market_price(positions, 200), 0.4, OrderType.FOK)
+        self.assertEqual(builder.calculate_sell_market_price(positions, 200, OrderType.FOK), 0.4)
 
         positions = [
             OrderSummary(price="0.3", size="334"),
@@ -129,7 +129,7 @@ class TestOrderBuilder(TestCase):
             OrderSummary(price="0.5", size="100"),
         ]
         builder = OrderBuilder(signer)
-        self.assertEqual(builder.calculate_sell_market_price(positions, 300), 0.3, OrderType.FOK)
+        self.assertEqual(builder.calculate_sell_market_price(positions, 300, OrderType.FOK), 0.3)
 
     def test_calculate_buy_market_price_FAK(self):
         # empty
@@ -143,7 +143,7 @@ class TestOrderBuilder(TestCase):
             OrderSummary(price="0.4", size="100"),
         ]
         builder = OrderBuilder(signer)
-        self.assertEqual(builder.calculate_buy_market_price(positions, 100), 0.5, OrderType.FAK)
+        self.assertEqual(builder.calculate_buy_market_price(positions, 100, OrderType.FAK), 0.5)
 
         # OK
         positions = [
@@ -152,7 +152,7 @@ class TestOrderBuilder(TestCase):
             OrderSummary(price="0.3", size="100"),
         ]
         builder = OrderBuilder(signer)
-        self.assertEqual(builder.calculate_buy_market_price(positions, 100), 0.5, OrderType.FAK)
+        self.assertEqual(builder.calculate_buy_market_price(positions, 100, OrderType.FAK), 0.5)
 
         positions = [
             OrderSummary(price="0.5", size="100"),
@@ -160,7 +160,7 @@ class TestOrderBuilder(TestCase):
             OrderSummary(price="0.3", size="100"),
         ]
         builder = OrderBuilder(signer)
-        self.assertEqual(builder.calculate_buy_market_price(positions, 100), 0.4, OrderType.FAK)
+        self.assertEqual(builder.calculate_buy_market_price(positions, 100, OrderType.FAK), 0.4)
 
         positions = [
             OrderSummary(price="0.5", size="120"),
@@ -168,7 +168,7 @@ class TestOrderBuilder(TestCase):
             OrderSummary(price="0.3", size="100"),
         ]
         builder = OrderBuilder(signer)
-        self.assertEqual(builder.calculate_buy_market_price(positions, 100), 0.5, OrderType.FAK)
+        self.assertEqual(builder.calculate_buy_market_price(positions, 100, OrderType.FAK), 0.5)
 
         positions = [
             OrderSummary(price="0.5", size="200"),
@@ -176,13 +176,13 @@ class TestOrderBuilder(TestCase):
             OrderSummary(price="0.3", size="100"),
         ]
         builder = OrderBuilder(signer)
-        self.assertEqual(builder.calculate_buy_market_price(positions, 100), 0.5, OrderType.FAK)
+        self.assertEqual(builder.calculate_buy_market_price(positions, 100, OrderType.FAK), 0.5)
 
     def test_calculate_sell_market_price_FAK(self):
         # empty
         with self.assertRaises(Exception):
             builder = OrderBuilder(signer)
-            builder.calculate_sell_market_price([], 100, OrderType.FAK)
+            builder.calculate_sell_market_price([], 100)
 
         # not enough
         positions = [
@@ -190,7 +190,7 @@ class TestOrderBuilder(TestCase):
             OrderSummary(price="0.5", size="10"),
         ]
         builder = OrderBuilder(signer)
-        self.assertEqual(builder.calculate_sell_market_price(positions, 100), 0.4, OrderType.FAK)
+        self.assertEqual(builder.calculate_sell_market_price(positions, 100, OrderType.FAK), 0.4)
 
         # OK
         positions = [
@@ -199,7 +199,7 @@ class TestOrderBuilder(TestCase):
             OrderSummary(price="0.5", size="100"),
         ]
         builder = OrderBuilder(signer)
-        self.assertEqual(builder.calculate_sell_market_price(positions, 100), 0.5, OrderType.FAK)
+        self.assertEqual(builder.calculate_sell_market_price(positions, 100, OrderType.FAK), 0.5)
 
         positions = [
             OrderSummary(price="0.3", size="100"),
@@ -207,7 +207,7 @@ class TestOrderBuilder(TestCase):
             OrderSummary(price="0.5", size="10"),
         ]
         builder = OrderBuilder(signer)
-        self.assertEqual(builder.calculate_sell_market_price(positions, 100), 0.4, OrderType.FAK)
+        self.assertEqual(builder.calculate_sell_market_price(positions, 100, OrderType.FAK), 0.4)
 
         positions = [
             OrderSummary(price="0.3", size="100"),
@@ -215,7 +215,7 @@ class TestOrderBuilder(TestCase):
             OrderSummary(price="0.5", size="10"),
         ]
         builder = OrderBuilder(signer)
-        self.assertEqual(builder.calculate_sell_market_price(positions, 100), 0.4, OrderType.FAK)
+        self.assertEqual(builder.calculate_sell_market_price(positions, 100, OrderType.FAK), 0.4)
 
         positions = [
             OrderSummary(price="0.3", size="300"),
@@ -223,7 +223,7 @@ class TestOrderBuilder(TestCase):
             OrderSummary(price="0.5", size="100"),
         ]
         builder = OrderBuilder(signer)
-        self.assertEqual(builder.calculate_sell_market_price(positions, 200), 0.4, OrderType.FAK)
+        self.assertEqual(builder.calculate_sell_market_price(positions, 200, OrderType.FAK), 0.4)
 
         positions = [
             OrderSummary(price="0.3", size="334"),
@@ -231,7 +231,7 @@ class TestOrderBuilder(TestCase):
             OrderSummary(price="0.5", size="100"),
         ]
         builder = OrderBuilder(signer)
-        self.assertEqual(builder.calculate_sell_market_price(positions, 300), 0.3, OrderType.FAK)
+        self.assertEqual(builder.calculate_sell_market_price(positions, 300, OrderType.FAK), 0.3)
 
 
     def test_get_market_order_amounts_buy_0_1(self):
