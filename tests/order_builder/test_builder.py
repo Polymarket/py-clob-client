@@ -5,6 +5,7 @@ from py_clob_client.clob_types import (
     MarketOrderArgs,
     CreateOrderOptions,
     OrderSummary,
+    OrderType
 )
 from py_clob_client.constants import AMOY
 from py_clob_client.order_builder.constants import BUY, SELL
@@ -16,8 +17,7 @@ from py_order_utils.model import (
     POLY_GNOSIS_SAFE,
     EOA,
     BUY as UtilsBuy,
-    SELL as UtilsSell,
-    OrderType
+    SELL as UtilsSell
 )
 
 # publicly known private key
