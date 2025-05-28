@@ -233,7 +233,6 @@ class TestOrderBuilder(TestCase):
         builder = OrderBuilder(signer)
         self.assertEqual(builder.calculate_sell_market_price(positions, 300, OrderType.FAK), 0.3)
 
-
     def test_get_market_order_amounts_buy_0_1(self):
         builder = OrderBuilder(signer)
 
