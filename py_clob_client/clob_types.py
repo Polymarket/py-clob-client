@@ -107,6 +107,8 @@ class MarketOrderArgs:
     Address of the order taker. The zero address is used to indicate a public order
     """
 
+    order_type: OrderType = OrderType.FOK
+
 
 @dataclass
 class TradeParams:
