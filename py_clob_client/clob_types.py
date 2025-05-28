@@ -6,6 +6,12 @@ from typing import Literal, Optional
 from .constants import ZERO_ADDRESS
 
 
+class OrderType(enumerate):
+    GTC = "GTC"
+    FOK = "FOK"
+    GTD = "GTD"
+    FAK = "FAK"
+
 @dataclass
 class ApiCreds:
     api_key: str
@@ -174,13 +180,6 @@ class BalanceAllowanceParams:
     asset_type: AssetType = None
     token_id: str = None
     signature_type: int = -1
-
-
-class OrderType(enumerate):
-    GTC = "GTC"
-    FOK = "FOK"
-    GTD = "GTD"
-    FAK = "FAK"
 
 
 @dataclass
