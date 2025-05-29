@@ -120,6 +120,7 @@ class MarketOrderArgs:
 class TradeParams:
     id: str = None
     maker_address: str = None
+    taker_address: str = None
     market: str = None
     asset_id: str = None
     before: int = None
