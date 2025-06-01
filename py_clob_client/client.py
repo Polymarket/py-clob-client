@@ -95,6 +95,7 @@ class ClobClient:
         creds: ApiCreds = None,
         signature_type: int = None,
         funder: str = None,
+        proxies: dict = None,
     ):
         """
         Initializes the clob client
@@ -113,6 +114,7 @@ class ClobClient:
         self.signer = Signer(key, chain_id) if key else None
         self.creds = creds
         self.mode = self._get_client_mode()
+        self.proxies = proxies
 
         if self.signer:
             self.builder = OrderBuilder(
@@ -160,14 +162,14 @@ class ClobClient:
         Health check: Confirms that the server is up
         Does not need authentication
         """
-        return get("{}/".format(self.host))
+        return get("{}/".format(self.host), proxies=self.proxies)
 
     def get_server_time(self):
         """
         Returns the current timestamp on the server
         Does not need authentication
         """
-        return get("{}{}".format(self.host, TIME))
+        return get("{}{}".format(self.host, TIME), proxies=self.proxies)
 
     def create_api_key(self, nonce: int = None) -> ApiCreds:
         """
@@ -178,7 +180,7 @@ class ClobClient:
         endpoint = "{}{}".format(self.host, CREATE_API_KEY)
         headers = create_level_1_headers(self.signer, nonce)
 
-        creds_raw = post(endpoint, headers=headers)
+        creds_raw = post(endpoint, headers=headers, proxies=self.proxies)
         try:
             creds = ApiCreds(
                 api_key=creds_raw["apiKey"],
@@ -199,7 +201,7 @@ class ClobClient:
         endpoint = "{}{}".format(self.host, DERIVE_API_KEY)
         headers = create_level_1_headers(self.signer, nonce)
 
-        creds_raw = get(endpoint, headers=headers)
+        creds_raw = get(endpoint, headers=headers, proxies=self.proxies)
         try:
             creds = ApiCreds(
                 api_key=creds_raw["apiKey"],
@@ -236,7 +238,7 @@ class ClobClient:
 
         request_args = RequestArgs(method="GET", request_path=GET_API_KEYS)
         headers = create_level_2_headers(self.signer, self.creds, request_args)
-        return get("{}{}".format(self.host, GET_API_KEYS), headers=headers)
+        return get("{}{}".format(self.host, GET_API_KEYS), headers=headers, proxies=self.proxies)
 
     def get_closed_only_mode(self):
         """
@@ -247,7 +249,7 @@ class ClobClient:
 
         request_args = RequestArgs(method="GET", request_path=CLOSED_ONLY)
         headers = create_level_2_headers(self.signer, self.creds, request_args)
-        return get("{}{}".format(self.host, CLOSED_ONLY), headers=headers)
+        return get("{}{}".format(self.host, CLOSED_ONLY), headers=headers, proxies=self.proxies)
 
     def delete_api_key(self):
         """
@@ -258,52 +260,52 @@ class ClobClient:
 
         request_args = RequestArgs(method="DELETE", request_path=DELETE_API_KEY)
         headers = create_level_2_headers(self.signer, self.creds, request_args)
-        return delete("{}{}".format(self.host, DELETE_API_KEY), headers=headers)
+        return delete("{}{}".format(self.host, DELETE_API_KEY), headers=headers, proxies=self.proxies)
 
     def get_midpoint(self, token_id):
         """
         Get the mid market price for the given market
         """
-        return get("{}{}?token_id={}".format(self.host, MID_POINT, token_id))
+        return get("{}{}?token_id={}".format(self.host, MID_POINT, token_id), proxies=self.proxies)
 
     def get_midpoints(self, params: list[BookParams]):
         """
         Get the mid market prices for a set of token ids
         """
         body = [{"token_id": param.token_id} for param in params]
-        return post("{}{}".format(self.host, MID_POINTS), data=body)
+        return post("{}{}".format(self.host, MID_POINTS), data=body, proxies=self.proxies)
 
     def get_price(self, token_id, side):
         """
         Get the market price for the given market
         """
-        return get("{}{}?token_id={}&side={}".format(self.host, PRICE, token_id, side))
+        return get("{}{}?token_id={}&side={}".format(self.host, PRICE, token_id, side), proxies=self.proxies)
 
     def get_prices(self, params: list[BookParams]):
         """
         Get the market prices for a set
         """
         body = [{"token_id": param.token_id, "side": param.side} for param in params]
-        return post("{}{}".format(self.host, GET_PRICES), data=body)
+        return post("{}{}".format(self.host, GET_PRICES), data=body, proxies=self.proxies)
 
     def get_spread(self, token_id):
         """
         Get the spread for the given market
         """
-        return get("{}{}?token_id={}".format(self.host, GET_SPREAD, token_id))
+        return get("{}{}?token_id={}".format(self.host, GET_SPREAD, token_id), proxies=self.proxies)
 
     def get_spreads(self, params: list[BookParams]):
         """
         Get the spreads for a set of token ids
         """
         body = [{"token_id": param.token_id} for param in params]
-        return post("{}{}".format(self.host, GET_SPREADS), data=body)
+        return post("{}{}".format(self.host, GET_SPREADS), data=body, proxies=self.proxies)
 
     def get_tick_size(self, token_id: str) -> TickSize:
         if token_id in self.__tick_sizes:
             return self.__tick_sizes[token_id]
 
-        result = get("{}{}?token_id={}".format(self.host, GET_TICK_SIZE, token_id))
+        result = get("{}{}?token_id={}".format(self.host, GET_TICK_SIZE, token_id), proxies=self.proxies)
         self.__tick_sizes[token_id] = str(result["minimum_tick_size"])
 
         return self.__tick_sizes[token_id]
@@ -312,7 +314,7 @@ class ClobClient:
         if token_id in self.__neg_risk:
             return self.__neg_risk[token_id]
 
-        result = get("{}{}?token_id={}".format(self.host, GET_NEG_RISK, token_id))
+        result = get("{}{}?token_id={}".format(self.host, GET_NEG_RISK, token_id), proxies=self.proxies)
         self.__neg_risk[token_id] = result["neg_risk"]
 
         return result["neg_risk"]
@@ -418,27 +420,26 @@ class ClobClient:
             ),
         )
 
-    def post_order(self, order, orderType: OrderType = OrderType.GTC):
+    def post_order(self, order, order_type: OrderType = OrderType.GTC, proxies=None):
         """
         Posts the order
         """
         self.assert_level_2_auth()
-        body = order_to_json(order, self.creds.api_key, orderType)
+        body = order_to_json(order, self.creds.api_key, order_type)
         headers = create_level_2_headers(
             self.signer,
             self.creds,
             RequestArgs(method="POST", request_path=POST_ORDER, body=body),
         )
-        return post("{}{}".format(self.host, POST_ORDER), headers=headers, data=body)
+        return post("{}{}".format(self.host, POST_ORDER), headers=headers, data=body, proxies=proxies)
 
     def create_and_post_order(
-        self, order_args: OrderArgs, options: PartialCreateOrderOptions = None
-    ):
+        self, order_args: OrderArgs, options: PartialCreateOrderOptions = None, order_type: OrderType = OrderType.GTC):
         """
         Utility function to create and publish an order
         """
         ord = self.create_order(order_args, options)
-        return self.post_order(ord)
+        return self.post_order(ord, order_type=order_type, proxies=self.proxies)
 
     def cancel(self, order_id):
         """
@@ -450,7 +451,7 @@ class ClobClient:
 
         request_args = RequestArgs(method="DELETE", request_path=CANCEL, body=body)
         headers = create_level_2_headers(self.signer, self.creds, request_args)
-        return delete("{}{}".format(self.host, CANCEL), headers=headers, data=body)
+        return delete("{}{}".format(self.host, CANCEL), headers=headers, data=body, proxies=self.proxies)
 
     def cancel_orders(self, order_ids):
         """
@@ -465,7 +466,7 @@ class ClobClient:
         )
         headers = create_level_2_headers(self.signer, self.creds, request_args)
         return delete(
-            "{}{}".format(self.host, CANCEL_ORDERS), headers=headers, data=body
+            "{}{}".format(self.host, CANCEL_ORDERS), headers=headers, data=body, proxies=self.proxies
         )
 
     def cancel_all(self):
@@ -476,7 +477,7 @@ class ClobClient:
         self.assert_level_2_auth()
         request_args = RequestArgs(method="DELETE", request_path=CANCEL_ALL)
         headers = create_level_2_headers(self.signer, self.creds, request_args)
-        return delete("{}{}".format(self.host, CANCEL_ALL), headers=headers)
+        return delete("{}{}".format(self.host, CANCEL_ALL), headers=headers, proxies=self.proxies)
 
     def cancel_market_orders(self, market: str = "", asset_id: str = ""):
         """
@@ -491,7 +492,7 @@ class ClobClient:
         )
         headers = create_level_2_headers(self.signer, self.creds, request_args)
         return delete(
-            "{}{}".format(self.host, CANCEL_MARKET_ORDERS), headers=headers, data=body
+            "{}{}".format(self.host, CANCEL_MARKET_ORDERS), headers=headers, data=body, proxies=self.proxies
         )
 
     def get_orders(self, params: OpenOrderParams = None, next_cursor="MA=="):
@@ -509,7 +510,7 @@ class ClobClient:
             url = add_query_open_orders_params(
                 "{}{}".format(self.host, ORDERS), params, next_cursor
             )
-            response = get(url, headers=headers)
+            response = get(url, headers=headers, proxies=self.proxies)
             next_cursor = response["next_cursor"]
             results += response["data"]
 
@@ -519,7 +520,7 @@ class ClobClient:
         """
         Fetches the orderbook for the token_id
         """
-        raw_obs = get("{}{}?token_id={}".format(self.host, GET_ORDER_BOOK, token_id))
+        raw_obs = get("{}{}?token_id={}".format(self.host, GET_ORDER_BOOK, token_id), proxies=self.proxies)
         return parse_raw_orderbook_summary(raw_obs)
 
     def get_order_books(self, params: list[BookParams]) -> list[OrderBookSummary]:
@@ -527,7 +528,7 @@ class ClobClient:
         Fetches the orderbook for a set of token ids
         """
         body = [{"token_id": param.token_id} for param in params]
-        raw_obs = post("{}{}".format(self.host, GET_ORDER_BOOKS), data=body)
+        raw_obs = post("{}{}".format(self.host, GET_ORDER_BOOKS), data=body, proxies=self.proxies)
         return [parse_raw_orderbook_summary(r) for r in raw_obs]
 
     def get_order_book_hash(self, orderbook: OrderBookSummary) -> str:
@@ -545,7 +546,7 @@ class ClobClient:
         endpoint = "{}{}".format(GET_ORDER, order_id)
         request_args = RequestArgs(method="GET", request_path=endpoint)
         headers = create_level_2_headers(self.signer, self.creds, request_args)
-        return get("{}{}".format(self.host, endpoint), headers=headers)
+        return get("{}{}".format(self.host, endpoint), headers=headers, proxies=self.proxies)
 
     def get_trades(self, params: TradeParams = None, next_cursor="MA=="):
         """
@@ -562,7 +563,7 @@ class ClobClient:
             url = add_query_trade_params(
                 "{}{}".format(self.host, TRADES), params, next_cursor
             )
-            response = get(url, headers=headers)
+            response = get(url, headers=headers, proxies=self.proxies)
             next_cursor = response["next_cursor"]
             results += response["data"]
 
@@ -572,14 +573,14 @@ class ClobClient:
         """
         Fetches the last trade price token_id
         """
-        return get("{}{}?token_id={}".format(self.host, GET_LAST_TRADE_PRICE, token_id))
+        return get("{}{}?token_id={}".format(self.host, GET_LAST_TRADE_PRICE, token_id), proxies=self.proxies)
 
     def get_last_trades_prices(self, params: list[BookParams]):
         """
         Fetches the last trades prices for a set of token ids
         """
         body = [{"token_id": param.token_id} for param in params]
-        return post("{}{}".format(self.host, GET_LAST_TRADES_PRICES), data=body)
+        return post("{}{}".format(self.host, GET_LAST_TRADES_PRICES), data=body, proxies=self.proxies)
 
     def assert_level_1_auth(self):
         """
@@ -613,7 +614,7 @@ class ClobClient:
         url = "{}{}?signature_type={}".format(
             self.host, GET_NOTIFICATIONS, self.builder.sig_type
         )
-        return get(url, headers=headers)
+        return get(url, headers=headers, proxies=self.proxies)
 
     def drop_notifications(self, params: DropNotificationParams = None):
         """
@@ -626,7 +627,7 @@ class ClobClient:
         url = drop_notifications_query_params(
             "{}{}".format(self.host, DROP_NOTIFICATIONS), params
         )
-        return delete(url, headers=headers)
+        return delete(url, headers=headers, proxies=self.proxies)
 
     def get_balance_allowance(self, params: BalanceAllowanceParams = None):
         """
@@ -641,7 +642,7 @@ class ClobClient:
         url = add_balance_allowance_params_to_url(
             "{}{}".format(self.host, GET_BALANCE_ALLOWANCE), params
         )
-        return get(url, headers=headers)
+        return get(url, headers=headers, proxies=self.proxies)
 
     def update_balance_allowance(self, params: BalanceAllowanceParams = None):
         """
@@ -656,7 +657,7 @@ class ClobClient:
         url = add_balance_allowance_params_to_url(
             "{}{}".format(self.host, UPDATE_BALANCE_ALLOWANCE), params
         )
-        return get(url, headers=headers)
+        return get(url, headers=headers, proxies=self.proxies)
 
     def is_order_scoring(self, params: OrderScoringParams):
         """
@@ -669,7 +670,7 @@ class ClobClient:
         url = add_order_scoring_params_to_url(
             "{}{}".format(self.host, IS_ORDER_SCORING), params
         )
-        return get(url, headers=headers)
+        return get(url, headers=headers, proxies=self.proxies)
 
     def are_orders_scoring(self, params: OrdersScoringParams):
         """
@@ -683,7 +684,7 @@ class ClobClient:
         )
         headers = create_level_2_headers(self.signer, self.creds, request_args)
         return post(
-            "{}{}".format(self.host, ARE_ORDERS_SCORING), headers=headers, data=body
+            "{}{}".format(self.host, ARE_ORDERS_SCORING), headers=headers, data=body, proxies=self.proxies
         )
 
     def get_sampling_markets(self, next_cursor="MA=="):
@@ -691,7 +692,7 @@ class ClobClient:
         Get the current sampling markets
         """
         return get(
-            "{}{}?next_cursor={}".format(self.host, GET_SAMPLING_MARKETS, next_cursor)
+            "{}{}?next_cursor={}".format(self.host, GET_SAMPLING_MARKETS, next_cursor), proxies=self.proxies
         )
 
     def get_sampling_simplified_markets(self, next_cursor="MA=="):
@@ -701,34 +702,34 @@ class ClobClient:
         return get(
             "{}{}?next_cursor={}".format(
                 self.host, GET_SAMPLING_SIMPLIFIED_MARKETS, next_cursor
-            )
+            ), proxies=self.proxies
         )
 
     def get_markets(self, next_cursor="MA=="):
         """
         Get the current markets
         """
-        return get("{}{}?next_cursor={}".format(self.host, GET_MARKETS, next_cursor))
+        return get("{}{}?next_cursor={}".format(self.host, GET_MARKETS, next_cursor), proxies=self.proxies)
 
     def get_simplified_markets(self, next_cursor="MA=="):
         """
         Get the current simplified markets
         """
         return get(
-            "{}{}?next_cursor={}".format(self.host, GET_SIMPLIFIED_MARKETS, next_cursor)
+            "{}{}?next_cursor={}".format(self.host, GET_SIMPLIFIED_MARKETS, next_cursor), proxies=self.proxies
         )
 
     def get_market(self, condition_id):
         """
         Get a market by condition_id
         """
-        return get("{}{}{}".format(self.host, GET_MARKET, condition_id))
+        return get("{}{}{}".format(self.host, GET_MARKET, condition_id), proxies=self.proxies)
 
     def get_market_trades_events(self, condition_id):
         """
         Get the market's trades events by condition id
         """
-        return get("{}{}{}".format(self.host, GET_MARKET_TRADES_EVENTS, condition_id))
+        return get("{}{}{}".format(self.host, GET_MARKET_TRADES_EVENTS, condition_id), proxies=self.proxies)
 
     def calculate_market_price(self, token_id: str, side: str, amount: float, order_type: OrderType) -> float:
         """
