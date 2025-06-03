@@ -2,7 +2,7 @@ from py_clob_client.client import ClobClient
 
 
 def main():
-    host = "http://localhost:8080"
+    host = os.getenv("CLOB_API_URL", "https://clob.polymarket.com")
     client = ClobClient(host)
 
     orderbook = client.get_order_book(
