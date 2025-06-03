@@ -23,7 +23,7 @@ def main():
     client = ClobClient(host, key=key, chain_id=chain_id, creds=creds)
 
     resp = client.post_orders([
-        PostOrderArgs(
+        PostOrdersArgs(
             # Create and sign a limit order buying 100 YES tokens for 0.50 each
             signed_order=client.create_order(OrderArgs(
                 price=0.5,
