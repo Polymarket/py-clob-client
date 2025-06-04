@@ -15,6 +15,7 @@ class OrderType(enumerate):
     GTD = "GTD"
     FAK = "FAK"
 
+
 @dataclass
 class ApiCreds:
     api_key: str
@@ -237,6 +238,7 @@ class ContractConfig:
     """
     The ERC1155 conditional tokens contract
     """
+
 
 @dataclass
 class PostOrdersArgs:
