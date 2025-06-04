@@ -58,3 +58,52 @@ print(resp)
 ```
 
 **See [examples](examples/) for more.**
+
+### Development
+
+#### Install dependencies
+
+```bash
+make init
+```
+
+#### Tests
+
+```bash
+make fmt test
+```
+
+#### Publish
+
+Ref: https://pythonpackaging.info/07-Package-Release.html
+
+##### Installing the necessary libs
+
+```bash
+pip install twine setuptools
+```
+
+##### Compiling the code
+
+```bash
+python setup.py sdist
+```
+
+##### Checking the generated code and publish
+
+```bash
+twine check dist/*
+# Checking dist/py_clob_client-0.22.0.tar.gz: PASSED
+```
+
+```bash
+twine upload dist/*
+
+# Uploading distributions to https://upload.pypi.org/legacy/
+# Enter your API token:
+# Uploading py_clob_client-0.22.0.tar.gz
+# 100% ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 31.9/31.9 kB • 00:00 • 29.6 MB/s
+
+# View at:
+# https://pypi.org/project/py-clob-client/0.22.0/
+```
