@@ -4,7 +4,7 @@
     <img src='https://img.shields.io/pypi/v/py-clob-client.svg' alt='PyPI'/>
 </a>
 
-Python client for the Polymarket CLOB. Full API documentation can be found [here](https://polymarket.github.io/slate-docs/#introduction).
+Python client for the Polymarket CLOB. Full API documentation can be found [here](https://docs.polymarket.com/developers/dev-resources/main).
 
 ### Installation
 
