@@ -423,7 +423,7 @@ class ClobClient:
             ),
         )
 
-    def post_orders(args: list[PostOrdersArgs]):
+    def post_orders(self, args: list[PostOrdersArgs]):
         """
         Posts orders
         """
