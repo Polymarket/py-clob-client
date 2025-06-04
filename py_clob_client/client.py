@@ -22,6 +22,7 @@ from .endpoints import (
     MID_POINT,
     ORDERS,
     POST_ORDER,
+    POST_ORDERS,
     PRICE,
     TIME,
     TRADES,
@@ -63,6 +64,7 @@ from .clob_types import (
     PartialCreateOrderOptions,
     BookParams,
     MarketOrderArgs,
+    PostOrdersArgs,
 )
 from .exceptions import PolyException
 from .http_helpers.helpers import (
@@ -417,6 +419,19 @@ class ClobClient:
                 neg_risk=neg_risk,
             ),
         )
+
+    def post_orders(args: list[PostOrdersArgs]):
+        """
+        Posts orders
+        """
+        self.assert_level_2_auth()
+        body = [order_to_json(arg.order, self.creds.api_key, arg.orderType) for arg in args]
+        headers = create_level_2_headers(
+            self.signer,
+            self.creds,
+            RequestArgs(method="POST", request_path=POST_ORDERS, body=body),
+        )
+        return post("{}{}".format(self.host, POST_ORDERS), headers=headers, data=body)
 
     def post_order(self, order, orderType: OrderType = OrderType.GTC):
         """
