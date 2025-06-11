@@ -2,6 +2,7 @@ from typing import Any
 from dataclasses import dataclass, asdict
 from json import dumps
 from typing import Literal, Optional
+from enum import Enum
 from py_order_utils.model import (
     SignedOrder,
 )
@@ -9,7 +10,7 @@ from py_order_utils.model import (
 from .constants import ZERO_ADDRESS
 
 
-class OrderType(enumerate):
+class OrderType(Enum):
     GTC = "GTC"
     FOK = "FOK"
     GTD = "GTD"
@@ -174,7 +175,7 @@ class OrderBookSummary:
         return dumps(self.__dict__, separators=(",", ":"))
 
 
-class AssetType(enumerate):
+class AssetType(Enum):
     COLLATERAL = "COLLATERAL"
     CONDITIONAL = "CONDITIONAL"
 
