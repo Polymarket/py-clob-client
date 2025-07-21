@@ -2,8 +2,18 @@ from typing import Any
 from dataclasses import dataclass, asdict
 from json import dumps
 from typing import Literal, Optional
+from py_order_utils.model import (
+    SignedOrder,
+)
 
 from .constants import ZERO_ADDRESS
+
+
+class OrderType(enumerate):
+    GTC = "GTC"
+    FOK = "FOK"
+    GTD = "GTD"
+    FAK = "FAK"
 
 
 @dataclass
@@ -107,6 +117,8 @@ class MarketOrderArgs:
     Address of the order taker. The zero address is used to indicate a public order
     """
 
+    order_type: OrderType = OrderType.FOK
+
 
 @dataclass
 class TradeParams:
@@ -174,12 +186,6 @@ class BalanceAllowanceParams:
     signature_type: int = -1
 
 
-class OrderType(enumerate):
-    GTC = "GTC"
-    FOK = "FOK"
-    GTD = "GTD"
-
-
 @dataclass
 class OrderScoringParams:
     orderId: str
@@ -232,3 +238,9 @@ class ContractConfig:
     """
     The ERC1155 conditional tokens contract
     """
+
+
+@dataclass
+class PostOrdersArgs:
+    order: SignedOrder
+    orderType: OrderType = OrderType.GTC
