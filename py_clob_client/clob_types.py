@@ -161,6 +161,9 @@ class OrderBookSummary:
     market: str = None
     asset_id: str = None
     timestamp: str = None
+    min_order_size: str = None
+    neg_risk: bool = None
+    tick_size: str = None
     bids: list[OrderSummary] = None
     asks: list[OrderSummary] = None
     hash: str = None
