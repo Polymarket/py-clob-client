@@ -46,8 +46,8 @@ def request(endpoint: str, method: str, headers=None, data=None):
         except requests.JSONDecodeError:
             return resp.text
 
-    except requests.RequestException:
-        raise PolyApiException(error_msg="Request exception!")
+    except requests.RequestException as e:
+        raise PolyApiException(error_msg="Request exception!") from e
 
 
 def post(endpoint, headers=None, data=None):
