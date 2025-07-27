@@ -41,7 +41,7 @@ from py_clob_client.order_builder.constants import BUY
 host: str = "https://clob.polymarket.com"
 key: str = "" #This is your Private Key. Export from reveal.polymarket.com or from your Web3 Application
 chain_id: int = 137 #No need to adjust this
-POLYMARKET_PROXY_ADDRESS: str = '' #This is the address you deposit/send USDC to to FUND your Polymarket account.
+POLYMARKET_PROXY_ADDRESS: str = '' # This is your Polymarket account address (visible in the profile URL when logged in, such as "0xdb0fdd3a0c9c86a066c5c26b068c643b8159dac3" from https://polymarket.com/profile/0xdb0fdd3a0c9c86a066c5c26b068c643b8159dac3). It is NOT the USDC deposit address that you sent funds to, and should not be confused with it.
 
 #Select from the following 3 initialization options to matches your login method, and remove any unused lines so only one client is initialized.
 
