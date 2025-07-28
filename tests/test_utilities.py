@@ -31,6 +31,9 @@ class TestUtilities(TestCase):
             ],
             "asks": [],
             "hash": "9d6d9e8831a150ac4cd878f99f7b2c6d419b875f",
+            "min_order_size": "100",
+            "neg_risk": False,
+            "tick_size": "0.01",
             "timestamp": "123456789",
         }
 
@@ -48,6 +51,10 @@ class TestUtilities(TestCase):
             orderbook_summary.hash, "9d6d9e8831a150ac4cd878f99f7b2c6d419b875f"
         )
         self.assertEqual(orderbook_summary.timestamp, "123456789")
+
+        self.assertEqual(orderbook_summary.min_order_size, "100")
+        self.assertEqual(orderbook_summary.neg_risk, False)
+        self.assertEqual(orderbook_summary.tick_size, "0.01")
 
         self.assertIsNotNone(orderbook_summary.asks)
         self.assertIsNotNone(orderbook_summary.bids)
@@ -71,6 +78,9 @@ class TestUtilities(TestCase):
             "asks": [],
             "hash": "7f81a35a09e1933a96b05edb51ac4be4a6163146",
             "timestamp": "123456789",
+            "min_order_size": "100",
+            "neg_risk": False,
+            "tick_size": "0.01",
         }
 
         orderbook_summary = parse_raw_orderbook_summary(raw_obs)
@@ -83,6 +93,11 @@ class TestUtilities(TestCase):
             orderbook_summary.asset_id,
             "100",
         )
+
+        self.assertEqual(orderbook_summary.min_order_size, "100")
+        self.assertEqual(orderbook_summary.neg_risk, False)
+        self.assertEqual(orderbook_summary.tick_size, "0.01")
+
         self.assertEqual(
             orderbook_summary.hash, "7f81a35a09e1933a96b05edb51ac4be4a6163146"
         )
@@ -108,16 +123,19 @@ class TestUtilities(TestCase):
             ],
             "hash": "",
             "timestamp": "123456789",
+            "min_order_size": "100",
+            "neg_risk": False,
+            "tick_size": "0.01",
         }
 
         orderbook_summary = parse_raw_orderbook_summary(raw_obs)
         self.assertEqual(
             generate_orderbook_summary_hash(orderbook_summary),
-            "5489da29343426f88622d61044975dc5fd828a27",
+            "ad2e0dbc878312e2f43f8899585fa4714ad2e176",
         )
         self.assertEqual(
             orderbook_summary.hash,
-            "5489da29343426f88622d61044975dc5fd828a27",
+            "ad2e0dbc878312e2f43f8899585fa4714ad2e176",
         )
 
         raw_obs = {
@@ -132,17 +150,20 @@ class TestUtilities(TestCase):
                 {"price": "0.6", "size": "100"},
                 {"price": "0.7", "size": "100"},
             ],
-            "hash": "5489da29343426f88622d61044975dc5fd828a27",
+            "min_order_size": "100",
+            "neg_risk": False,
+            "tick_size": "0.01",
+            "hash": "",
         }
 
         orderbook_summary = parse_raw_orderbook_summary(raw_obs)
         self.assertEqual(
             generate_orderbook_summary_hash(orderbook_summary),
-            "5489da29343426f88622d61044975dc5fd828a27",
+            "ad2e0dbc878312e2f43f8899585fa4714ad2e176",
         )
         self.assertEqual(
             orderbook_summary.hash,
-            "5489da29343426f88622d61044975dc5fd828a27",
+            "ad2e0dbc878312e2f43f8899585fa4714ad2e176",
         )
 
         raw_obs = {
@@ -152,16 +173,19 @@ class TestUtilities(TestCase):
             "bids": [],
             "asks": [],
             "hash": "",
+            "min_order_size": "100",
+            "neg_risk": False,
+            "tick_size": "0.01",
         }
 
         orderbook_summary = parse_raw_orderbook_summary(raw_obs)
         self.assertEqual(
             generate_orderbook_summary_hash(orderbook_summary),
-            "6d754a2f0304a83544f91a076fa3faa9cbfb9f63",
+            "bda996237b2a07bff56abd9e116b534d8f2cffe4",
         )
         self.assertEqual(
             orderbook_summary.hash,
-            "6d754a2f0304a83544f91a076fa3faa9cbfb9f63",
+            "bda996237b2a07bff56abd9e116b534d8f2cffe4",
         )
 
     def test_order_to_json_0_1(self):

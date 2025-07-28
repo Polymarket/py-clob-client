@@ -164,6 +164,9 @@ class OrderBookSummary:
     timestamp: str = None
     bids: list[OrderSummary] = None
     asks: list[OrderSummary] = None
+    min_order_size: str = None
+    neg_risk: bool = None
+    tick_size: str = None
     hash: str = None
 
     @property
