@@ -30,5 +30,15 @@ def main():
     pprint(resp)
     print("Done!")
 
+    for batch, next_cursor in client.get_trade_batches(
+        TradeParams(
+            maker_address=client.get_address(),
+            market="0x5f65177b394277fd294cd75650044e32ba009a95022d88a0c1d565897d72f8f1",
+        )
+    ):
+        pprint(batch)
+        pprint(next_cursor)
+    print("Done!")
+
 
 main()
