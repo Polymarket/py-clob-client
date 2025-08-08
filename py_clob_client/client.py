@@ -572,11 +572,21 @@ class ClobClient:
         Fetches the trade history for a user
         Requires Level 2 authentication
         """
+        return [
+            line
+            for data, next_cursor in self.get_trade_batches(params, next_cursor)
+            for line in data
+        ]
+
+    def get_trade_batches(self, params: TradeParams = None, next_cursor="MA=="):
+        """
+        Fetches the trade history for a user and yields them in batches
+        Requires Level 2 authentication
+        """
         self.assert_level_2_auth()
         request_args = RequestArgs(method="GET", request_path=TRADES)
         headers = create_level_2_headers(self.signer, self.creds, request_args)
 
-        results = []
         next_cursor = next_cursor if next_cursor is not None else "MA=="
         while next_cursor != END_CURSOR:
             url = add_query_trade_params(
@@ -584,9 +594,7 @@ class ClobClient:
             )
             response = get(url, headers=headers)
             next_cursor = response["next_cursor"]
-            results += response["data"]
-
-        return results
+            yield response["data"], next_cursor
 
     def get_last_trade_price(self, token_id):
         """
