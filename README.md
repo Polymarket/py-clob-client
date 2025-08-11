@@ -1,125 +1,273 @@
-## py-clob-client
+# Polymarket Python CLOB Client
 
 <a href='https://pypi.org/project/py-clob-client'>
     <img src='https://img.shields.io/pypi/v/py-clob-client.svg' alt='PyPI'/>
 </a>
 
-Python client for the Polymarket CLOB. Full API documentation can be found [here](https://docs.polymarket.com/developers/dev-resources/main).
+Python client for the Polymarket Central Limit Order Book (CLOB).
 
-### Installation
+## Documentation
 
-`pip install py-clob-client`
+## Installation
 
-Intended for use with Python 3.9
+```bash
+# install from PyPI (Python 3.9>)
+pip install py-clob-client
+```
+## Usage
 
-### Requisites
+The examples below are short and copy‑pasteable.
 
-#### Allowances
-Adjusting and setting allowances is only required when using an EOA or a web3 wallet like MetaMask. If you sign in with a Magic link or email login, allowances are automatically configured for you during account creation.
+- What you need:
+  - **Python 3.9+**
+  - **Private key** that owns funds on Polymarket
+  - Optional: a **proxy/funder address** if you use an email or smart‑contract wallet
+  - Tip: store secrets in environment variables (e.g., with `.env`)
 
-If you are interacting with the API with an EOA or web3/MetaMask wallet then correct token allowances must be set before orders can be placed. 
-The following mainnet (Polygon) allowances should be set by the funding (maker) address. For additional documentation please refer to the [API documentation](https://polymarket.github.io/slate-docs/#introduction).
+### Quickstart (read‑only)
 
-|                   token(s)                   |                   spender                    |                                  description                                   |
-| :------------------------------------------: | :------------------------------------------: | :----------------------------------------------------------------------------: |
-| `0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174` | `0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E` |            allow the CTF Exchange contract to transfer user's usdc             |
-| `0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174` | `0xC5d563A36AE78145C45a50134d48A1215220f80a` |        allow the Neg Risk CTF Exchange contract to transfer user's usdc        |
-| `0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174` | `0xd91E80cF2E7be2e162c6513ceD06f1dD0dA35296` |          allow the Neg Risk Adapter contract to transfer user's usdc           |
-| `0x4D97DCd97eC945f40cF65F87097ACe5EA0476045` | `0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E` |     allow the CTF Exchange contract to transfer user's conditional tokens      |
-| `0x4D97DCd97eC945f40cF65F87097ACe5EA0476045` | `0xC5d563A36AE78145C45a50134d48A1215220f80a` | allow the Neg Risk CTF Exchange contract to transfer user's conditional tokens |
-| `0x4D97DCd97eC945f40cF65F87097ACe5EA0476045` | `0xd91E80cF2E7be2e162c6513ceD06f1dD0dA35296` |   allow the Neg Risk Adapter contract to transfer user's conditional tokens    |
+```python
+from py_clob_client.client import ClobClient
 
-See [this gist](https://gist.github.com/poly-rodr/44313920481de58d5a3f6d1f8226bd5e) for a an example of how to set these allowances for an account using python.
+client = ClobClient("https://clob.polymarket.com")  # Level 0 (no auth)
 
-### Usage
+ok = client.get_ok()
+time = client.get_server_time()
+print(ok, time)
+```
 
-```py
+### Start trading (EOA)
+
+**Note**: If using MetaMask or hardware wallet, you must first set token allowances. See [Token Allowances section](#important-token-allowances-for-metamaskeoa-users) below.
+
+```python
+from py_clob_client.client import ClobClient
+
+HOST = "https://clob.polymarket.com"
+CHAIN_ID = 137
+PRIVATE_KEY = "<your-private-key>"
+FUNDER = "<your-funder-address>"
+
+client = ClobClient(
+    HOST,  # The CLOB API endpoint
+    key=PRIVATE_KEY,  # Your wallet's private key
+    chain_id=CHAIN_ID,  # Polygon chain ID (137)
+    signature_type=1,  # 1 for email/Magic wallet signatures
+    funder=FUNDER  # Address that holds your funds
+)
+client.set_api_creds(client.create_or_derive_api_creds())
+```
+
+### Start trading (proxy wallet)
+
+For email/Magic or browser wallet proxies, you need to specify two additional parameters:
+
+#### Funder Address
+The **funder address** is the actual address that holds your funds on Polymarket. When using proxy wallets (email wallets like Magic or browser extension wallets), the signing key differs from the address holding the funds. The funder address ensures orders are properly attributed to your funded account.
+
+#### Signature Types
+The **signature_type** parameter tells the system how to verify your signatures:
+- `signature_type=0` (default): Standard EOA (Externally Owned Account) signatures - includes MetaMask, hardware wallets, and any wallet where you control the private key directly
+- `signature_type=1`: Email/Magic wallet signatures (delegated signing)
+- `signature_type=2`: Browser wallet proxy signatures (when using a proxy contract, not direct wallet connections)
+
+```python
+from py_clob_client.client import ClobClient
+
+HOST = "https://clob.polymarket.com"
+CHAIN_ID = 137
+PRIVATE_KEY = "<your-private-key>"
+PROXY_FUNDER = "<your-proxy-or-smart-wallet-address>"  # Address that holds your funds
+
+client = ClobClient(
+    HOST,  # The CLOB API endpoint
+    key=PRIVATE_KEY,  # Your wallet's private key
+    chain_id=CHAIN_ID,  # Polygon chain ID (137)
+    signature_type=1,  # 1 for email/Magic wallet signatures
+    funder=PROXY_FUNDER  # Address that holds your funds
+)
+client.set_api_creds(client.create_or_derive_api_creds())
+```
+
+### Find markets, prices, and orderbooks
+
+```python
+from py_clob_client.client import ClobClient
+from py_clob_client.clob_types import BookParams
+
+client = ClobClient("https://clob.polymarket.com")  # read-only
+
+token_id = "<token-id>"  # Get a token ID: https://docs.polymarket.com/developers/gamma-markets-api/get-markets
+
+mid = client.get_midpoint(token_id)
+price = client.get_price(token_id, side="BUY")
+book = client.get_order_book(token_id)
+books = client.get_order_books([BookParams(token_id=token_id)])
+print(mid, price, book.market, len(books))
+```
+
+### Place a market order (buy by $ amount)
+
+**Note**: EOA/MetaMask users must set token allowances before trading. See [Token Allowances section](#important-token-allowances-for-metamaskeoa-users) below.
+
+```python
+from py_clob_client.client import ClobClient
+from py_clob_client.clob_types import MarketOrderArgs, OrderType
+from py_clob_client.order_builder.constants import BUY
+
+HOST = "https://clob.polymarket.com"
+CHAIN_ID = 137
+PRIVATE_KEY = "<your-private-key>"
+FUNDER = "<your-funder-address>"
+
+client = ClobClient(
+    HOST,  # The CLOB API endpoint
+    key=PRIVATE_KEY,  # Your wallet's private key
+    chain_id=CHAIN_ID,  # Polygon chain ID (137)
+    signature_type=1,  # 1 for email/Magic wallet signatures
+    funder=FUNDER  # Address that holds your funds
+)
+client.set_api_creds(client.create_or_derive_api_creds())
+
+mo = MarketOrderArgs(token_id="<token-id>", amount=25.0, side=BUY, order_type=OrderType.FOK)  # Get a token ID: https://docs.polymarket.com/developers/gamma-markets-api/get-markets
+signed = client.create_market_order(mo)
+resp = client.post_order(signed, OrderType.FOK)
+print(resp)
+```
+
+### Place a limit order (shares at a price)
+
+**Note**: EOA/MetaMask users must set token allowances before trading. See [Token Allowances section](#important-token-allowances-for-metamaskeoa-users) below.
+
+```python
 from py_clob_client.client import ClobClient
 from py_clob_client.clob_types import OrderArgs, OrderType
 from py_clob_client.order_builder.constants import BUY
 
-host: str = "https://clob.polymarket.com"
-key: str = "" #This is your Private Key. Export from reveal.polymarket.com or from your Web3 Application
-chain_id: int = 137 #No need to adjust this
-POLYMARKET_PROXY_ADDRESS: str = '' #This is the address you deposit/send USDC to to FUND your Polymarket account.
+HOST = "https://clob.polymarket.com"
+CHAIN_ID = 137
+PRIVATE_KEY = "<your-private-key>"
+FUNDER = "<your-funder-address>"
 
-#Select from the following 3 initialization options to matches your login method, and remove any unused lines so only one client is initialized.
-
-
-### Initialization of a client using a Polymarket Proxy associated with an Email/Magic account. If you login with your email use this example.
-client = ClobClient(host, key=key, chain_id=chain_id, signature_type=1, funder=POLYMARKET_PROXY_ADDRESS)
-
-### Initialization of a client using a Polymarket Proxy associated with a Browser Wallet(Metamask, Coinbase Wallet, etc)
-client = ClobClient(host, key=key, chain_id=chain_id, signature_type=2, funder=POLYMARKET_PROXY_ADDRESS)
-
-### Initialization of a client that trades directly from an EOA. 
-client = ClobClient(host, key=key, chain_id=chain_id)
-
-## Create and sign a limit order buying 5 tokens for 0.010c each
-#Refer to the Markets API documentation to locate a tokenID: https://docs.polymarket.com/developers/gamma-markets-api/get-markets
-
-client.set_api_creds(client.create_or_derive_api_creds()) 
-
-order_args = OrderArgs(
-    price=0.01,
-    size=5.0,
-    side=BUY,
-    token_id="", #Token ID you want to purchase goes here. 
+client = ClobClient(
+    HOST,  # The CLOB API endpoint
+    key=PRIVATE_KEY,  # Your wallet's private key
+    chain_id=CHAIN_ID,  # Polygon chain ID (137)
+    signature_type=1,  # 1 for email/Magic wallet signatures
+    funder=FUNDER  # Address that holds your funds
 )
-signed_order = client.create_order(order_args)
+client.set_api_creds(client.create_or_derive_api_creds())
 
-## GTC(Good-Till-Cancelled) Order
-resp = client.post_order(signed_order, OrderType.GTC)
+order = OrderArgs(token_id="<token-id>", price=0.01, size=5.0, side=BUY)  # Get a token ID: https://docs.polymarket.com/developers/gamma-markets-api/get-markets
+signed = client.create_order(order)
+resp = client.post_order(signed, OrderType.GTC)
 print(resp)
 ```
 
-**See [examples](examples/) for more.**
+### Manage orders
 
-### Development
+**Note**: EOA/MetaMask users must set token allowances before trading. See [Token Allowances section](#important-token-allowances-for-metamaskeoa-users) below.
 
-#### Install dependencies
+```python
+from py_clob_client.client import ClobClient
+from py_clob_client.clob_types import OpenOrderParams
 
-```bash
-make init
+HOST = "https://clob.polymarket.com"
+CHAIN_ID = 137
+PRIVATE_KEY = "<your-private-key>"
+FUNDER = "<your-funder-address>"
+
+client = ClobClient(
+    HOST,  # The CLOB API endpoint
+    key=PRIVATE_KEY,  # Your wallet's private key
+    chain_id=CHAIN_ID,  # Polygon chain ID (137)
+    signature_type=1,  # 1 for email/Magic wallet signatures
+    funder=FUNDER  # Address that holds your funds
+)
+client.set_api_creds(client.create_or_derive_api_creds())
+
+open_orders = client.get_orders(OpenOrderParams())
+
+order_id = open_orders[0]["id"] if open_orders else None
+if order_id:
+    client.cancel(order_id)
+
+client.cancel_all()
 ```
 
-#### Tests
+### Markets (read‑only)
 
-```bash
-make fmt test
+```python
+from py_clob_client.client import ClobClient
+
+client = ClobClient("https://clob.polymarket.com")
+markets = client.get_simplified_markets()
+print(markets["data"][:1])
 ```
 
-#### Publish
+### User trades (requires auth)
 
-Ref: https://pythonpackaging.info/07-Package-Release.html
+**Note**: EOA/MetaMask users must set token allowances before trading. See [Token Allowances section](#important-token-allowances-for-metamaskeoa-users) below.
 
-##### Installing the necessary libs
+```python
+from py_clob_client.client import ClobClient
 
-```bash
-pip install twine setuptools
+HOST = "https://clob.polymarket.com"
+CHAIN_ID = 137
+PRIVATE_KEY = "<your-private-key>"
+FUNDER = "<your-funder-address>"
+
+client = ClobClient(
+    HOST,  # The CLOB API endpoint
+    key=PRIVATE_KEY,  # Your wallet's private key
+    chain_id=CHAIN_ID,  # Polygon chain ID (137)
+    signature_type=1,  # 1 for email/Magic wallet signatures
+    funder=FUNDER  # Address that holds your funds
+)
+client.set_api_creds(client.create_or_derive_api_creds())
+
+last = client.get_last_trade_price("<token-id>")
+trades = client.get_trades()
+print(last, len(trades))
 ```
 
-##### Compiling the code
+## Important: Token Allowances for MetaMask/EOA Users
 
-```bash
-python setup.py sdist
-```
+### Do I need to set allowances?
+- **Using email/Magic wallet?** No action needed - allowances are set automatically.
+- **Using MetaMask or hardware wallet?** You need to set allowances before trading.
 
-##### Checking the generated code and publish
+### What are allowances?
+Think of allowances as permissions. Before Polymarket can move your funds to execute trades, you need to give the exchange contracts permission to access your USDC and conditional tokens.
 
-```bash
-twine check dist/*
-# Checking dist/py_clob_client-0.22.0.tar.gz: PASSED
-```
+### Quick Setup
+You need to approve two types of tokens:
+1. **USDC** (for deposits and trading)
+2. **Conditional Tokens** (the outcome tokens you trade)
 
-```bash
-twine upload dist/*
+Each needs approval for the exchange contracts to work properly.
 
-# Uploading distributions to https://upload.pypi.org/legacy/
-# Enter your API token:
-# Uploading py_clob_client-0.22.0.tar.gz
-# 100% ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 31.9/31.9 kB • 00:00 • 29.6 MB/s
+### Setting Allowances
+Here's a simple breakdown of what needs to be approved:
 
-# View at:
-# https://pypi.org/project/py-clob-client/0.22.0/
-```
+**For USDC (your trading currency):**
+- Token: `0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174`
+- Approve for these contracts:
+  - `0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E` (Main exchange)
+  - `0xC5d563A36AE78145C45a50134d48A1215220f80a` (Neg risk markets)
+  - `0xd91E80cF2E7be2e162c6513ceD06f1dD0dA35296` (Neg risk adapter)
+
+**For Conditional Tokens (your outcome tokens):**
+- Token: `0x4D97DCd97eC945f40cF65F87097ACe5EA0476045`
+- Approve for the same three contracts above
+
+### Example Code
+See [this Python example](https://gist.github.com/poly-rodr/44313920481de58d5a3f6d1f8226bd5e) for setting allowances programmatically.
+
+**Pro tip**: You only need to set these once per wallet. After that, you can trade freely.
+
+## Notes
+- To discover token IDs, use the Markets API Explorer: [Get Markets](https://docs.polymarket.com/developers/gamma-markets-api/get-markets).
+- Prices are in dollars from 0.00 to 1.00. Shares are whole or fractional units of the outcome token.
+
+See [/example](/examples) for more.
