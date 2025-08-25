@@ -326,9 +326,10 @@ class ClobClient:
             return self.__fee_rates[token_id]
 
         result = get("{}{}?token_id={}".format(self.host, GET_FEE_RATE, token_id))
-        self.__fee_rates[token_id] = result["base_fee"]
+        fee_rate = result.get("base_fee") or 0
+        self.__fee_rates[token_id] = fee_rate
 
-        return result["base_fee"]
+        return fee_rate
 
     def __resolve_tick_size(
         self, token_id: str, tick_size: TickSize = None
