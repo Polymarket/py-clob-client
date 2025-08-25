@@ -350,11 +350,13 @@ class ClobClient:
         self, token_id: str, user_fee_rate: int = None
     ) -> int:
         market_fee_rate_bps = self.get_fee_rate_bps(token_id)
-        if market_fee_rate_bps and user_fee_rate and user_fee_rate != market_fee_rate_bps:
+        # If both fee rate on the market and the user supplied fee rate are non-zero, validate that they match
+        # else return the market fee rate
+        if market_fee_rate_bps > 0 and user_fee_rate > 0 and user_fee_rate != market_fee_rate_bps:
             raise Exception("invalid user provided fee rate: ("
                     + str(user_fee_rate)
-                    + "), fee rate for the market must be "
-                    + str(market_fee_rate_bps),
+                    + "), fee rate for the market must be ("
+                    + str(market_fee_rate_bps) + ")",
             )
         return market_fee_rate_bps
 
