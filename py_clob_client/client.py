@@ -356,7 +356,6 @@ class ClobClient:
                     + "), fee rate for the market must be "
                     + str(market_fee_rate_bps),
             )
-        print(f"Fee rate bps for {token_id}: {market_fee_rate_bps}")
         return market_fee_rate_bps
 
     def create_order(
