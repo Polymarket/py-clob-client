@@ -1,0 +1,4 @@
+# All PRs on any file must be reviewed by one of the following team members
+# Wildcard (*) for all files
+* @Polymarket/eng-platform
+* @Polymarket/eng-platform-admins
