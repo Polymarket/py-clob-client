@@ -9,7 +9,10 @@ def build_hmac_signature(
     """
     Creates an HMAC signature by signing a payload with the secret
     """
-    base64_secret = base64.urlsafe_b64decode(secret)
+    # Add padding if necessary for proper base64 decoding
+    secret_padded = secret + '=' * ((4 - len(secret) % 4) % 4)
+
+    base64_secret = base64.urlsafe_b64decode(secret_padded)
     message = str(timestamp) + str(method) + str(requestPath)
     if body:
         # NOTE: Necessary to replace single quotes with double quotes
