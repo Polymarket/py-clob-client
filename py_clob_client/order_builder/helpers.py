@@ -3,17 +3,17 @@ from decimal import Decimal, ROUND_FLOOR, ROUND_HALF_UP, ROUND_CEILING
 
 def round_down(x: float, sig_digits: int) -> float:
     exp = Decimal(1).scaleb(-sig_digits)
-    return float(Decimal((str(x))).quantize(exp=exp, rounding=ROUND_FLOOR))
+    return float(Decimal(str(x)).quantize(exp=exp, rounding=ROUND_FLOOR))
 
 
 def round_normal(x: float, sig_digits: int) -> float:
     exp = Decimal(1).scaleb(-sig_digits)
-    return float(Decimal((str(x))).quantize(exp=exp, rounding=ROUND_HALF_UP))
+    return float(Decimal(str(x)).quantize(exp=exp, rounding=ROUND_HALF_UP))
 
 
 def round_up(x: float, sig_digits: int) -> float:
     exp = Decimal(1).scaleb(-sig_digits)
-    return float(Decimal((str(x))).quantize(exp=exp, rounding=ROUND_CEILING))
+    return float(Decimal(str(x)).quantize(exp=exp, rounding=ROUND_CEILING))
 
 
 def to_token_decimals(x: float) -> int:
