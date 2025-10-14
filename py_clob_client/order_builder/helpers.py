@@ -19,7 +19,7 @@ def round_up(x: float, sig_digits: int) -> float:
 def to_token_decimals(x: float) -> int:
     exp = Decimal(1)
     return int(
-        Decimal(str(x)) * Decimal(10**6).quantize(exp=exp, rounding=ROUND_HALF_UP)
+        (Decimal(str(x)) * Decimal(10**6)).quantize(exp=exp, rounding=ROUND_HALF_UP)
     )
 
 
