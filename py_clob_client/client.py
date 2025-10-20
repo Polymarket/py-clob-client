@@ -522,11 +522,7 @@ class ClobClient:
 
         # Builder flow
         if self.can_builder_auth():
-            # TODO: can builder auth!
-            print("Can BUILDER AUTH!!")
             builder_headers = self._generate_builder_headers(request_args, headers)
-            print("builder headers:")
-            print(builder_headers)
             if builder_headers is not None:
                 return post(
                     "{}{}".format(self.host, POST_ORDER),
