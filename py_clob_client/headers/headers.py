@@ -4,7 +4,6 @@ from ..signer import Signer
 from ..signing.eip712 import sign_clob_auth_message
 
 from datetime import datetime
-from py_builder_signing_sdk.sdk_types import BuilderHeaderPayload
 
 POLY_ADDRESS = "POLY_ADDRESS"
 POLY_SIGNATURE = "POLY_SIGNATURE"
