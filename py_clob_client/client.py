@@ -1,8 +1,14 @@
 import logging
 from typing import Optional
 
+from py_builder_signing_sdk.config import BuilderConfig
+
 from .order_builder.builder import OrderBuilder
-from .headers.headers import create_level_1_headers, create_level_2_headers
+from .headers.headers import (
+    create_level_1_headers,
+    create_level_2_headers,
+    enrich_l2_headers_with_builder_headers,
+)
 from .signer import Signer
 from .config import get_contract_config
 
@@ -47,6 +53,7 @@ from .endpoints import (
     GET_PRICES,
     GET_SPREAD,
     GET_SPREADS,
+    GET_BUILDER_TRADES,
 )
 from .clob_types import (
     ApiCreds,
@@ -79,7 +86,15 @@ from .http_helpers.helpers import (
     add_order_scoring_params_to_url,
 )
 
-from .constants import L0, L1, L1_AUTH_UNAVAILABLE, L2, L2_AUTH_UNAVAILABLE, END_CURSOR
+from .constants import (
+    L0,
+    L1,
+    L1_AUTH_UNAVAILABLE,
+    L2,
+    L2_AUTH_UNAVAILABLE,
+    END_CURSOR,
+    BUILDER_AUTH_UNAVAILABLE,
+)
 from .utilities import (
     parse_raw_orderbook_summary,
     generate_orderbook_summary_hash,
@@ -98,6 +113,7 @@ class ClobClient:
         creds: ApiCreds = None,
         signature_type: int = None,
         funder: str = None,
+        builder_config: BuilderConfig = None,
     ):
         """
         Initializes the clob client
@@ -121,6 +137,9 @@ class ClobClient:
             self.builder = OrderBuilder(
                 self.signer, sig_type=signature_type, funder=funder
             )
+
+        if builder_config:
+            self.builder_config = builder_config
 
         # local cache
         self.__tick_sizes = {}
@@ -320,7 +339,7 @@ class ClobClient:
         self.__neg_risk[token_id] = result["neg_risk"]
 
         return result["neg_risk"]
-    
+
     def get_fee_rate_bps(self, token_id: str) -> int:
         if token_id in self.__fee_rates:
             return self.__fee_rates[token_id]
@@ -346,15 +365,21 @@ class ClobClient:
         else:
             tick_size = min_tick_size
         return tick_size
-    
-    def __resolve_fee_rate(
-        self, token_id: str, user_fee_rate: int = None
-    ) -> int:
+
+    def __resolve_fee_rate(self, token_id: str, user_fee_rate: int = None) -> int:
         market_fee_rate_bps = self.get_fee_rate_bps(token_id)
         # If both fee rate on the market and the user supplied fee rate are non-zero, validate that they match
         # else return the market fee rate
-        if market_fee_rate_bps is not None and market_fee_rate_bps > 0 and user_fee_rate is not None and user_fee_rate > 0 and user_fee_rate != market_fee_rate_bps:
-            raise Exception(f"invalid user provided fee rate: ({user_fee_rate}), fee rate for the market must be {market_fee_rate_bps}")
+        if (
+            market_fee_rate_bps is not None
+            and market_fee_rate_bps > 0
+            and user_fee_rate is not None
+            and user_fee_rate > 0
+            and user_fee_rate != market_fee_rate_bps
+        ):
+            raise Exception(
+                f"invalid user provided fee rate: ({user_fee_rate}), fee rate for the market must be {market_fee_rate_bps}"
+            )
         return market_fee_rate_bps
 
     def create_order(
@@ -389,7 +414,9 @@ class ClobClient:
         )
 
         # fee rate
-        fee_rate_bps = self.__resolve_fee_rate(order_args.token_id, order_args.fee_rate_bps)
+        fee_rate_bps = self.__resolve_fee_rate(
+            order_args.token_id, order_args.fee_rate_bps
+        )
         order_args.fee_rate_bps = fee_rate_bps
 
         return self.builder.create_order(
@@ -442,9 +469,10 @@ class ClobClient:
         )
 
         # fee rate
-        fee_rate_bps = self.__resolve_fee_rate(order_args.token_id, order_args.fee_rate_bps)
+        fee_rate_bps = self.__resolve_fee_rate(
+            order_args.token_id, order_args.fee_rate_bps
+        )
         order_args.fee_rate_bps = fee_rate_bps
-
 
         return self.builder.create_market_order(
             order_args,
@@ -462,11 +490,21 @@ class ClobClient:
         body = [
             order_to_json(arg.order, self.creds.api_key, arg.orderType) for arg in args
         ]
+        request_args = RequestArgs(method="POST", request_path=POST_ORDERS, body=body)
         headers = create_level_2_headers(
             self.signer,
             self.creds,
-            RequestArgs(method="POST", request_path=POST_ORDERS, body=body),
+            request_args,
         )
+        # Builder flow
+        if self.can_builder_auth():
+            builder_headers = self._generate_builder_headers(request_args, headers)
+            if builder_headers is not None:
+                return post(
+                    "{}{}".format(self.host, POST_ORDERS),
+                    headers=builder_headers,
+                    data=body,
+                )
         return post("{}{}".format(self.host, POST_ORDERS), headers=headers, data=body)
 
     def post_order(self, order, orderType: OrderType = OrderType.GTC):
@@ -475,11 +513,22 @@ class ClobClient:
         """
         self.assert_level_2_auth()
         body = order_to_json(order, self.creds.api_key, orderType)
+        request_args = RequestArgs(method="POST", request_path=POST_ORDER, body=body)
         headers = create_level_2_headers(
             self.signer,
             self.creds,
-            RequestArgs(method="POST", request_path=POST_ORDER, body=body),
+            request_args,
         )
+
+        # Builder flow
+        if self.can_builder_auth():
+            builder_headers = self._generate_builder_headers(request_args, headers)
+            if builder_headers is not None:
+                return post(
+                    "{}{}".format(self.host, POST_ORDER),
+                    headers=builder_headers,
+                    data=body,
+                )
         return post("{}{}".format(self.host, POST_ORDER), headers=headers, data=body)
 
     def create_and_post_order(
@@ -646,12 +695,45 @@ class ClobClient:
         if self.mode < L2:
             raise PolyException(L2_AUTH_UNAVAILABLE)
 
+    def assert_builder_auth(self):
+        """
+        Builder Auth
+        """
+        if not self.can_builder_auth():
+            raise PolyException(BUILDER_AUTH_UNAVAILABLE)
+
+    def can_builder_auth(self) -> bool:
+        return self.builder_config is not None and self.builder_config.is_valid()
+
     def _get_client_mode(self):
         if self.signer is not None and self.creds is not None:
             return L2
         if self.signer is not None:
             return L1
         return L0
+
+    def _generate_builder_headers(self, request_args: RequestArgs, headers: dict):
+        """
+        Generates builder headers and attaches them to the L2 Header
+        """
+        if self.builder_config is not None:
+            builder_headers = self._get_builder_headers(
+                request_args.method,
+                request_args.request_path,
+                request_args.body,
+            )
+            if builder_headers is None:
+                return None
+            return enrich_l2_headers_with_builder_headers(headers, builder_headers)
+        return None
+
+    def _get_builder_headers(self, method: str, path: str, body: str = None):
+        if body is not None:
+            body = str(body)
+        headers = self.builder_config.generate_builder_headers(method, path, body)
+        if headers:
+            return headers.to_dict()
+        return None
 
     def get_notifications(self):
         """
@@ -780,6 +862,29 @@ class ClobClient:
         Get the market's trades events by condition id
         """
         return get("{}{}{}".format(self.host, GET_MARKET_TRADES_EVENTS, condition_id))
+
+    def get_builder_trades(self, params: TradeParams = None, next_cursor="MA=="):
+        """
+        Get trades originated by the builder
+        """
+        self.assert_builder_auth()
+
+        request_args = RequestArgs(method="GET", request_path=GET_BUILDER_TRADES)
+        headers = self._get_builder_headers(
+            request_args.method, request_args.request_path, request_args.body
+        )
+
+        results = []
+        next_cursor = next_cursor if next_cursor is not None else "MA=="
+        while next_cursor != END_CURSOR:
+            url = add_query_trade_params(
+                "{}{}".format(self.host, GET_BUILDER_TRADES), params, next_cursor
+            )
+            response = get(url, headers=headers)
+            next_cursor = response["next_cursor"]
+            results += response["data"]
+
+        return results
 
     def calculate_market_price(
         self, token_id: str, side: str, amount: float, order_type: OrderType

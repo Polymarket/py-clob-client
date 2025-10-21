@@ -7,3 +7,4 @@ pytest==8.2.2
 python-dotenv==0.19.2
 requests==2.32.3
 websockets==12.0
+py_builder_signing_sdk==0.0.2
