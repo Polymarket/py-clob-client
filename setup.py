@@ -20,6 +20,7 @@ setuptools.setup(
         "poly_eip712_structs>=0.0.1",
         "py-order-utils>=0.3.2",
         "python-dotenv",
+        "py-builder-signing-sdk>=0.0.2",
         "requests",
     ],
     project_urls={
