@@ -138,6 +138,7 @@ class ClobClient:
                 self.signer, sig_type=signature_type, funder=funder
             )
 
+        self.builder_config = None
         if builder_config:
             self.builder_config = builder_config
 
