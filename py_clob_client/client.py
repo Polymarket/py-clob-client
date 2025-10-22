@@ -138,10 +138,9 @@ class ClobClient:
                 self.signer, sig_type=signature_type, funder=funder
             )
 
+        self.builder_config = None
         if builder_config:
             self.builder_config = builder_config
-        else:
-            self.builder_config = None
 
         # local cache
         self.__tick_sizes = {}
