@@ -140,6 +140,8 @@ class ClobClient:
 
         if builder_config:
             self.builder_config = builder_config
+        else:
+            self.builder_config = None
 
         # local cache
         self.__tick_sizes = {}
