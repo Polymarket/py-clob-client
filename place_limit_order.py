@@ -43,7 +43,7 @@ def main():
         host,
         key=private_key,
         chain_id=CHAIN_ID,
-        signature_type=1,  # Измените на 0 если используете MetaMask/EOA
+        signature_type=2,  # 0=EOA, 1=Email/Magic, 2=MetaMask+Proxy (измените если нужно)
         funder=funder,
         creds=creds
     )
