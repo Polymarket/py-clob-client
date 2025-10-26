@@ -99,9 +99,9 @@ def main():
     print("="*60)
 
     # Запрос подтверждения
-    confirm = input("\n⚠️  Разместить этот ордер? (yes/no): ").strip().lower()
+    confirm = input("\n⚠️  Разместить этот ордер? (y/n): ").strip().lower()
 
-    if confirm != 'yes':
+    if confirm not in ['y', 'yes']:
         print("Отменено пользователем.")
         return
 
