@@ -8,6 +8,7 @@
 </a>
 <a href='https://github.com/Polymarket/py-clob-client/actions/workflows/github-code-scanning/codeql'>
     <img src='https://github.com/Polymarket/py-clob-client/actions/workflows/github-code-scanning/codeql/badge.svg' alt='CodeQL'/>
+</a>
 
 Python client for the Polymarket Central Limit Order Book (CLOB).
 
