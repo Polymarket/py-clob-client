@@ -320,7 +320,7 @@ class ClobClient:
         self.__neg_risk[token_id] = result["neg_risk"]
 
         return result["neg_risk"]
-    
+
     def get_fee_rate_bps(self, token_id: str) -> int:
         if token_id in self.__fee_rates:
             return self.__fee_rates[token_id]
@@ -346,15 +346,21 @@ class ClobClient:
         else:
             tick_size = min_tick_size
         return tick_size
-    
-    def __resolve_fee_rate(
-        self, token_id: str, user_fee_rate: int = None
-    ) -> int:
+
+    def __resolve_fee_rate(self, token_id: str, user_fee_rate: int = None) -> int:
         market_fee_rate_bps = self.get_fee_rate_bps(token_id)
         # If both fee rate on the market and the user supplied fee rate are non-zero, validate that they match
         # else return the market fee rate
-        if market_fee_rate_bps is not None and market_fee_rate_bps > 0 and user_fee_rate is not None and user_fee_rate > 0 and user_fee_rate != market_fee_rate_bps:
-            raise Exception(f"invalid user provided fee rate: ({user_fee_rate}), fee rate for the market must be {market_fee_rate_bps}")
+        if (
+            market_fee_rate_bps is not None
+            and market_fee_rate_bps > 0
+            and user_fee_rate is not None
+            and user_fee_rate > 0
+            and user_fee_rate != market_fee_rate_bps
+        ):
+            raise Exception(
+                f"invalid user provided fee rate: ({user_fee_rate}), fee rate for the market must be {market_fee_rate_bps}"
+            )
         return market_fee_rate_bps
 
     def create_order(
@@ -389,7 +395,9 @@ class ClobClient:
         )
 
         # fee rate
-        fee_rate_bps = self.__resolve_fee_rate(order_args.token_id, order_args.fee_rate_bps)
+        fee_rate_bps = self.__resolve_fee_rate(
+            order_args.token_id, order_args.fee_rate_bps
+        )
         order_args.fee_rate_bps = fee_rate_bps
 
         return self.builder.create_order(
@@ -442,9 +450,10 @@ class ClobClient:
         )
 
         # fee rate
-        fee_rate_bps = self.__resolve_fee_rate(order_args.token_id, order_args.fee_rate_bps)
+        fee_rate_bps = self.__resolve_fee_rate(
+            order_args.token_id, order_args.fee_rate_bps
+        )
         order_args.fee_rate_bps = fee_rate_bps
-
 
         return self.builder.create_market_order(
             order_args,

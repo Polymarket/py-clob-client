@@ -1,4 +1,4 @@
-import requests
+import httpx
 
 from py_clob_client.clob_types import (
     DropNotificationParams,
@@ -15,6 +15,9 @@ GET = "GET"
 POST = "POST"
 DELETE = "DELETE"
 PUT = "PUT"
+
+# Single shared client = persistent connections + pooling + optional HTTP/2
+_http_client = httpx.Client(http2=True, timeout=5.0)
 
 
 def overloadHeaders(method: str, headers: dict) -> dict:
@@ -35,18 +38,25 @@ def overloadHeaders(method: str, headers: dict) -> dict:
 def request(endpoint: str, method: str, headers=None, data=None):
     try:
         headers = overloadHeaders(method, headers)
-        resp = requests.request(
-            method=method, url=endpoint, headers=headers, json=data if data else None
+        resp = _http_client.request(
+            method=method,
+            url=endpoint,
+            headers=headers,
+            json=data if data else None,
         )
+
+        # Preserve existing behavior: only 200 is considered success
         if resp.status_code != 200:
             raise PolyApiException(resp)
 
         try:
             return resp.json()
-        except requests.JSONDecodeError:
+        except ValueError:
+            # httpx raises ValueError on JSON decode failure
             return resp.text
 
-    except requests.RequestException:
+    except httpx.RequestError:
+        # Network / transport-level errors
         raise PolyApiException(error_msg="Request exception!")
 
 
