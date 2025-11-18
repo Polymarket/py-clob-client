@@ -16,7 +16,6 @@ POST = "POST"
 DELETE = "DELETE"
 PUT = "PUT"
 
-# Single shared client = persistent connections + pooling + optional HTTP/2
 _http_client = httpx.Client(http2=True, timeout=5.0)
 
 
@@ -45,18 +44,15 @@ def request(endpoint: str, method: str, headers=None, data=None):
             json=data if data else None,
         )
 
-        # Preserve existing behavior: only 200 is considered success
         if resp.status_code != 200:
             raise PolyApiException(resp)
 
         try:
             return resp.json()
         except ValueError:
-            # httpx raises ValueError on JSON decode failure
             return resp.text
 
     except httpx.RequestError:
-        # Network / transport-level errors
         raise PolyApiException(error_msg="Request exception!")
 
 
