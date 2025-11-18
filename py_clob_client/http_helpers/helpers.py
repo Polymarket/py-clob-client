@@ -16,7 +16,7 @@ POST = "POST"
 DELETE = "DELETE"
 PUT = "PUT"
 
-_http_client = httpx.Client(http2=True, timeout=5.0)
+_http_client = httpx.Client(http2=True)
 
 
 def overloadHeaders(method: str, headers: dict) -> dict:
