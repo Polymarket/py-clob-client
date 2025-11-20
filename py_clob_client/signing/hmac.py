@@ -14,7 +14,7 @@ def build_hmac_signature(
     if body:
         # NOTE: Necessary to replace single quotes with double quotes
         # to generate the same hmac message as go and typescript
-        message += str(body).replace("'", '"')
+        message += json.dumps(body, separators=(",", ":"))
 
     h = hmac.new(base64_secret, bytes(message, "utf-8"), hashlib.sha256)
 
