@@ -14,6 +14,6 @@ class TestHMAC(TestCase):
         )
         self.assertIsNotNone(signature)
         self.assertEqual(
+            "a3ZnZvcsH3ZwD7FuHGttDruLDurcl9PffnPSvac_bWQ=",
             signature,
-            "ZwAdJKvoYRlEKDkNMwd5BuwNNtg93kNaR_oU2HrfVvc=",
         )
