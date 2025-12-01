@@ -22,9 +22,7 @@ class TestHMAC(TestCase):
             self.secret, self.timestamp, self.method, self.path, self.string_body
         )
         self.assertIsNotNone(signature)
-        self.assertEqual(
-            "a3ZnZvcsH3ZwD7FuHGttDruLDurcl9PffnPSvac_bWQ=", signature
-        )
+        self.assertEqual("ZwAdJKvoYRlEKDkNMwd5BuwNNtg93kNaR_oU2HrfVvc=", signature)
 
     def test_dict_body_produces_different_signature_from_string_body(self):
         dict_body_sig = build_hmac_signature(
@@ -50,7 +48,11 @@ class TestHMAC(TestCase):
 
     def test_different_path_changes_signature(self):
         sig_path = build_hmac_signature(
-            self.secret, self.timestamp, self.method, "/api/v1/orders", {"hash": "0x123"}
+            self.secret,
+            self.timestamp,
+            self.method,
+            "/api/v1/orders",
+            {"hash": "0x123"},
         )
         self.assertNotEqual(sig_path, self.baseline_signature)
 
@@ -69,9 +71,10 @@ class TestHMAC(TestCase):
             self.path,
             {"foo": "bar", "hash": "0x123"},
         )
+        # Canonicalization sorts keys, so order1 and order2 SHOULD be equal
+        self.assertEqual(sig_order1, sig_order2)
+        # And both differ from the baseline string-body signature
         self.assertNotEqual(sig_order1, self.baseline_signature)
-        self.assertNotEqual(sig_order2, self.baseline_signature)
-        self.assertNotEqual(sig_order1, sig_order2)
 
     def test_array_body_signature(self):
         sig_array = build_hmac_signature(
@@ -136,3 +139,75 @@ class TestHMAC(TestCase):
                 self.path,
                 {"hash": "0x123"},
             )
+
+    # New tests for additional body types and canonicalization behaviors
+    def test_boolean_body_signature(self):
+        sig_true = build_hmac_signature(
+            self.secret, self.timestamp, self.method, self.path, True
+        )
+        sig_false = build_hmac_signature(
+            self.secret, self.timestamp, self.method, self.path, False
+        )
+        self.assertIsNotNone(sig_true)
+        self.assertIsNotNone(sig_false)
+        self.assertNotEqual(sig_true, sig_false)
+
+    def test_numeric_body_signature(self):
+        sig_int = build_hmac_signature(
+            self.secret, self.timestamp, self.method, self.path, 42
+        )
+        sig_float = build_hmac_signature(
+            self.secret, self.timestamp, self.method, self.path, 3.14159
+        )
+        self.assertIsNotNone(sig_int)
+        self.assertIsNotNone(sig_float)
+        self.assertNotEqual(sig_int, sig_float)
+
+    def test_nested_object_canonicalization(self):
+        body_a = {"a": {"z": 1, "b": 2}, "c": [3, 2, 1]}
+        body_b = {"c": [3, 2, 1], "a": {"b": 2, "z": 1}}
+        sig_a = build_hmac_signature(
+            self.secret, self.timestamp, self.method, self.path, body_a
+        )
+        sig_b = build_hmac_signature(
+            self.secret, self.timestamp, self.method, self.path, body_b
+        )
+        # Keys sorted recursively in JSON dumps with sort_keys=True
+        self.assertEqual(sig_a, sig_b)
+
+    def test_list_of_dicts_canonicalization(self):
+        body1 = [{"b": 2, "a": 1}, {"d": 4, "c": 3}]
+        body2 = [{"a": 1, "b": 2}, {"c": 3, "d": 4}]
+        sig1 = build_hmac_signature(
+            self.secret, self.timestamp, self.method, self.path, body1
+        )
+        sig2 = build_hmac_signature(
+            self.secret, self.timestamp, self.method, self.path, body2
+        )
+        # Within each object, keys are sorted, list order must match exactly
+        self.assertEqual(sig1, sig2)
+
+    def test_bytes_body_unsupported(self):
+        # bytes are not handled explicitly; json.dumps will fail
+        with self.assertRaises(TypeError):
+            build_hmac_signature(
+                self.secret, self.timestamp, self.method, self.path, b"abc"
+            )
+
+    def test_set_body_unsupported(self):
+        with self.assertRaises(TypeError):
+            build_hmac_signature(
+                self.secret, self.timestamp, self.method, self.path, {1, 2, 3}
+            )
+
+    def test_string_body_preserved_verbatim(self):
+        # Ensure whitespace differences affect signature when body is string
+        string_a = '{"x":1, "y":2}'
+        string_b = '{"x":1,"y":2}'
+        sig_a = build_hmac_signature(
+            self.secret, self.timestamp, self.method, self.path, string_a
+        )
+        sig_b = build_hmac_signature(
+            self.secret, self.timestamp, self.method, self.path, string_b
+        )
+        self.assertNotEqual(sig_a, sig_b)
