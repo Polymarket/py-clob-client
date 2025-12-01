@@ -2,7 +2,6 @@ import hmac
 import hashlib
 import base64
 import json
-import os
 
 
 def build_hmac_signature(
@@ -14,10 +13,7 @@ def build_hmac_signature(
     Body handling:
     - None / empty string: omitted.
     - String: appended verbatim.
-    - Other JSON types: serialized.
-
-    Default serialization is compact (no spaces) to match legacy / production behavior.
-    Set environment variable POLY_SIGNATURE_SPACED=1 to use default json spacing if needed for debugging.
+    - Other JSON types: serialized using compact JSON (no spaces) for deterministic, legacy parity.
     """
     base64_secret = base64.urlsafe_b64decode(secret)
     message = str(timestamp) + str(method).upper() + str(requestPath)
@@ -26,11 +22,7 @@ def build_hmac_signature(
         if isinstance(body, str):
             message += body
         elif isinstance(body, (dict, list, int, float, bool)):
-            spaced = os.getenv("POLY_SIGNATURE_SPACED") == "1"
-            if spaced:
-                message += json.dumps(body, ensure_ascii=True, allow_nan=False)
-            else:
-                message += json.dumps(body, separators=(",", ":"), ensure_ascii=False, allow_nan=False)
+            message += json.dumps(body, separators=(",", ":"), ensure_ascii=False, allow_nan=False)
         else:
             raise TypeError("Unsupported body type for HMAC signing")
 
