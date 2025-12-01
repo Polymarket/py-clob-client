@@ -22,10 +22,10 @@ def build_hmac_signature(
     if body is not None and body != "":
         if isinstance(body, str):
             # Preserve legacy behavior: use provided JSON string as-is
-            message += body
+            message += str(body).replace("'", '"')
         else:
             # Canonicalize non-string bodies for cross-language parity
-            message += json.dumps(body, separators=(",", ":"), sort_keys=True)
+            message += json.dumps(body, separators=(",", ":"))
 
     h = hmac.new(base64_secret, bytes(message, "utf-8"), hashlib.sha256)
 

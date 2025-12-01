@@ -71,8 +71,8 @@ class TestHMAC(TestCase):
             self.path,
             {"foo": "bar", "hash": "0x123"},
         )
-        # Canonicalization sorts keys, so order1 and order2 SHOULD be equal
-        self.assertEqual(sig_order1, sig_order2)
+        # Without key sorting, different insertion orders yield different signatures
+        self.assertNotEqual(sig_order1, sig_order2)
         # And both differ from the baseline string-body signature
         self.assertNotEqual(sig_order1, self.baseline_signature)
 
@@ -140,7 +140,6 @@ class TestHMAC(TestCase):
                 {"hash": "0x123"},
             )
 
-    # New tests for additional body types and canonicalization behaviors
     def test_boolean_body_signature(self):
         sig_true = build_hmac_signature(
             self.secret, self.timestamp, self.method, self.path, True
@@ -163,7 +162,7 @@ class TestHMAC(TestCase):
         self.assertIsNotNone(sig_float)
         self.assertNotEqual(sig_int, sig_float)
 
-    def test_nested_object_canonicalization(self):
+    def test_nested_object_no_sorting_means_signatures_can_differ(self):
         body_a = {"a": {"z": 1, "b": 2}, "c": [3, 2, 1]}
         body_b = {"c": [3, 2, 1], "a": {"b": 2, "z": 1}}
         sig_a = build_hmac_signature(
@@ -172,10 +171,9 @@ class TestHMAC(TestCase):
         sig_b = build_hmac_signature(
             self.secret, self.timestamp, self.method, self.path, body_b
         )
-        # Keys sorted recursively in JSON dumps with sort_keys=True
-        self.assertEqual(sig_a, sig_b)
+        self.assertNotEqual(sig_a, sig_b)
 
-    def test_list_of_dicts_canonicalization(self):
+    def test_list_of_dicts_key_order_affects_signature(self):
         body1 = [{"b": 2, "a": 1}, {"d": 4, "c": 3}]
         body2 = [{"a": 1, "b": 2}, {"c": 3, "d": 4}]
         sig1 = build_hmac_signature(
@@ -184,11 +182,9 @@ class TestHMAC(TestCase):
         sig2 = build_hmac_signature(
             self.secret, self.timestamp, self.method, self.path, body2
         )
-        # Within each object, keys are sorted, list order must match exactly
-        self.assertEqual(sig1, sig2)
+        self.assertNotEqual(sig1, sig2)
 
     def test_bytes_body_unsupported(self):
-        # bytes are not handled explicitly; json.dumps will fail
         with self.assertRaises(TypeError):
             build_hmac_signature(
                 self.secret, self.timestamp, self.method, self.path, b"abc"
