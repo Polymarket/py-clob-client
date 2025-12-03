@@ -50,7 +50,7 @@ def request(endpoint: str, method: str, headers=None, data=None):
                 method=method,
                 url=endpoint,
                 headers=headers,
-                json=data if data is not None else None,
+                json=data,
             )
 
         if resp.status_code != 200:

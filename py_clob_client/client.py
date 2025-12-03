@@ -756,7 +756,18 @@ class ClobClient:
             return enrich_l2_headers_with_builder_headers(headers, builder_headers)
         return None
 
-    def _get_builder_headers(self, method: str, path: str, body: str = None):
+    def _get_builder_headers(self, method: str, path: str, body: Optional[str] = None):
+        """
+        Generates builder headers for the given method, path, and body.
+
+        Args:
+            method (str): HTTP method.
+            path (str): Request path.
+            body (Optional[str]): Pre-serialized JSON string or None.
+
+        Returns:
+            dict or None: Builder headers as a dictionary, or None if not available.
+        """
         headers = self.builder_config.generate_builder_headers(method, path, body)
         if headers:
             return headers.to_dict()
