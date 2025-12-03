@@ -730,7 +730,6 @@ class ClobClient:
         Requires Level 2 authentication
         """
         self.assert_level_2_auth()
-        # No request body; IDs are sent as query params
         request_args = RequestArgs(method="DELETE", request_path=DROP_NOTIFICATIONS)
         headers = create_level_2_headers(self.signer, self.creds, request_args)
         url = drop_notifications_query_params(
