@@ -22,9 +22,7 @@ class TestHMAC(TestCase):
         )
         self.assertIsNotNone(signature)
         # Expected signature for current implementation (no method mutation, verbatim string body)
-        self.assertEqual(
-            "ZwAdJKvoYRlEKDkNMwd5BuwNNtg93kNaR_oU2HrfVvc=", signature
-        )
+        self.assertEqual("ZwAdJKvoYRlEKDkNMwd5BuwNNtg93kNaR_oU2HrfVvc=", signature)
 
     def test_dict_body_same_as_equivalent_string_body(self):
         # Current hmac implementation converts dict to python str() then swaps single to double quotes.
@@ -52,7 +50,11 @@ class TestHMAC(TestCase):
 
     def test_different_path_changes_signature(self):
         sig_path = build_hmac_signature(
-            self.secret, self.timestamp, self.method, "/api/v1/orders", {"hash": "0x123"}
+            self.secret,
+            self.timestamp,
+            self.method,
+            "/api/v1/orders",
+            {"hash": "0x123"},
         )
         self.assertNotEqual(sig_path, self.baseline_signature)
 
@@ -181,7 +183,6 @@ class TestHMAC(TestCase):
             self.secret, self.timestamp, self.method, self.path, body2
         )
         self.assertNotEqual(sig1, sig2)
-
 
     def test_string_body_preserved_verbatim(self):
         string_a = '{"x":1, "y":2}'

@@ -39,7 +39,11 @@ def create_level_2_headers(signer: Signer, creds: ApiCreds, request_args: Reques
     timestamp = int(datetime.now().timestamp())
 
     # Prefer the pre-serialized body string for deterministic signing if available
-    body_for_sig = request_args.serialized_body if request_args.serialized_body is not None else request_args.body
+    body_for_sig = (
+        request_args.serialized_body
+        if request_args.serialized_body is not None
+        else request_args.body
+    )
 
     hmac_sig = build_hmac_signature(
         creds.api_secret,
