@@ -757,8 +757,6 @@ class ClobClient:
         return None
 
     def _get_builder_headers(self, method: str, path: str, body: str = None):
-        if body is not None:
-            body = str(body)
         headers = self.builder_config.generate_builder_headers(method, path, body)
         if headers:
             return headers.to_dict()
