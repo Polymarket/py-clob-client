@@ -1,4 +1,5 @@
 import logging
+import json
 from typing import Optional
 
 from py_builder_signing_sdk.config import BuilderConfig
@@ -491,12 +492,13 @@ class ClobClient:
         body = [
             order_to_json(arg.order, self.creds.api_key, arg.orderType) for arg in args
         ]
-        request_args = RequestArgs(method="POST", request_path=POST_ORDERS, body=body)
-        headers = create_level_2_headers(
-            self.signer,
-            self.creds,
-            request_args,
+        request_args = RequestArgs(
+            method="POST",
+            request_path=POST_ORDERS,
+            body=body,
+            serialized_body=json.dumps(body, separators=(",", ":"), ensure_ascii=False),
         )
+        headers = create_level_2_headers(self.signer, self.creds, request_args)
         # Builder flow
         if self.can_builder_auth():
             builder_headers = self._generate_builder_headers(request_args, headers)
@@ -504,9 +506,14 @@ class ClobClient:
                 return post(
                     "{}{}".format(self.host, POST_ORDERS),
                     headers=builder_headers,
-                    data=body,
+                    data=request_args.serialized_body,
                 )
-        return post("{}{}".format(self.host, POST_ORDERS), headers=headers, data=body)
+        # send exact serialized bytes
+        return post(
+            "{}{}".format(self.host, POST_ORDERS),
+            headers=headers,
+            data=request_args.serialized_body,
+        )
 
     def post_order(self, order, orderType: OrderType = OrderType.GTC):
         """
@@ -514,13 +521,13 @@ class ClobClient:
         """
         self.assert_level_2_auth()
         body = order_to_json(order, self.creds.api_key, orderType)
-        request_args = RequestArgs(method="POST", request_path=POST_ORDER, body=body)
-        headers = create_level_2_headers(
-            self.signer,
-            self.creds,
-            request_args,
+        request_args = RequestArgs(
+            method="POST",
+            request_path=POST_ORDER,
+            body=body,
+            serialized_body=json.dumps(body, separators=(",", ":"), ensure_ascii=False),
         )
-
+        headers = create_level_2_headers(self.signer, self.creds, request_args)
         # Builder flow
         if self.can_builder_auth():
             builder_headers = self._generate_builder_headers(request_args, headers)
@@ -528,9 +535,13 @@ class ClobClient:
                 return post(
                     "{}{}".format(self.host, POST_ORDER),
                     headers=builder_headers,
-                    data=body,
+                    data=request_args.serialized_body,
                 )
-        return post("{}{}".format(self.host, POST_ORDER), headers=headers, data=body)
+        return post(
+            "{}{}".format(self.host, POST_ORDER),
+            headers=headers,
+            data=request_args.serialized_body,
+        )
 
     def create_and_post_order(
         self, order_args: OrderArgs, options: PartialCreateOrderOptions = None
@@ -549,9 +560,18 @@ class ClobClient:
         self.assert_level_2_auth()
         body = {"orderID": order_id}
 
-        request_args = RequestArgs(method="DELETE", request_path=CANCEL, body=body)
+        request_args = RequestArgs(
+            method="DELETE",
+            request_path=CANCEL,
+            body=body,
+            serialized_body=json.dumps(body, separators=(",", ":"), ensure_ascii=False),
+        )
         headers = create_level_2_headers(self.signer, self.creds, request_args)
-        return delete("{}{}".format(self.host, CANCEL), headers=headers, data=body)
+        return delete(
+            "{}{}".format(self.host, CANCEL),
+            headers=headers,
+            data=request_args.serialized_body,
+        )
 
     def cancel_orders(self, order_ids):
         """
@@ -560,13 +580,16 @@ class ClobClient:
         """
         self.assert_level_2_auth()
         body = order_ids
-
+        serialized = json.dumps(body, separators=(",", ":"), ensure_ascii=False)
         request_args = RequestArgs(
-            method="DELETE", request_path=CANCEL_ORDERS, body=body
+            method="DELETE",
+            request_path=CANCEL_ORDERS,
+            body=body,
+            serialized_body=serialized,
         )
         headers = create_level_2_headers(self.signer, self.creds, request_args)
         return delete(
-            "{}{}".format(self.host, CANCEL_ORDERS), headers=headers, data=body
+            "{}{}".format(self.host, CANCEL_ORDERS), headers=headers, data=serialized
         )
 
     def cancel_all(self):
@@ -586,13 +609,18 @@ class ClobClient:
         """
         self.assert_level_2_auth()
         body = {"market": market, "asset_id": asset_id}
-
+        serialized = json.dumps(body, separators=(",", ":"), ensure_ascii=False)
         request_args = RequestArgs(
-            method="DELETE", request_path=CANCEL_MARKET_ORDERS, body=body
+            method="DELETE",
+            request_path=CANCEL_MARKET_ORDERS,
+            body=body,
+            serialized_body=serialized,
         )
         headers = create_level_2_headers(self.signer, self.creds, request_args)
         return delete(
-            "{}{}".format(self.host, CANCEL_MARKET_ORDERS), headers=headers, data=body
+            "{}{}".format(self.host, CANCEL_MARKET_ORDERS),
+            headers=headers,
+            data=serialized,
         )
 
     def get_orders(self, params: OpenOrderParams = None, next_cursor="MA=="):
@@ -721,16 +749,25 @@ class ClobClient:
             builder_headers = self._get_builder_headers(
                 request_args.method,
                 request_args.request_path,
-                request_args.body,
+                request_args.serialized_body,
             )
             if builder_headers is None:
                 return None
             return enrich_l2_headers_with_builder_headers(headers, builder_headers)
         return None
 
-    def _get_builder_headers(self, method: str, path: str, body: str = None):
-        if body is not None:
-            body = str(body)
+    def _get_builder_headers(self, method: str, path: str, body: Optional[str] = None):
+        """
+        Generates builder headers for the given method, path, and body.
+
+        Args:
+            method (str): HTTP method.
+            path (str): Request path.
+            body (Optional[str]): Pre-serialized JSON string or None.
+
+        Returns:
+            dict or None: Builder headers as a dictionary, or None if not available.
+        """
         headers = self.builder_config.generate_builder_headers(method, path, body)
         if headers:
             return headers.to_dict()
@@ -812,12 +849,18 @@ class ClobClient:
         """
         self.assert_level_2_auth()
         body = params.orderIds
+        serialized = json.dumps(body, separators=(",", ":"), ensure_ascii=False)
         request_args = RequestArgs(
-            method="POST", request_path=ARE_ORDERS_SCORING, body=body
+            method="POST",
+            request_path=ARE_ORDERS_SCORING,
+            body=body,
+            serialized_body=serialized,
         )
         headers = create_level_2_headers(self.signer, self.creds, request_args)
         return post(
-            "{}{}".format(self.host, ARE_ORDERS_SCORING), headers=headers, data=body
+            "{}{}".format(self.host, ARE_ORDERS_SCORING),
+            headers=headers,
+            data=serialized,
         )
 
     def get_sampling_markets(self, next_cursor="MA=="):
