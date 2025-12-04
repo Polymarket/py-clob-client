@@ -68,6 +68,10 @@ def delete(endpoint, headers=None, data=None):
     return request(endpoint, DELETE, headers, data)
 
 
+def put(endpoint, headers=None, data=None):
+    return request(endpoint, PUT, headers, data)
+
+
 def build_query_params(url: str, param: str, val: str) -> str:
     url_with_params = url
     last = url_with_params[-1]

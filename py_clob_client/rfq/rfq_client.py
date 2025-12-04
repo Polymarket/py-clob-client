@@ -1,0 +1,568 @@
+"""
+RFQ (Request for Quote) client for the Polymarket CLOB API.
+
+This module provides the RfqClient class which handles all RFQ operations
+including creating requests, quotes, and executing trades.
+"""
+
+import json
+from typing import Optional, Any, TYPE_CHECKING
+
+from ..clob_types import RequestArgs, OrderArgs, PartialCreateOrderOptions
+from ..headers.headers import create_level_2_headers
+from ..http_helpers.helpers import get, post, put, delete
+from ..order_builder.builder import ROUNDING_CONFIG
+from ..order_builder.helpers import round_normal, round_down
+from ..order_builder.constants import BUY, SELL
+from ..endpoints import (
+    CREATE_RFQ_REQUEST,
+    CANCEL_RFQ_REQUEST,
+    GET_RFQ_REQUESTS,
+    CREATE_RFQ_QUOTE,
+    IMPROVE_RFQ_QUOTE,
+    CANCEL_RFQ_QUOTE,
+    GET_RFQ_QUOTES,
+    GET_RFQ_BEST_QUOTE,
+    RFQ_REQUESTS_ACCEPT,
+    RFQ_QUOTE_APPROVE,
+    RFQ_CONFIG,
+)
+
+from .rfq_types import (
+    RfqUserOrder,
+    CreateRfqRequestParams,
+    CreateRfqQuoteParams,
+    ImproveRfqQuoteParams,
+    CancelRfqRequestParams,
+    CancelRfqQuoteParams,
+    AcceptQuoteParams,
+    ApproveOrderParams,
+    GetRfqRequestsParams,
+    GetRfqQuotesParams,
+    GetRfqBestQuoteParams,
+)
+from .rfq_helpers import (
+    parse_units,
+    parse_rfq_requests_params,
+    parse_rfq_quotes_params,
+    COLLATERAL_TOKEN_DECIMALS,
+)
+
+if TYPE_CHECKING:
+    from ..client import ClobClient
+
+
+class RfqClient:
+    """
+    RFQ client for creating and managing RFQ requests and quotes.
+
+    This client is typically accessed via the parent ClobClient's `rfq` attribute:
+
+        client = ClobClient(host, chain_id, key, creds)
+        request_params = client.rfq.create_rfq_request(user_order)
+        response = client.rfq.post_rfq_request(request_params)
+    """
+
+    def __init__(self, parent: "ClobClient"):
+        """
+        Initialize the RFQ client.
+
+        Args:
+            parent: The parent ClobClient instance providing auth and config.
+        """
+        self._parent = parent
+
+    def _ensure_l2_auth(self) -> None:
+        """
+        Verify that L2 authentication is available.
+
+        Raises:
+            PolyException: If signer or creds are not configured.
+        """
+        self._parent.assert_level_2_auth()
+
+    def _get_l2_headers(self, method: str, endpoint: str, body: Any = None) -> dict:
+        """
+        Create L2 authentication headers for a request.
+
+        Args:
+            method: HTTP method (GET, POST, PUT, DELETE)
+            endpoint: API endpoint path
+            body: Optional request body
+
+        Returns:
+            Dictionary of authentication headers.
+        """
+        request_args = RequestArgs(method=method, request_path=endpoint, body=body)
+        return create_level_2_headers(
+            self._parent.signer,
+            self._parent.creds,
+            request_args,
+        )
+
+    def _build_url(self, endpoint: str) -> str:
+        """Build full URL from endpoint."""
+        return f"{self._parent.host}{endpoint}"
+
+    # =========================================================================
+    # Request-side methods
+    # =========================================================================
+
+    def create_rfq_request(
+        self,
+        user_order: RfqUserOrder,
+        options: Optional[PartialCreateOrderOptions] = None,
+    ) -> CreateRfqRequestParams:
+        """
+        Create RFQ request parameters from a user order.
+
+        This method:
+        1. Resolves the tick size for the token
+        2. Rounds price and size according to tick size rules
+        3. Calculates amount_in and amount_out based on side
+        4. Returns parameters ready to post to the server
+
+        Args:
+            user_order: Simplified order with token_id, price, side, size
+            options: Optional tick size override
+
+        Returns:
+            CreateRfqRequestParams ready for posting via post_rfq_request()
+
+        Example:
+            >>> params = client.rfq.create_rfq_request(
+            ...     RfqUserOrder(
+            ...         token_id="123...",
+            ...         price=0.5,
+            ...         side="BUY",
+            ...         size=40,
+            ...     )
+            ... )
+            >>> response = client.rfq.post_rfq_request(params)
+        """
+        token_id = user_order.token_id
+        price = user_order.price
+        side = user_order.side
+        size = user_order.size
+
+        # Resolve tick size (from options or fetch from server)
+        tick_size = self._parent._ClobClient__resolve_tick_size(
+            token_id,
+            options.tick_size if options else None,
+        )
+
+        # Get rounding configuration
+        round_config = ROUNDING_CONFIG[tick_size]
+
+        # Round price and size
+        rounded_price = round_normal(price, round_config.price)
+        rounded_size = round_down(size, round_config.size)
+
+        # Format with correct decimal places
+        price_decimals = int(round_config.price)
+        size_decimals = int(round_config.size)
+        amount_decimals = int(round_config.amount)
+
+        rounded_price_str = f"{rounded_price:.{price_decimals}f}"
+        rounded_size_str = f"{rounded_size:.{size_decimals}f}"
+
+        # Parse back to numbers for calculation
+        size_num = float(rounded_size_str)
+        price_num = float(rounded_price_str)
+
+        # Get signature type from parent's order builder
+        user_type = self._parent.builder.sig_type
+
+        # Calculate amounts based on side
+        if side == BUY:
+            # Buying tokens: pay USDC, receive tokens
+            # asset_in = tokens (what taker receives)
+            # asset_out = USDC (what taker pays)
+            amount_in = parse_units(rounded_size_str, COLLATERAL_TOKEN_DECIMALS)
+
+            usdc_amount = size_num * price_num
+            usdc_amount_str = f"{usdc_amount:.{amount_decimals}f}"
+            amount_out = parse_units(usdc_amount_str, COLLATERAL_TOKEN_DECIMALS)
+
+            asset_in = token_id
+            asset_out = "0"  # USDC
+        else:
+            # Selling tokens: pay tokens, receive USDC
+            # asset_in = USDC (what taker receives)
+            # asset_out = tokens (what taker pays)
+            usdc_amount = size_num * price_num
+            usdc_amount_str = f"{usdc_amount:.{amount_decimals}f}"
+            amount_in = parse_units(usdc_amount_str, COLLATERAL_TOKEN_DECIMALS)
+
+            amount_out = parse_units(rounded_size_str, COLLATERAL_TOKEN_DECIMALS)
+
+            asset_in = "0"  # USDC
+            asset_out = token_id
+
+        return CreateRfqRequestParams(
+            asset_in=asset_in,
+            asset_out=asset_out,
+            amount_in=str(amount_in),
+            amount_out=str(amount_out),
+            user_type=user_type,
+        )
+
+    def post_rfq_request(self, payload: CreateRfqRequestParams) -> dict:
+        """
+        Post an RFQ request to the server.
+
+        Args:
+            payload: Request parameters from create_rfq_request()
+
+        Returns:
+            Response dict with request_id on success.
+        """
+        self._ensure_l2_auth()
+
+        body = {
+            "assetIn": payload.asset_in,
+            "assetOut": payload.asset_out,
+            "amountIn": payload.amount_in,
+            "amountOut": payload.amount_out,
+            "userType": payload.user_type,
+        }
+
+        headers = self._get_l2_headers("POST", CREATE_RFQ_REQUEST, body)
+        return post(self._build_url(CREATE_RFQ_REQUEST), headers=headers, data=body)
+
+    def cancel_rfq_request(self, params: CancelRfqRequestParams) -> str:
+        """
+        Cancel an RFQ request.
+
+        Args:
+            params: Contains request_id to cancel.
+
+        Returns:
+            "OK" on success.
+        """
+        self._ensure_l2_auth()
+
+        body = {"requestId": params.request_id}
+
+        headers = self._get_l2_headers("DELETE", CANCEL_RFQ_REQUEST, body)
+        return delete(self._build_url(CANCEL_RFQ_REQUEST), headers=headers, data=body)
+
+    def get_rfq_requests(
+        self, params: Optional[GetRfqRequestsParams] = None
+    ) -> dict:
+        """
+        Get RFQ requests with optional filtering.
+
+        Args:
+            params: Optional filter parameters.
+
+        Returns:
+            Paginated response with RFQ requests.
+        """
+        self._ensure_l2_auth()
+
+        headers = self._get_l2_headers("GET", GET_RFQ_REQUESTS)
+        query_params = parse_rfq_requests_params(params)
+
+        # Build URL with query params
+        url = self._build_url(GET_RFQ_REQUESTS)
+        if query_params:
+            query_string = "&".join(f"{k}={v}" for k, v in query_params.items())
+            url = f"{url}?{query_string}"
+
+        return get(url, headers=headers)
+
+    # =========================================================================
+    # Quote-side methods
+    # =========================================================================
+
+    def create_rfq_quote(self, params: CreateRfqQuoteParams) -> dict:
+        """
+        Create a quote for an RFQ request.
+
+        The user_type is automatically filled from the client's configuration.
+
+        Args:
+            params: Quote parameters (request_id, assets, amounts).
+
+        Returns:
+            Response dict with quote_id on success.
+        """
+        self._ensure_l2_auth()
+
+        # Get signature type from parent's order builder
+        user_type = self._parent.builder.sig_type
+
+        body = {
+            "requestId": params.request_id,
+            "assetIn": params.asset_in,
+            "assetOut": params.asset_out,
+            "amountIn": params.amount_in,
+            "amountOut": params.amount_out,
+            "userType": user_type,
+        }
+
+        headers = self._get_l2_headers("POST", CREATE_RFQ_QUOTE, body)
+        return post(self._build_url(CREATE_RFQ_QUOTE), headers=headers, data=body)
+
+    def get_rfq_quotes(self, params: Optional[GetRfqQuotesParams] = None) -> dict:
+        """
+        Get RFQ quotes with optional filtering.
+
+        Args:
+            params: Optional filter parameters.
+
+        Returns:
+            Paginated response with RFQ quotes.
+        """
+        self._ensure_l2_auth()
+
+        headers = self._get_l2_headers("GET", GET_RFQ_QUOTES)
+        query_params = parse_rfq_quotes_params(params)
+
+        # Build URL with query params
+        url = self._build_url(GET_RFQ_QUOTES)
+        if query_params:
+            query_string = "&".join(f"{k}={v}" for k, v in query_params.items())
+            url = f"{url}?{query_string}"
+
+        return get(url, headers=headers)
+
+    def get_rfq_best_quote(
+        self, params: Optional[GetRfqBestQuoteParams] = None
+    ) -> dict:
+        """
+        Get the best quote for an RFQ request.
+
+        Args:
+            params: Contains request_id.
+
+        Returns:
+            Single quote object representing the best quote.
+        """
+        self._ensure_l2_auth()
+
+        headers = self._get_l2_headers("GET", GET_RFQ_BEST_QUOTE)
+
+        url = self._build_url(GET_RFQ_BEST_QUOTE)
+        if params and params.request_id:
+            url = f"{url}?requestId={params.request_id}"
+
+        return get(url, headers=headers)
+
+    def improve_rfq_quote(self, params: ImproveRfqQuoteParams) -> str:
+        """
+        Improve an existing quote with a better amount_out.
+
+        Args:
+            params: Contains quote_id and new amount_out.
+
+        Returns:
+            "OK" on success.
+        """
+        self._ensure_l2_auth()
+
+        body = {
+            "quoteId": params.quote_id,
+            "amountOut": params.amount_out,
+        }
+
+        headers = self._get_l2_headers("PUT", IMPROVE_RFQ_QUOTE, body)
+        return put(self._build_url(IMPROVE_RFQ_QUOTE), headers=headers, data=body)
+
+    def cancel_rfq_quote(self, params: CancelRfqQuoteParams) -> str:
+        """
+        Cancel an RFQ quote.
+
+        Args:
+            params: Contains quote_id to cancel.
+
+        Returns:
+            "OK" on success.
+        """
+        self._ensure_l2_auth()
+
+        body = {"quoteId": params.quote_id}
+
+        headers = self._get_l2_headers("DELETE", CANCEL_RFQ_QUOTE, body)
+        return delete(self._build_url(CANCEL_RFQ_QUOTE), headers=headers, data=body)
+
+    # =========================================================================
+    # Trade execution methods
+    # =========================================================================
+
+    def accept_rfq_quote(self, params: AcceptQuoteParams) -> str:
+        """
+        Accept an RFQ quote (taker side).
+
+        This method:
+        1. Fetches the RFQ request details
+        2. Creates a signed order based on request parameters
+        3. Submits the acceptance with the order
+
+        Args:
+            params: Contains request_id, quote_id, and expiration.
+
+        Returns:
+            "OK" on success.
+        """
+        self._ensure_l2_auth()
+
+        # Step 1: Fetch the RFQ request
+        rfq_requests = self.get_rfq_requests(
+            GetRfqRequestsParams(request_ids=[params.request_id])
+        )
+
+        if not rfq_requests.get("data") or len(rfq_requests["data"]) == 0:
+            raise Exception("RFQ request not found")
+
+        rfq_request = rfq_requests["data"][0]
+
+        # Step 2: Create an order based on request details
+        side = rfq_request.get("side", BUY)
+
+        # Determine size based on side
+        if side == BUY:
+            size = rfq_request.get("sizeIn") or rfq_request.get("size_in")
+        else:
+            size = rfq_request.get("sizeOut") or rfq_request.get("size_out")
+
+        token_id = rfq_request.get("token")
+        price = rfq_request.get("price")
+
+        order_args = OrderArgs(
+            token_id=token_id,
+            price=float(price),
+            size=float(size) / (10 ** COLLATERAL_TOKEN_DECIMALS),  # Convert from smallest units
+            side=side,
+            expiration=params.expiration,
+        )
+
+        order = self._parent.create_order(order_args)
+
+        if not order:
+            raise Exception("Error creating order")
+
+        # Step 3: Build accept payload
+        accept_payload = {
+            "requestId": params.request_id,
+            "quoteId": params.quote_id,
+            "owner": self._parent.creds.api_key,
+            # Order fields
+            "salt": int(order.salt),
+            "maker": order.maker,
+            "signer": order.signer,
+            "taker": order.taker,
+            "tokenId": order.tokenId,
+            "makerAmount": order.makerAmount,
+            "takerAmount": order.takerAmount,
+            "expiration": int(order.expiration),
+            "nonce": int(order.nonce),
+            "feeRateBps": int(order.feeRateBps),
+            "side": side,
+            "signatureType": int(order.signatureType),
+            "signature": order.signature,
+        }
+
+        headers = self._get_l2_headers("POST", RFQ_REQUESTS_ACCEPT, accept_payload)
+        return post(
+            self._build_url(RFQ_REQUESTS_ACCEPT),
+            headers=headers,
+            data=accept_payload,
+        )
+
+    def approve_rfq_order(self, params: ApproveOrderParams) -> str:
+        """
+        Approve an RFQ order (maker side).
+
+        This method:
+        1. Fetches the RFQ quote details
+        2. Creates a signed order based on quote parameters
+        3. Submits the approval with the order
+
+        Args:
+            params: Contains request_id, quote_id, and expiration.
+
+        Returns:
+            "OK" on success.
+        """
+        self._ensure_l2_auth()
+
+        # Step 1: Fetch the RFQ quote
+        rfq_quotes = self.get_rfq_quotes(
+            GetRfqQuotesParams(quote_ids=[params.quote_id])
+        )
+
+        if not rfq_quotes.get("data") or len(rfq_quotes["data"]) == 0:
+            raise Exception("RFQ quote not found")
+
+        rfq_quote = rfq_quotes["data"][0]
+
+        # Step 2: Create an order based on quote details
+        side = rfq_quote.get("side", BUY)
+
+        # Determine size based on side
+        if side == BUY:
+            size = rfq_quote.get("sizeIn") or rfq_quote.get("size_in")
+        else:
+            size = rfq_quote.get("sizeOut") or rfq_quote.get("size_out")
+
+        token_id = rfq_quote.get("token")
+        price = rfq_quote.get("price")
+
+        order_args = OrderArgs(
+            token_id=token_id,
+            price=float(price),
+            size=float(size) / (10 ** COLLATERAL_TOKEN_DECIMALS),  # Convert from smallest units
+            side=side,
+            expiration=params.expiration,
+        )
+
+        order = self._parent.create_order(order_args)
+
+        if not order:
+            raise Exception("Error creating order")
+
+        # Step 3: Build approve payload
+        approve_payload = {
+            "requestId": params.request_id,
+            "quoteId": params.quote_id,
+            "owner": self._parent.creds.api_key,
+            # Order fields
+            "salt": int(order.salt),
+            "maker": order.maker,
+            "signer": order.signer,
+            "taker": order.taker,
+            "tokenId": order.tokenId,
+            "makerAmount": order.makerAmount,
+            "takerAmount": order.takerAmount,
+            "expiration": int(order.expiration),
+            "nonce": int(order.nonce),
+            "feeRateBps": int(order.feeRateBps),
+            "side": side,
+            "signatureType": int(order.signatureType),
+            "signature": order.signature,
+        }
+
+        headers = self._get_l2_headers("POST", RFQ_QUOTE_APPROVE, approve_payload)
+        return post(
+            self._build_url(RFQ_QUOTE_APPROVE),
+            headers=headers,
+            data=approve_payload,
+        )
+
+    # =========================================================================
+    # Configuration
+    # =========================================================================
+
+    def rfq_config(self) -> dict:
+        """
+        Get RFQ configuration from the server.
+
+        Returns:
+            Configuration object with RFQ system parameters.
+        """
+        self._ensure_l2_auth()
+
+        headers = self._get_l2_headers("GET", RFQ_CONFIG)
+        return get(self._build_url(RFQ_CONFIG), headers=headers)

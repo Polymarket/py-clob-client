@@ -14,116 +14,123 @@ This implementation adds a new `RfqClient` module that integrates with the exist
 
 ---
 
-## Phase 1: Data Types and Constants
+## Phase 1: Data Types and Constants ✅ COMPLETED
 
 ### Checklist
 
-- [ ] Create `py_clob_client/rfq/` directory
-- [ ] Create `py_clob_client/rfq/__init__.py`
-- [ ] Create `py_clob_client/rfq/rfq_types.py` with:
-  - [ ] `RfqUserOrder` dataclass (token_id, price, side, size)
-  - [ ] `CreateRfqRequestParams` dataclass (asset_in, asset_out, amount_in, amount_out, user_type)
-  - [ ] `CreateRfqQuoteParams` dataclass
-  - [ ] `ImproveRfqQuoteParams` dataclass
-  - [ ] `CancelRfqRequestParams` dataclass
-  - [ ] `CancelRfqQuoteParams` dataclass
-  - [ ] `AcceptQuoteParams` dataclass
-  - [ ] `ApproveOrderParams` dataclass
-  - [ ] `GetRfqRequestsParams` dataclass
-  - [ ] `GetRfqQuotesParams` dataclass
-  - [ ] `GetRfqBestQuoteParams` dataclass
-  - [ ] `RfqRequest` response dataclass
-  - [ ] `RfqQuote` response dataclass
-  - [ ] `RfqRequestResponse` dataclass
-  - [ ] `RfqQuoteResponse` dataclass
-  - [ ] `RfqPaginatedResponse` dataclass
-- [ ] Add RFQ endpoints to `py_clob_client/endpoints.py`:
-  - [ ] `CREATE_RFQ_REQUEST = "/rfq/request"`
-  - [ ] `CANCEL_RFQ_REQUEST = "/rfq/request"`
-  - [ ] `GET_RFQ_REQUESTS = "/rfq/data/requests"`
-  - [ ] `CREATE_RFQ_QUOTE = "/rfq/quote"`
-  - [ ] `IMPROVE_RFQ_QUOTE = "/rfq/quote"`
-  - [ ] `CANCEL_RFQ_QUOTE = "/rfq/quote"`
-  - [ ] `GET_RFQ_QUOTES = "/rfq/data/quotes"`
-  - [ ] `GET_RFQ_BEST_QUOTE = "/rfq/data/best-quote"`
-  - [ ] `RFQ_REQUESTS_ACCEPT = "/rfq/request/accept"`
-  - [ ] `RFQ_QUOTE_APPROVE = "/rfq/quote/approve"`
-  - [ ] `RFQ_CONFIG = "/rfq/config"`
+- [x] Create `py_clob_client/rfq/` directory
+- [x] Create `py_clob_client/rfq/__init__.py`
+- [x] Create `py_clob_client/rfq/rfq_types.py` with:
+  - [x] `RfqUserOrder` dataclass (token_id, price, side, size)
+  - [x] `CreateRfqRequestParams` dataclass (asset_in, asset_out, amount_in, amount_out, user_type)
+  - [x] `CreateRfqQuoteParams` dataclass
+  - [x] `ImproveRfqQuoteParams` dataclass
+  - [x] `CancelRfqRequestParams` dataclass
+  - [x] `CancelRfqQuoteParams` dataclass
+  - [x] `AcceptQuoteParams` dataclass
+  - [x] `ApproveOrderParams` dataclass
+  - [x] `GetRfqRequestsParams` dataclass
+  - [x] `GetRfqQuotesParams` dataclass
+  - [x] `GetRfqBestQuoteParams` dataclass
+  - [x] `RfqRequest` response dataclass
+  - [x] `RfqQuote` response dataclass
+  - [x] `RfqRequestResponse` dataclass
+  - [x] `RfqQuoteResponse` dataclass
+  - [x] `RfqPaginatedResponse` dataclass
+- [x] Add RFQ endpoints to `py_clob_client/endpoints.py`:
+  - [x] `CREATE_RFQ_REQUEST = "/rfq/request"`
+  - [x] `CANCEL_RFQ_REQUEST = "/rfq/request"`
+  - [x] `GET_RFQ_REQUESTS = "/rfq/data/requests"`
+  - [x] `CREATE_RFQ_QUOTE = "/rfq/quote"`
+  - [x] `IMPROVE_RFQ_QUOTE = "/rfq/quote"`
+  - [x] `CANCEL_RFQ_QUOTE = "/rfq/quote"`
+  - [x] `GET_RFQ_QUOTES = "/rfq/data/quotes"`
+  - [x] `GET_RFQ_BEST_QUOTE = "/rfq/data/best-quote"`
+  - [x] `RFQ_REQUESTS_ACCEPT = "/rfq/request/accept"`
+  - [x] `RFQ_QUOTE_APPROVE = "/rfq/quote/approve"`
+  - [x] `RFQ_CONFIG = "/rfq/config"`
 
 ---
 
-## Phase 2: RFQ Helpers and Utilities
+## Phase 2: RFQ Helpers and Utilities ✅ COMPLETED
 
 ### Checklist
 
-- [ ] Create `py_clob_client/rfq/rfq_helpers.py` with:
-  - [ ] `parse_rfq_requests_params()` - Convert GetRfqRequestsParams to query dict
-  - [ ] `parse_rfq_quotes_params()` - Convert GetRfqQuotesParams to query dict
-  - [ ] `parse_units()` - Convert decimal string to smallest units (6 decimals)
-  - [ ] `to_camel_case()` - Convert snake_case to camelCase for JSON
-- [ ] Verify existing helpers can be reused:
-  - [ ] `round_normal()` from `order_builder/helpers.py`
-  - [ ] `round_down()` from `order_builder/helpers.py`
-  - [ ] `ROUNDING_CONFIG` from `order_builder/helpers.py`
-  - [ ] `decimal_places()` from `order_builder/helpers.py`
+- [x] Create `py_clob_client/rfq/rfq_helpers.py` with:
+  - [x] `parse_rfq_requests_params()` - Convert GetRfqRequestsParams to query dict
+  - [x] `parse_rfq_quotes_params()` - Convert GetRfqQuotesParams to query dict
+  - [x] `parse_units()` - Convert decimal string to smallest units (6 decimals)
+  - [x] `to_camel_case()` - Convert snake_case to camelCase for JSON
+  - [x] `COLLATERAL_TOKEN_DECIMALS` constant (6)
+  - [x] `CONDITIONAL_TOKEN_DECIMALS` constant (6)
+- [x] Verify existing helpers can be reused:
+  - [x] `round_normal()` from `order_builder/helpers.py`
+  - [x] `round_down()` from `order_builder/helpers.py`
+  - [x] `ROUNDING_CONFIG` from `order_builder/builder.py`
+  - [x] `decimal_places()` from `order_builder/helpers.py`
 
 ---
 
-## Phase 3: HTTP Layer Enhancement
+## Phase 3: HTTP Layer Enhancement ✅ COMPLETED
 
 ### Checklist
 
-- [ ] Add `put()` method to `py_clob_client/http_helpers/helpers.py`:
-  - [ ] Accept endpoint, headers, and data parameters
-  - [ ] Use `_http_client.put()` with JSON body
-  - [ ] Handle response parsing (JSON or text)
-  - [ ] Handle errors with `PolyApiException`
-- [ ] Verify L2 headers work with PUT method in `headers/headers.py`
+- [x] Add `put()` method to `py_clob_client/http_helpers/helpers.py`:
+  - [x] Accept endpoint, headers, and data parameters
+  - [x] Uses existing `request()` function with PUT method
+  - [x] Handle response parsing (JSON or text) - via existing `request()` function
+  - [x] Handle errors with `PolyApiException` - via existing `request()` function
+- [x] Verify L2 headers work with PUT method in `headers/headers.py`
+  - [x] `create_level_2_headers()` accepts any method string via `RequestArgs`
+  - [x] `build_hmac_signature()` handles any HTTP method
 
 ---
 
-## Phase 4: RFQ Client Implementation
+## Phase 4: RFQ Client Implementation ✅ COMPLETED
 
 ### Checklist
 
-- [ ] Create `py_clob_client/rfq/rfq_client.py` with `RfqClient` class
-- [ ] Implement `__init__()` accepting parent ClobClient reference
-- [ ] Implement `_ensure_l2_auth()` helper method
-- [ ] Implement `_get_timestamp()` helper (server time or local)
-- [ ] Implement request-side methods:
-  - [ ] `create_rfq_request(user_order, options)` - Build request params from user order
-  - [ ] `post_rfq_request(payload)` - POST to /rfq/request
-  - [ ] `cancel_rfq_request(params)` - DELETE to /rfq/request
-  - [ ] `get_rfq_requests(params)` - GET /rfq/data/requests
-- [ ] Implement quote-side methods:
-  - [ ] `create_rfq_quote(params)` - POST to /rfq/quote
-  - [ ] `get_rfq_quotes(params)` - GET /rfq/data/quotes
-  - [ ] `get_rfq_best_quote(params)` - GET /rfq/data/best-quote
-  - [ ] `improve_rfq_quote(params)` - PUT to /rfq/quote
-  - [ ] `cancel_rfq_quote(params)` - DELETE to /rfq/quote
-- [ ] Implement trade execution methods:
-  - [ ] `accept_rfq_quote(params)` - POST to /rfq/request/accept (taker side)
-  - [ ] `approve_rfq_order(params)` - POST to /rfq/quote/approve (maker side)
-- [ ] Implement configuration method:
-  - [ ] `rfq_config()` - GET /rfq/config
+- [x] Create `py_clob_client/rfq/rfq_client.py` with `RfqClient` class
+- [x] Implement `__init__()` accepting parent ClobClient reference
+- [x] Implement `_ensure_l2_auth()` helper method
+- [x] Implement `_get_l2_headers()` helper method
+- [x] Implement `_build_url()` helper method
+- [x] Implement request-side methods:
+  - [x] `create_rfq_request(user_order, options)` - Build request params from user order
+  - [x] `post_rfq_request(payload)` - POST to /rfq/request
+  - [x] `cancel_rfq_request(params)` - DELETE to /rfq/request
+  - [x] `get_rfq_requests(params)` - GET /rfq/data/requests
+- [x] Implement quote-side methods:
+  - [x] `create_rfq_quote(params)` - POST to /rfq/quote
+  - [x] `get_rfq_quotes(params)` - GET /rfq/data/quotes
+  - [x] `get_rfq_best_quote(params)` - GET /rfq/data/best-quote
+  - [x] `improve_rfq_quote(params)` - PUT to /rfq/quote
+  - [x] `cancel_rfq_quote(params)` - DELETE to /rfq/quote
+- [x] Implement trade execution methods:
+  - [x] `accept_rfq_quote(params)` - POST to /rfq/request/accept (taker side)
+  - [x] `approve_rfq_order(params)` - POST to /rfq/quote/approve (maker side)
+- [x] Implement configuration method:
+  - [x] `rfq_config()` - GET /rfq/config
+- [x] Update `py_clob_client/rfq/__init__.py` to export `RfqClient`
 
 ---
 
-## Phase 5: Integration with Main Client
+## Phase 5: Integration with Main Client ✅ COMPLETED
 
 ### Checklist
 
-- [ ] Modify `py_clob_client/client.py`:
-  - [ ] Import `RfqClient` from rfq module
-  - [ ] Add `self.rfq` attribute in `__init__()`
-  - [ ] Initialize `RfqClient` with self as dependency provider
-  - [ ] Add `use_server_time` configuration option if not present
-- [ ] Update `py_clob_client/__init__.py`:
-  - [ ] Export RFQ types
-  - [ ] Export RfqClient (optional, for direct access)
-- [ ] Update `py_clob_client/rfq/__init__.py`:
-  - [ ] Export all public types
-  - [ ] Export RfqClient
+- [x] Modify `py_clob_client/client.py`:
+  - [x] Import `RfqClient` from rfq module
+  - [x] Add `self.rfq` attribute in `__init__()`
+  - [x] Initialize `RfqClient` with self as dependency provider
+- [x] Update `py_clob_client/__init__.py`:
+  - [x] Export core types (ApiCreds, OrderArgs, etc.)
+  - [x] Export RfqClient
+  - [x] Export all RFQ input types
+  - [x] Export all RFQ response types
+- [x] Update `py_clob_client/rfq/__init__.py`:
+  - [x] Export all public types (completed in Phase 4)
+  - [x] Export RfqClient (completed in Phase 4)
 
 ---
 
