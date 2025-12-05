@@ -23,7 +23,7 @@ def main():
 
     # Create an RFQ request to BUY 100 tokens at $0.50 each
     user_order = RfqUserOrder(
-        token_id="71321045679252212594626385532706912750332728571942532289631379312455583992563",
+        token_id="34097058504275310827233323421517291090691602969494795225921954353603704046623",
         price=0.50,
         side=BUY,
         size=100.0,
