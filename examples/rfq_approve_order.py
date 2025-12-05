@@ -28,15 +28,15 @@ def main():
     chain_id = int(os.getenv("CHAIN_ID", "137"))
     client = ClobClient(host, key=key, chain_id=chain_id, creds=creds)
 
-    request_id = os.getenv("RFQ_REQUEST_ID")
-    quote_id = os.getenv("RFQ_QUOTE_ID")
+    request_id = "019aed55-087a-7b19-9b72-89416c0604a1"
+    quote_id = "019aed6a-4c0a-78aa-8d0a-cb99feb6029b"
 
     if not request_id:
-        print("RFQ_REQUEST_ID not provided. Please set this environment variable.")
+        print("RFQ_REQUEST_ID not provided.")
         return
 
     if not quote_id:
-        print("RFQ_QUOTE_ID not provided. Please set this environment variable.")
+        print("RFQ_QUOTE_ID not provided.")
         return
 
     # Set expiration to 1 hour from now

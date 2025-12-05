@@ -433,7 +433,7 @@ class RfqClient:
         order_args = OrderArgs(
             token_id=token_id,
             price=float(price),
-            size=float(size) / (10 ** COLLATERAL_TOKEN_DECIMALS),  # Convert from smallest units
+            size=float(size),
             side=side,
             expiration=params.expiration,
         )
@@ -444,25 +444,29 @@ class RfqClient:
             raise Exception("Error creating order")
 
         # Step 3: Build accept payload
+        order_dict = order.dict()
+
         accept_payload = {
             "requestId": params.request_id,
             "quoteId": params.quote_id,
             "owner": self._parent.creds.api_key,
-            # Order fields
-            "salt": int(order.salt),
-            "maker": order.maker,
-            "signer": order.signer,
-            "taker": order.taker,
-            "tokenId": order.tokenId,
-            "makerAmount": order.makerAmount,
-            "takerAmount": order.takerAmount,
-            "expiration": int(order.expiration),
-            "nonce": int(order.nonce),
-            "feeRateBps": int(order.feeRateBps),
+            # Order fields from dict
+            "salt": int(order_dict["salt"]),
+            "maker": order_dict["maker"],
+            "signer": order_dict["signer"],
+            "taker": order_dict["taker"],
+            "tokenId": order_dict["tokenId"],
+            "makerAmount": order_dict["makerAmount"],
+            "takerAmount": order_dict["takerAmount"],
+            "expiration": int(order_dict["expiration"]),
+            "nonce": order_dict["nonce"],
+            "feeRateBps": order_dict["feeRateBps"],
             "side": side,
-            "signatureType": int(order.signatureType),
-            "signature": order.signature,
+            "signatureType": int(order_dict["signatureType"]),
+            "signature": order_dict["signature"],
         }
+
+        print(f"Accept payload: {accept_payload}")
 
         headers = self._get_l2_headers("POST", RFQ_REQUESTS_ACCEPT, accept_payload)
         return post(
@@ -513,7 +517,7 @@ class RfqClient:
         order_args = OrderArgs(
             token_id=token_id,
             price=float(price),
-            size=float(size) / (10 ** COLLATERAL_TOKEN_DECIMALS),  # Convert from smallest units
+            size=float(size),
             side=side,
             expiration=params.expiration,
         )
@@ -524,24 +528,26 @@ class RfqClient:
             raise Exception("Error creating order")
 
         # Step 3: Build approve payload
+        order_dict = order.dict()
+
         approve_payload = {
             "requestId": params.request_id,
             "quoteId": params.quote_id,
             "owner": self._parent.creds.api_key,
-            # Order fields
-            "salt": int(order.salt),
-            "maker": order.maker,
-            "signer": order.signer,
-            "taker": order.taker,
-            "tokenId": order.tokenId,
-            "makerAmount": order.makerAmount,
-            "takerAmount": order.takerAmount,
-            "expiration": int(order.expiration),
-            "nonce": int(order.nonce),
-            "feeRateBps": int(order.feeRateBps),
+            # Order fields from dict
+            "salt": int(order_dict["salt"]),
+            "maker": order_dict["maker"],
+            "signer": order_dict["signer"],
+            "taker": order_dict["taker"],
+            "tokenId": order_dict["tokenId"],
+            "makerAmount": order_dict["makerAmount"],
+            "takerAmount": order_dict["takerAmount"],
+            "expiration": int(order_dict["expiration"]),
+            "nonce": order_dict["nonce"],
+            "feeRateBps": order_dict["feeRateBps"],
             "side": side,
-            "signatureType": int(order.signatureType),
-            "signature": order.signature,
+            "signatureType": int(order_dict["signatureType"]),
+            "signature": order_dict["signature"],
         }
 
         headers = self._get_l2_headers("POST", RFQ_QUOTE_APPROVE, approve_payload)
