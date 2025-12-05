@@ -37,12 +37,21 @@ def overloadHeaders(method: str, headers: dict) -> dict:
 def request(endpoint: str, method: str, headers=None, data=None):
     try:
         headers = overloadHeaders(method, headers)
-        resp = _http_client.request(
-            method=method,
-            url=endpoint,
-            headers=headers,
-            json=data if data else None,
-        )
+        if isinstance(data, str):
+            # Pre-serialized body: send exact bytes
+            resp = _http_client.request(
+                method=method,
+                url=endpoint,
+                headers=headers,
+                content=data.encode("utf-8"),
+            )
+        else:
+            resp = _http_client.request(
+                method=method,
+                url=endpoint,
+                headers=headers,
+                json=data,
+            )
 
         if resp.status_code != 200:
             raise PolyApiException(resp)

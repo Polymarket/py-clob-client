@@ -28,6 +28,7 @@ class RequestArgs:
     method: str
     request_path: str
     body: Any = None
+    serialized_body: Optional[str] = None
 
 
 @dataclass
