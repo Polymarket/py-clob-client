@@ -112,25 +112,25 @@ class RfqClient:
         self,
         user_order: RfqUserOrder,
         options: Optional[PartialCreateOrderOptions] = None,
-    ) -> CreateRfqRequestParams:
+    ) -> dict:
         """
-        Create RFQ request parameters from a user order.
+        Create and post an RFQ request from a user order.
 
         This method:
         1. Resolves the tick size for the token
         2. Rounds price and size according to tick size rules
         3. Calculates amount_in and amount_out based on side
-        4. Returns parameters ready to post to the server
+        4. Posts the request to the server
 
         Args:
             user_order: Simplified order with token_id, price, side, size
             options: Optional tick size override
 
         Returns:
-            CreateRfqRequestParams ready for posting via post_rfq_request()
+            Response dict with request_id on success.
 
         Example:
-            >>> params = client.rfq.create_rfq_request(
+            >>> response = client.rfq.create_rfq_request(
             ...     RfqUserOrder(
             ...         token_id="123...",
             ...         price=0.5,
@@ -138,7 +138,6 @@ class RfqClient:
             ...         size=40,
             ...     )
             ... )
-            >>> response = client.rfq.post_rfq_request(params)
         """
         token_id = user_order.token_id
         price = user_order.price
@@ -199,13 +198,15 @@ class RfqClient:
             asset_in = "0"  # USDC
             asset_out = token_id
 
-        return CreateRfqRequestParams(
+        params = CreateRfqRequestParams(
             asset_in=asset_in,
             asset_out=asset_out,
             amount_in=str(amount_in),
             amount_out=str(amount_out),
             user_type=user_type,
         )
+
+        return self.post_rfq_request(params)
 
     def post_rfq_request(self, payload: CreateRfqRequestParams) -> dict:
         """

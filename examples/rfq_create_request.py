@@ -42,19 +42,9 @@ def main():
         size=100.0,
     )
 
-    # Build the request parameters
-    print("Creating RFQ request parameters...")
-    request_params = client.rfq.create_rfq_request(user_order)
-
-    print(f"  Asset In: {request_params.asset_in}")
-    print(f"  Asset Out: {request_params.asset_out}")
-    print(f"  Amount In: {request_params.amount_in}")
-    print(f"  Amount Out: {request_params.amount_out}")
-    print(f"  User Type: {request_params.user_type}")
-
-    # Post the request to the server
-    print("\nPosting RFQ request...")
-    response = client.rfq.post_rfq_request(request_params)
+    # Create and post the RFQ request
+    print("Creating RFQ request...")
+    response = client.rfq.create_rfq_request(user_order)
 
     print(f"Response: {response}")
     if "requestId" in response:
