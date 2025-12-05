@@ -1,16 +1,10 @@
-"""
-Example: Cancel an RFQ quote (Maker side)
-
-This script demonstrates how a maker can cancel their quote.
-"""
-
 import os
 
 from py_clob_client.client import ClobClient
 from py_clob_client.clob_types import ApiCreds
 from py_clob_client.rfq import CancelRfqQuoteParams
+from py_clob_client.constants import AMOY
 from dotenv import load_dotenv
-
 
 load_dotenv()
 
@@ -23,32 +17,14 @@ def main():
         api_secret=os.getenv("CLOB_SECRET"),
         api_passphrase=os.getenv("CLOB_PASS_PHRASE"),
     )
-    chain_id = int(os.getenv("CHAIN_ID", "137"))
+    chain_id = AMOY
     client = ClobClient(host, key=key, chain_id=chain_id, creds=creds)
 
-    quote_id = os.getenv("RFQ_QUOTE_ID")
-
-    if not quote_id:
-        print("RFQ_QUOTE_ID not provided. Please set this environment variable.")
-        return
-
-    print(f"Cancelling RFQ quote: {quote_id}")
-
-    cancel_params = CancelRfqQuoteParams(quote_id=quote_id)
-
-    try:
-        response = client.rfq.cancel_rfq_quote(cancel_params)
-        print(f"Response: {response}")
-
-        if response == "OK":
-            print("\nRFQ quote cancelled successfully!")
-        else:
-            print(f"\nCancel returned: {response}")
-    except Exception as e:
-        print(f"\nError cancelling quote: {e}")
-
-    print("\nDone!")
+    resp = client.rfq.cancel_rfq_quote(
+        CancelRfqQuoteParams(quote_id="0xaaaa")
+    )
+    print(resp)
+    print("Done!")
 
 
-if __name__ == "__main__":
-    main()
+main()
