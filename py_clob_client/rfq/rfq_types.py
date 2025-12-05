@@ -37,6 +37,23 @@ class RfqUserOrder:
 
 
 @dataclass
+class RfqUserQuote:
+    """
+    Simplified user input for creating an RFQ quote.
+
+    This is the user-facing quote format that gets converted to
+    CreateRfqQuoteParams for the API. The quoter only needs to specify
+    the request_id and their quoted price.
+    """
+
+    request_id: str
+    """ID of the RFQ request being quoted."""
+
+    price: float
+    """Quoted price per token (0 < price < 1)."""
+
+
+@dataclass
 class CreateRfqRequestParams:
     """
     Server payload for creating an RFQ request.
@@ -70,31 +87,18 @@ class CreateRfqQuoteParams:
     """ID of the RFQ request being quoted."""
 
     asset_in: str
-    """Asset the maker is paying."""
+    """Asset the quoter is paying."""
 
     asset_out: str
-    """Asset the maker is receiving."""
+    """Asset the quoter is receiving."""
 
     amount_in: str
-    """Amount maker is paying (in smallest units)."""
+    """Amount quoter is paying (in smallest units)."""
 
     amount_out: str
-    """Amount maker is receiving (in smallest units)."""
+    """Amount quoter is receiving (in smallest units)."""
 
     # Note: user_type is auto-filled by the client
-
-
-@dataclass
-class ImproveRfqQuoteParams:
-    """
-    Parameters for improving an existing quote with a better amount.
-    """
-
-    quote_id: str
-    """ID of the quote to improve."""
-
-    amount_out: str
-    """New improved amount_out (in smallest units)."""
 
 
 @dataclass
@@ -120,9 +124,9 @@ class CancelRfqQuoteParams:
 @dataclass
 class AcceptQuoteParams:
     """
-    Parameters for accepting a quote (taker side).
+    Parameters for accepting a quote (requester side).
 
-    When a taker accepts a quote, they create a signed order
+    When a requester accepts a quote, they create a signed order
     and submit it with this payload.
     """
 
@@ -139,9 +143,9 @@ class AcceptQuoteParams:
 @dataclass
 class ApproveOrderParams:
     """
-    Parameters for approving an order (maker side).
+    Parameters for approving an order (quoter side).
 
-    When a maker's quote is accepted, they approve by creating
+    When a quoter's quote is accepted, they approve by creating
     a signed order and submitting it with this payload.
     """
 

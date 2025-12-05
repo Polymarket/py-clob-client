@@ -10,7 +10,7 @@ from typing import Optional, Any, TYPE_CHECKING
 
 from ..clob_types import RequestArgs, OrderArgs, PartialCreateOrderOptions
 from ..headers.headers import create_level_2_headers
-from ..http_helpers.helpers import get, post, put, delete
+from ..http_helpers.helpers import get, post, delete
 from ..order_builder.builder import ROUNDING_CONFIG
 from ..order_builder.helpers import round_normal, round_down
 from ..order_builder.constants import BUY, SELL
@@ -19,7 +19,6 @@ from ..endpoints import (
     CANCEL_RFQ_REQUEST,
     GET_RFQ_REQUESTS,
     CREATE_RFQ_QUOTE,
-    IMPROVE_RFQ_QUOTE,
     CANCEL_RFQ_QUOTE,
     GET_RFQ_QUOTES,
     GET_RFQ_BEST_QUOTE,
@@ -30,9 +29,9 @@ from ..endpoints import (
 
 from .rfq_types import (
     RfqUserOrder,
+    RfqUserQuote,
     CreateRfqRequestParams,
     CreateRfqQuoteParams,
-    ImproveRfqQuoteParams,
     CancelRfqRequestParams,
     CancelRfqQuoteParams,
     AcceptQuoteParams,
@@ -278,14 +277,125 @@ class RfqClient:
     # Quote-side methods
     # =========================================================================
 
-    def create_rfq_quote(self, params: CreateRfqQuoteParams) -> dict:
+    def create_rfq_quote(
+        self,
+        user_quote: RfqUserQuote,
+        options: Optional[PartialCreateOrderOptions] = None,
+    ) -> dict:
         """
-        Create a quote for an RFQ request.
+        Create and post an RFQ quote from a user quote.
 
-        The user_type is automatically filled from the client's configuration.
+        This method:
+        1. Fetches the RFQ request to get token, side, and size
+        2. Resolves the tick size for the token
+        3. Rounds price according to tick size rules
+        4. Calculates amount_in and amount_out based on the quoted price
+        5. Posts the quote to the server
 
         Args:
-            params: Quote parameters (request_id, assets, amounts).
+            user_quote: Simplified quote with request_id and price
+            options: Optional tick size override
+
+        Returns:
+            Response dict with quote_id on success.
+
+        Example:
+            >>> response = client.rfq.create_rfq_quote(
+            ...     RfqUserQuote(
+            ...         request_id="abc123",
+            ...         price=0.52,
+            ...     )
+            ... )
+        """
+        # Step 1: Fetch the RFQ request to get details
+        rfq_requests = self.get_rfq_requests(
+            GetRfqRequestsParams(request_ids=[user_quote.request_id])
+        )
+
+        if not rfq_requests.get("data") or len(rfq_requests["data"]) == 0:
+            raise Exception("RFQ request not found")
+
+        rfq_request = rfq_requests["data"][0]
+
+        token_id = rfq_request.get("token")
+        side = rfq_request.get("side", BUY)
+        price = user_quote.price
+
+        # Get size from request (sizeIn for BUY, sizeOut for SELL from requester's perspective)
+        # Quoter takes the opposite side
+        if side == BUY:
+            size = rfq_request.get("sizeIn") or rfq_request.get("size_in")
+        else:
+            size = rfq_request.get("sizeOut") or rfq_request.get("size_out")
+
+        # Step 2: Resolve tick size
+        tick_size = self._parent._ClobClient__resolve_tick_size(
+            token_id,
+            options.tick_size if options else None,
+        )
+
+        # Get rounding configuration
+        round_config = ROUNDING_CONFIG[tick_size]
+
+        # Round price
+        rounded_price = round_normal(price, round_config.price)
+
+        # Format with correct decimal places
+        price_decimals = int(round_config.price)
+        size_decimals = int(round_config.size)
+        amount_decimals = int(round_config.amount)
+
+        rounded_price_str = f"{rounded_price:.{price_decimals}f}"
+        size_str = f"{float(size):.{size_decimals}f}"
+
+        # Parse back to numbers for calculation
+        size_num = float(size_str)
+        price_num = float(rounded_price_str)
+
+        # Get signature type from parent's order builder
+        user_type = self._parent.builder.sig_type
+
+        # Step 3: Calculate amounts based on side
+        # Quoter takes the opposite side of the requester
+        if side == BUY:
+            # Requester wants to BUY tokens, so quoter SELLs tokens
+            # Quoter pays tokens (asset_out), receives USDC (asset_in)
+            amount_out = parse_units(size_str, COLLATERAL_TOKEN_DECIMALS)
+
+            usdc_amount = size_num * price_num
+            usdc_amount_str = f"{usdc_amount:.{amount_decimals}f}"
+            amount_in = parse_units(usdc_amount_str, COLLATERAL_TOKEN_DECIMALS)
+
+            asset_in = "0"  # USDC
+            asset_out = token_id
+        else:
+            # Requester wants to SELL tokens, so quoter BUYs tokens
+            # Quoter pays USDC (asset_out), receives tokens (asset_in)
+            amount_in = parse_units(size_str, COLLATERAL_TOKEN_DECIMALS)
+
+            usdc_amount = size_num * price_num
+            usdc_amount_str = f"{usdc_amount:.{amount_decimals}f}"
+            amount_out = parse_units(usdc_amount_str, COLLATERAL_TOKEN_DECIMALS)
+
+            asset_in = token_id
+            asset_out = "0"  # USDC
+
+        params = CreateRfqQuoteParams(
+            request_id=user_quote.request_id,
+            asset_in=asset_in,
+            asset_out=asset_out,
+            amount_in=str(amount_in),
+            amount_out=str(amount_out),
+        )
+
+        return self.post_rfq_quote(params)
+
+    def post_rfq_quote(self, payload: CreateRfqQuoteParams) -> dict:
+        """
+        Post an RFQ quote to the server.
+
+        Args:
+            payload: Quote parameters from create_rfq_quote()
 
         Returns:
             Response dict with quote_id on success.
@@ -296,11 +406,11 @@ class RfqClient:
         user_type = self._parent.builder.sig_type
 
         body = {
-            "requestId": params.request_id,
-            "assetIn": params.asset_in,
-            "assetOut": params.asset_out,
-            "amountIn": params.amount_in,
-            "amountOut": params.amount_out,
+            "requestId": payload.request_id,
+            "assetIn": payload.asset_in,
+            "assetOut": payload.asset_out,
+            "amountIn": payload.amount_in,
+            "amountOut": payload.amount_out,
             "userType": user_type,
         }
 
@@ -352,26 +462,6 @@ class RfqClient:
 
         return get(url, headers=headers)
 
-    def improve_rfq_quote(self, params: ImproveRfqQuoteParams) -> str:
-        """
-        Improve an existing quote with a better amount_out.
-
-        Args:
-            params: Contains quote_id and new amount_out.
-
-        Returns:
-            "OK" on success.
-        """
-        self._ensure_l2_auth()
-
-        body = {
-            "quoteId": params.quote_id,
-            "amountOut": params.amount_out,
-        }
-
-        headers = self._get_l2_headers("PUT", IMPROVE_RFQ_QUOTE, body)
-        return put(self._build_url(IMPROVE_RFQ_QUOTE), headers=headers, data=body)
-
     def cancel_rfq_quote(self, params: CancelRfqQuoteParams) -> str:
         """
         Cancel an RFQ quote.
@@ -395,11 +485,11 @@ class RfqClient:
 
     def accept_rfq_quote(self, params: AcceptQuoteParams) -> str:
         """
-        Accept an RFQ quote (taker side).
+        Accept an RFQ quote (requester side).
 
         This method:
-        1. Fetches the RFQ request details
-        2. Creates a signed order based on request parameters
+        1. Fetches the RFQ quote details
+        2. Creates a signed order matching the quote
         3. Submits the acceptance with the order
 
         Args:
@@ -410,27 +500,29 @@ class RfqClient:
         """
         self._ensure_l2_auth()
 
-        # Step 1: Fetch the RFQ request
-        rfq_requests = self.get_rfq_requests(
-            GetRfqRequestsParams(request_ids=[params.request_id])
+        # Step 1: Fetch the RFQ quote
+        rfq_quotes = self.get_rfq_quotes(
+            GetRfqQuotesParams(quote_ids=[params.quote_id])
         )
 
-        if not rfq_requests.get("data") or len(rfq_requests["data"]) == 0:
-            raise Exception("RFQ request not found")
+        if not rfq_quotes.get("data") or len(rfq_quotes["data"]) == 0:
+            raise Exception("RFQ quote not found")
 
-        rfq_request = rfq_requests["data"][0]
+        rfq_quote = rfq_quotes["data"][0]
 
-        # Step 2: Create an order based on request details
-        side = rfq_request.get("side", BUY)
+        # Step 2: Create an order matching the quote
+        # Requester takes the opposite side of the quoter
+        quote_side = rfq_quote.get("side", BUY)
+        side = SELL if quote_side == BUY else BUY
 
-        # Determine size based on side
-        if side == BUY:
-            size = rfq_request.get("sizeIn") or rfq_request.get("size_in")
+        # Determine size based on quote side
+        if quote_side == BUY:
+            size = rfq_quote.get("sizeIn") or rfq_quote.get("size_in")
         else:
-            size = rfq_request.get("sizeOut") or rfq_request.get("size_out")
+            size = rfq_quote.get("sizeOut") or rfq_quote.get("size_out")
 
-        token_id = rfq_request.get("token")
-        price = rfq_request.get("price")
+        token_id = rfq_quote.get("token")
+        price = rfq_quote.get("price")
 
         order_args = OrderArgs(
             token_id=token_id,
@@ -485,7 +577,7 @@ class RfqClient:
 
     def approve_rfq_order(self, params: ApproveOrderParams) -> str:
         """
-        Approve an RFQ order (maker side).
+        Approve an RFQ order (quoter side).
 
         This method:
         1. Fetches the RFQ quote details
