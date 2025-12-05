@@ -22,7 +22,7 @@ def main():
     client = ClobClient(host, key=key, chain_id=chain_id, creds=creds)
 
     # Replace with the readonly API key you want to delete
-    readonly_api_key = "your-readonly-api-key-here"
+    readonly_api_key = "019aee85-4ea1-79cd-a287-8508f21209a2"
 
     resp = client.delete_readonly_api_key(readonly_api_key)
     print(resp)

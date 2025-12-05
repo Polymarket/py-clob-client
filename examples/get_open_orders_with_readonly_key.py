@@ -11,10 +11,10 @@ load_dotenv()
 
 def main():
     host = os.getenv("CLOB_API_URL", "https://clob.polymarket.com")
-    address = os.getenv("POLY_ADDRESS")
 
-    # Replace with your readonly API key from create_readonly_api_key
-    readonly_api_key = os.getenv("CLOB_READONLY_API_KEY", "your-readonly-api-key-here")
+    # Replace with your address and readonly API key
+    address = os.getenv("POLY_ADDRESS", "0xc68576124eC1fF645F81a560E14003C8deF2e8fb")
+    readonly_api_key = os.getenv("CLOB_READONLY_API_KEY", "019aee85-4ea1-79cd-a287-8508f21209a2")
 
     # Get all open orders for the address
     response = httpx.get(
@@ -27,8 +27,12 @@ def main():
         params={
             "maker_address": address,
         },
+        follow_redirects=True,
     )
-    print(response.json())
+    if response.status_code == 200:
+        print(response.json())
+    else:
+        print(f"Error {response.status_code}: {response.text}")
     print("Done!")
 
 
