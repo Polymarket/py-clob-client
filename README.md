@@ -57,6 +57,11 @@ client = ClobClient(
 )
 client.set_api_creds(client.create_or_derive_api_creds())
 ```
+Before running write-enabled examples, make sure you have configured the
+environment variables for your private key and (optionally) funder address,
+for example via a `.env` file or your shell. These examples send real
+requests to the production CLOB API, so consider using a test key or small
+balances when trying them for the first time.
 
 ### Start trading (proxy wallet)
 
