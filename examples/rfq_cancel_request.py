@@ -10,6 +10,7 @@ from py_clob_client.client import ClobClient
 from py_clob_client.clob_types import ApiCreds
 from py_clob_client.rfq import CancelRfqRequestParams
 from dotenv import load_dotenv
+from py_clob_client.constants import AMOY
 
 
 load_dotenv()
@@ -23,18 +24,10 @@ def main():
         api_secret=os.getenv("CLOB_SECRET"),
         api_passphrase=os.getenv("CLOB_PASS_PHRASE"),
     )
-    chain_id = int(os.getenv("CHAIN_ID", "137"))
+    chain_id = int(os.getenv("CHAIN_ID", AMOY))
     client = ClobClient(host, key=key, chain_id=chain_id, creds=creds)
 
-    request_id = os.getenv("RFQ_REQUEST_ID")
-
-    if not request_id:
-        print("RFQ_REQUEST_ID not provided. Please set this environment variable.")
-        return
-
-    print(f"Cancelling RFQ request: {request_id}")
-
-    cancel_params = CancelRfqRequestParams(request_id=request_id)
+    cancel_params = CancelRfqRequestParams(request_id="019aed34-9c9f-71e8-976f-0ed0f783d0a0")
 
     try:
         response = client.rfq.cancel_rfq_request(cancel_params)
