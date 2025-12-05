@@ -13,6 +13,10 @@ Python client for the Polymarket Central Limit Order Book (CLOB).
 ```bash
 # install from PyPI (Python 3.9>)
 pip install py-clob-client
+The library is tested against modern Python 3 versions (3.9+). If you need to
+pin a specific release or work in an older environment, check the GitHub
+releases page or the project page on PyPI for available versions.
+
 ```
 ## Usage
 
