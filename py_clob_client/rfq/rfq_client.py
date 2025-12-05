@@ -5,7 +5,7 @@ This module provides the RfqClient class which handles all RFQ operations
 including creating requests, quotes, and executing trades.
 """
 
-import json
+import logging
 from typing import Optional, Any, TYPE_CHECKING
 
 from ..clob_types import RequestArgs, OrderArgs, PartialCreateOrderOptions
@@ -71,6 +71,7 @@ class RfqClient:
             parent: The parent ClobClient instance providing auth and config.
         """
         self._parent = parent
+        self.logger = logging.getLogger(self.__class__.__name__)
 
     def _ensure_l2_auth(self) -> None:
         """
@@ -467,7 +468,13 @@ class RfqClient:
             "signature": order_dict["signature"],
         }
 
-        print(f"Accept payload: {accept_payload}")
+        self.logger.debug(
+            "Accept payload: requestId=%s, quoteId=%s, tokenId=%s, side=%s",
+            accept_payload.get("requestId"),
+            accept_payload.get("quoteId"),
+            accept_payload.get("tokenId"),
+            accept_payload.get("side"),
+        )
 
         headers = self._get_l2_headers("POST", RFQ_REQUESTS_ACCEPT, accept_payload)
         return post(
