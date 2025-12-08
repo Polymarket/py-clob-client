@@ -24,6 +24,11 @@ class ApiCreds:
 
 
 @dataclass
+class ReadonlyApiKeyResponse:
+    api_key: str
+
+
+@dataclass
 class RequestArgs:
     method: str
     request_path: str
