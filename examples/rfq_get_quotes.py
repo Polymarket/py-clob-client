@@ -21,7 +21,19 @@ def main():
     client = ClobClient(host, key=key, chain_id=chain_id, creds=creds)
 
     # Get all quotes
-    params = GetRfqQuotesParams(limit=10)
+    params = GetRfqQuotesParams(
+        # quote_ids=["0197656d-56ee-74a4-a06a-3b179121f3bf"],
+        # state="active",
+        # markets=["0x0000000000000000000000000000000000000000"],
+        # size_min=5,
+        # size_max=100,
+        # price_min=0.1,
+        # price_max=0.9,
+        # sort_by="price",
+        # sort_dir="asc",
+        limit=10,
+        # offset="MA==",
+    )
     resp = client.rfq.get_rfq_quotes(params)
     print(resp)
     print("Done!")
