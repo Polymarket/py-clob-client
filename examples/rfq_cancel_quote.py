@@ -21,7 +21,7 @@ def main():
     client = ClobClient(host, key=key, chain_id=chain_id, creds=creds)
 
     resp = client.rfq.cancel_rfq_quote(
-        CancelRfqQuoteParams(quote_id="0xaaaa")
+        CancelRfqQuoteParams(quote_id="0197656d-56ee-74a4-a06a-3b179121f3bf")
     )
     print(resp)
     print("Done!")
