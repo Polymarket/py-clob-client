@@ -510,16 +510,30 @@ class RfqClient:
 
         rfq_quote = rfq_quotes["data"][0]
 
+        # Step 1b: Fetch the original RFQ request to get the correct size
+        rfq_requests = self.get_rfq_requests(
+            GetRfqRequestsParams(request_ids=[params.request_id])
+        )
+
+        if not rfq_requests.get("data") or len(rfq_requests["data"]) == 0:
+            raise Exception("RFQ request not found")
+
+        rfq_request = rfq_requests["data"][0]
+
         # Step 2: Create an order matching the quote
         # Requester takes the opposite side of the quoter
         quote_side = rfq_quote.get("side", BUY)
         side = SELL if quote_side == BUY else BUY
 
-        # Determine size based on quote side
-        if quote_side == BUY:
-            size = rfq_quote.get("sizeIn") or rfq_quote.get("size_in")
+        # Determine size from the ORIGINAL REQUEST (not the quote)
+        # The requester's order size must match what they originally requested
+        request_side = rfq_request.get("side", BUY)
+        if request_side == BUY:
+            # Requester wanted to BUY tokens, use sizeIn (number of tokens)
+            size = rfq_request.get("sizeIn") or rfq_request.get("size_in")
         else:
-            size = rfq_quote.get("sizeOut") or rfq_quote.get("size_out")
+            # Requester wanted to SELL tokens, use sizeIn (number of tokens)
+            size = rfq_request.get("sizeIn") or rfq_request.get("size_in")
 
         token_id = rfq_quote.get("token")
         price = rfq_quote.get("price")
