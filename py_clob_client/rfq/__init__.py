@@ -1,22 +1,5 @@
-from .client import ClobClient
-from .clob_types import (
-    ApiCreds,
-    OrderArgs,
-    MarketOrderArgs,
-    OrderType,
-    TickSize,
-    BookParams,
-    TradeParams,
-    OpenOrderParams,
-    BalanceAllowanceParams,
-    AssetType,
-    PartialCreateOrderOptions,
-    CreateOrderOptions,
-)
-
-# RFQ exports
-from .rfq import (
-    RfqClient,
+from .rfq_types import (
+    # Input types
     RfqUserRequest,
     RfqUserQuote,
     CreateRfqRequestParams,
@@ -28,6 +11,7 @@ from .rfq import (
     GetRfqRequestsParams,
     GetRfqQuotesParams,
     GetRfqBestQuoteParams,
+    # Response types
     RfqRequest,
     RfqQuote,
     RfqRequestResponse,
@@ -35,25 +19,21 @@ from .rfq import (
     RfqPaginatedResponse,
 )
 
+from .rfq_helpers import (
+    parse_units,
+    to_camel_case,
+    parse_rfq_requests_params,
+    parse_rfq_quotes_params,
+    COLLATERAL_TOKEN_DECIMALS,
+    CONDITIONAL_TOKEN_DECIMALS,
+)
+
+from .rfq_client import RfqClient
+
 __all__ = [
-    # Main client
-    "ClobClient",
-    # Core types
-    "ApiCreds",
-    "OrderArgs",
-    "MarketOrderArgs",
-    "OrderType",
-    "TickSize",
-    "BookParams",
-    "TradeParams",
-    "OpenOrderParams",
-    "BalanceAllowanceParams",
-    "AssetType",
-    "PartialCreateOrderOptions",
-    "CreateOrderOptions",
-    # RFQ client
+    # Client
     "RfqClient",
-    # RFQ input types
+    # Input types
     "RfqUserRequest",
     "RfqUserQuote",
     "CreateRfqRequestParams",
@@ -65,10 +45,17 @@ __all__ = [
     "GetRfqRequestsParams",
     "GetRfqQuotesParams",
     "GetRfqBestQuoteParams",
-    # RFQ response types
+    # Response types
     "RfqRequest",
     "RfqQuote",
     "RfqRequestResponse",
     "RfqQuoteResponse",
     "RfqPaginatedResponse",
+    # Helpers
+    "parse_units",
+    "to_camel_case",
+    "parse_rfq_requests_params",
+    "parse_rfq_quotes_params",
+    "COLLATERAL_TOKEN_DECIMALS",
+    "CONDITIONAL_TOKEN_DECIMALS",
 ]

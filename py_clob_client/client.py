@@ -108,6 +108,7 @@ from .utilities import (
     is_tick_size_smaller,
     price_valid,
 )
+from .rfq import RfqClient
 
 
 class ClobClient:
@@ -152,6 +153,9 @@ class ClobClient:
         self.__tick_sizes = {}
         self.__neg_risk = {}
         self.__fee_rates = {}
+
+        # RFQ client
+        self.rfq = RfqClient(self)
 
         self.logger = logging.getLogger(self.__class__.__name__)
 

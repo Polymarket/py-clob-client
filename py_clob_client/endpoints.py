@@ -47,3 +47,15 @@ GET_MARKET = "/markets/"
 GET_MARKET_TRADES_EVENTS = "/live-activity/events/"
 
 GET_BUILDER_TRADES = "/builder/trades"
+
+# RFQ Endpoints
+CREATE_RFQ_REQUEST = "/rfq/request"
+CANCEL_RFQ_REQUEST = "/rfq/request"
+GET_RFQ_REQUESTS = "/rfq/data/requests"
+CREATE_RFQ_QUOTE = "/rfq/quote"
+CANCEL_RFQ_QUOTE = "/rfq/quote"
+GET_RFQ_QUOTES = "/rfq/data/quotes"
+GET_RFQ_BEST_QUOTE = "/rfq/data/best-quote"
+RFQ_REQUESTS_ACCEPT = "/rfq/request/accept"
+RFQ_QUOTE_APPROVE = "/rfq/quote/approve"
+RFQ_CONFIG = "/rfq/config"
