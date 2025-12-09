@@ -10,14 +10,14 @@ load_dotenv()
 
 
 def main():
-    host = os.getenv("CLOB_API_URL", "https://clob.polymarket.com")
+    host = os.getenv("CLOB_API_URL", "https://clob-staging.polymarket.com/")
+    chain_id = os.getenv("CHAIN_ID", AMOY)
     key = os.getenv("PK")
     creds = ApiCreds(
         api_key=os.getenv("CLOB_API_KEY"),
         api_secret=os.getenv("CLOB_SECRET"),
         api_passphrase=os.getenv("CLOB_PASS_PHRASE"),
     )
-    chain_id = AMOY
     client = ClobClient(host, key=key, chain_id=chain_id, creds=creds)
 
     # Get all quotes
