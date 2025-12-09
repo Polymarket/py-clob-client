@@ -37,23 +37,6 @@ class RfqUserOrder:
 
 
 @dataclass
-class RfqUserQuote:
-    """
-    Simplified user input for creating an RFQ quote.
-
-    This is the user-facing quote format that gets converted to
-    CreateRfqQuoteParams for the API. The quoter only needs to specify
-    the request_id and their quoted price.
-    """
-
-    request_id: str
-    """ID of the RFQ request being quoted."""
-
-    price: float
-    """Quoted price per token (0 < price < 1)."""
-
-
-@dataclass
 class CreateRfqRequestParams:
     """
     Server payload for creating an RFQ request.

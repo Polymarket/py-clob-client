@@ -29,7 +29,6 @@ from ..endpoints import (
 
 from .rfq_types import (
     RfqUserOrder,
-    RfqUserQuote,
     CreateRfqRequestParams,
     CreateRfqQuoteParams,
     CancelRfqRequestParams,
@@ -277,128 +276,35 @@ class RfqClient:
     # Quote-side methods
     # =========================================================================
 
-    def create_rfq_quote(
-        self,
-        user_quote: RfqUserQuote,
-        options: Optional[PartialCreateOrderOptions] = None,
-    ) -> dict:
+    def create_rfq_quote(self, payload: CreateRfqQuoteParams) -> dict:
         """
-        Create and post an RFQ quote from a user quote.
+        Create an RFQ quote in response to an RFQ request.
 
-        This method:
-        1. Fetches the RFQ request to get token, side, and size
-        2. Resolves the tick size for the token
-        3. Rounds price according to tick size rules
-        4. Calculates amount_in and amount_out based on the quoted price
-        5. Posts the quote to the server
+        This method allows a market maker to respond to an RFQ request with a quote
+        offering to fill the request.
 
         Args:
-            user_quote: Simplified quote with request_id and price
-            options: Optional tick size override
+            payload: Quote parameters containing:
+                - request_id: The ID of the RFQ request being quoted
+                - asset_in: The asset the quoter will receive (token ID or "0" for USDC)
+                - asset_out: The asset the quoter will provide
+                - amount_in: Amount of asset_in (in smallest units, e.g., 6 decimals for USDC)
+                - amount_out: Amount of asset_out the quoter offers
 
         Returns:
             Response dict with quote_id on success.
 
         Example:
-            >>> response = client.rfq.create_rfq_quote(
-            ...     RfqUserQuote(
-            ...         request_id="abc123",
-            ...         price=0.52,
+            >>> quote = client.rfq.create_rfq_quote(
+            ...     CreateRfqQuoteParams(
+            ...         request_id="019a83a9-f4c7-7c96-9139-2da2b2d934ef",
+            ...         asset_in="0",  # Receiving USDC
+            ...         asset_out="3409705850...",  # Providing this token
+            ...         amount_in="20000000",  # 20 USDC (6 decimals)
+            ...         amount_out="40000000",  # 40 tokens
             ...     )
             ... )
-        """
-        # Step 1: Fetch the RFQ request to get details
-        rfq_requests = self.get_rfq_requests(
-            GetRfqRequestsParams(request_ids=[user_quote.request_id])
-        )
-
-        if not rfq_requests.get("data") or len(rfq_requests["data"]) == 0:
-            raise Exception("RFQ request not found")
-
-        rfq_request = rfq_requests["data"][0]
-
-        token_id = rfq_request.get("token")
-        side = rfq_request.get("side", BUY)
-        price = user_quote.price
-
-        # Get size from request (sizeIn for BUY, sizeOut for SELL from requester's perspective)
-        # Quoter takes the opposite side
-        if side == BUY:
-            size = rfq_request.get("sizeIn") or rfq_request.get("size_in")
-        else:
-            size = rfq_request.get("sizeOut") or rfq_request.get("size_out")
-
-        # Step 2: Resolve tick size
-        tick_size = self._parent._ClobClient__resolve_tick_size(
-            token_id,
-            options.tick_size if options else None,
-        )
-
-        # Get rounding configuration
-        round_config = ROUNDING_CONFIG[tick_size]
-
-        # Round price
-        rounded_price = round_normal(price, round_config.price)
-
-        # Format with correct decimal places
-        price_decimals = int(round_config.price)
-        size_decimals = int(round_config.size)
-        amount_decimals = int(round_config.amount)
-
-        rounded_price_str = f"{rounded_price:.{price_decimals}f}"
-        size_str = f"{float(size):.{size_decimals}f}"
-
-        # Parse back to numbers for calculation
-        size_num = float(size_str)
-        price_num = float(rounded_price_str)
-
-        # Get signature type from parent's order builder
-        user_type = self._parent.builder.sig_type
-
-        # Step 3: Calculate amounts based on side
-        # Quoter takes the opposite side of the requester
-        if side == BUY:
-            # Requester wants to BUY tokens, so quoter SELLs tokens
-            # Quoter pays tokens (asset_out), receives USDC (asset_in)
-            amount_out = parse_units(size_str, COLLATERAL_TOKEN_DECIMALS)
-
-            usdc_amount = size_num * price_num
-            usdc_amount_str = f"{usdc_amount:.{amount_decimals}f}"
-            amount_in = parse_units(usdc_amount_str, COLLATERAL_TOKEN_DECIMALS)
-
-            asset_in = "0"  # USDC
-            asset_out = token_id
-        else:
-            # Requester wants to SELL tokens, so quoter BUYs tokens
-            # Quoter pays USDC (asset_out), receives tokens (asset_in)
-            amount_in = parse_units(size_str, COLLATERAL_TOKEN_DECIMALS)
-
-            usdc_amount = size_num * price_num
-            usdc_amount_str = f"{usdc_amount:.{amount_decimals}f}"
-            amount_out = parse_units(usdc_amount_str, COLLATERAL_TOKEN_DECIMALS)
-
-            asset_in = token_id
-            asset_out = "0"  # USDC
-
-        params = CreateRfqQuoteParams(
-            request_id=user_quote.request_id,
-            asset_in=asset_in,
-            asset_out=asset_out,
-            amount_in=str(amount_in),
-            amount_out=str(amount_out),
-        )
-
-        return self.post_rfq_quote(params)
-
-    def post_rfq_quote(self, payload: CreateRfqQuoteParams) -> dict:
-        """
-        Post an RFQ quote to the server.
-
-        Args:
-            payload: Quote parameters from create_rfq_quote()
-
-        Returns:
-            Response dict with quote_id on success.
+            >>> # Returns: { "quoteId": "..." }
         """
         self._ensure_l2_auth()
 
