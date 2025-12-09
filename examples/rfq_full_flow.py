@@ -3,7 +3,8 @@ RFQ Full Flow Example
 
 This script demonstrates the complete RFQ (Request for Quote) flow between two parties.
 For a single manual test, edit the REQUEST_PARAMS and QUOTE_PARAMS at the top.
-This example assumes two EOA wallets. For using different signature types, see other RFQ examples.
+This example assumes two EOA wallets.
+For using different signature types, you need to set the funder address signature type when initializing the client.
 
 Usage: python rfq_full_flow.py
 
