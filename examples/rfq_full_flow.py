@@ -3,17 +3,29 @@ RFQ Full Flow Example
 
 This script demonstrates the complete RFQ (Request for Quote) flow between two parties.
 For a single manual test, edit the REQUEST_PARAMS and QUOTE_PARAMS at the top.
+This example assumes two EOA wallets. For using different signature types, see other RFQ examples.
 
 Usage: python rfq_full_flow.py
 
 TROUBLESHOOTING "invalid request" errors:
 1. Ensure the tokenID exists in your environment (staging vs production)
-2. Check that the market is active and has liquidity
-3. Verify your API keys have RFQ permissions enabled
-4. Run `python get_markets.py` to get valid token IDs
+2. Check that the market is active, RFQ-enabled and has liquidity
+3. Verify your quoter has been whitelisted
+4. Run `python examples/get_markets.py` to get valid token IDs
 5. Make sure you're using the correct CLOB_API_URL for your environment
 
-If you get "invalid request" on all steps, the token ID is likely invalid for your environment.
+
+ENV VARIABLES:
+REQUESTER_PK: Private key of the requester
+REQUESTER_API_KEY: API key of the requester
+REQUESTER_SECRET: Secret of the requester
+REQUESTER_PASS_PHRASE: Passphrase of the requester
+QUOTER_PK: Private key of the quoter
+QUOTER_API_KEY: API key of the quoter
+QUOTER_SECRET: Secret of the quoter
+QUOTER_PASS_PHRASE: Passphrase of the quoter
+CHAIN_ID: Chain ID of the network
+CLOB_API_URL: URL of the CLOB API
 """
 
 import os
@@ -34,7 +46,7 @@ load_dotenv()
 # ============================================
 TOKEN_ID = "34097058504275310827233323421517291090691602969494795225921954353603704046623"
 
-REQUEST_REQUEST = RfqUserRequest(
+USER_REQUEST = RfqUserRequest(
     token_id=TOKEN_ID,
     price=0.50,       # Price per token (e.g., 0.50 = 50 cents)
     side=BUY,         # BUY or SELL
@@ -44,8 +56,10 @@ REQUEST_REQUEST = RfqUserRequest(
 # ============================================
 # RFQ QUOTE PARAMETERS (QUOTER) - EDIT THESE
 # ============================================
+QUOTE_TOKEN_ID = TOKEN_ID  # Token ID for the quote (defaults to same as request)
 QUOTE_PRICE = 0.50  # Quoted price per token
 QUOTE_SIZE = 100.0  # Number of tokens to quote
+QUOTE_SIDE = SELL   # BUY or SELL
 
 # ============================================
 # EXPIRATION CONFIGURATION
@@ -58,7 +72,7 @@ def main():
     # Setup: Initialize both requester and quoter clients
     # ============================================
     host = os.getenv("CLOB_API_URL", "https://clob-staging.polymarket.com/")
-    chain_id = os.getenv("CHAIN_ID", AMOY)
+    chain_id = int(os.getenv("CHAIN_ID", AMOY))
 
     # Requester (creates the request and accepts the quote)
     requester_key = os.getenv("REQUESTER_PK")
@@ -89,12 +103,12 @@ def main():
     # Step 1: Requester creates RFQ request
     # ============================================
     print("\n[Step 1] Requester creating RFQ request...")
-    print(f"  Token ID: {REQUEST_ORDER.token_id}")
-    print(f"  Side: {REQUEST_ORDER.side}")
-    print(f"  Size: {REQUEST_ORDER.size}")
-    print(f"  Price: {REQUEST_ORDER.price}")
+    print(f"  Token ID: {USER_REQUEST.token_id}")
+    print(f"  Side: {USER_REQUEST.side}")
+    print(f"  Size: {USER_REQUEST.size}")
+    print(f"  Price: {USER_REQUEST.price}")
 
-    rfq_request_response = requester_client.rfq.create_rfq_request(REQUEST_ORDER)
+    rfq_request_response = requester_client.rfq.create_rfq_request(USER_REQUEST)
 
     # Check for errors
     if rfq_request_response.get("error"):
@@ -115,14 +129,16 @@ def main():
     # ============================================
     print("\n[Step 2] Quoter creating quote for request...")
     print(f"  Request ID: {request_id}")
+    print(f"  Token ID: {QUOTE_TOKEN_ID}")
     print(f"  Price: {QUOTE_PRICE}")
-    print(f"  Side: {SELL}")
+    print(f"  Side: {QUOTE_SIDE}")
     print(f"  Size: {QUOTE_SIZE}")
 
     user_quote = RfqUserQuote(
         request_id=request_id,
+        token_id=QUOTE_TOKEN_ID,
         price=QUOTE_PRICE,
-        side=SELL,
+        side=QUOTE_SIDE,
         size=QUOTE_SIZE,
     )
     rfq_quote_response = quoter_client.rfq.create_rfq_quote(user_quote)

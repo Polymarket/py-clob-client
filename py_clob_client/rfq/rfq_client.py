@@ -148,8 +148,9 @@ class RfqClient:
             options.tick_size if options else None,
         )
 
-        # Get rounding configuration
-        round_config = ROUNDING_CONFIG[tick_size]
+        # Get rounding configuration (ensure tick_size is a string for lookup)
+        tick_size_str = str(tick_size) if not isinstance(tick_size, str) else tick_size
+        round_config = ROUNDING_CONFIG[tick_size_str]
 
         # Round price and size
         rounded_price = round_normal(price, round_config.price)
@@ -272,7 +273,7 @@ class RfqClient:
         5. Posts the quote to the server
 
         Args:
-            user_quote: Simplified quote with request_id, price, side, size
+            user_quote: Simplified quote with request_id, token_id, price, side, size
             options: Optional tick size override
 
         Returns:
@@ -282,6 +283,7 @@ class RfqClient:
             >>> response = client.rfq.create_rfq_quote(
             ...     RfqUserQuote(
             ...         request_id="019a83a9-f4c7-7c96-9139-2da2b2d934ef",
+            ...         token_id="123...",
             ...         price=0.5,
             ...         side="SELL",
             ...         size=100.0,
@@ -289,23 +291,10 @@ class RfqClient:
             ... )
         """
         request_id = user_quote.request_id
+        token_id = user_quote.token_id
         price = user_quote.price
         side = user_quote.side
         size = user_quote.size
-
-        # Fetch the RFQ request to get token_id
-        rfq_requests = self.get_rfq_requests(
-            GetRfqRequestsParams(request_ids=[request_id])
-        )
-
-        if not rfq_requests.get("data") or len(rfq_requests["data"]) == 0:
-            raise Exception("RFQ request not found")
-
-        rfq_request = rfq_requests["data"][0]
-        token_id = rfq_request.get("token")
-
-        if not token_id:
-            raise Exception("Token ID not found in RFQ request")
 
         # Resolve tick size (from options or fetch from server)
         tick_size = self._parent._ClobClient__resolve_tick_size(
@@ -313,8 +302,9 @@ class RfqClient:
             options.tick_size if options else None,
         )
 
-        # Get rounding configuration
-        round_config = ROUNDING_CONFIG[tick_size]
+        # Get rounding configuration (ensure tick_size is a string for lookup)
+        tick_size_str = str(tick_size) if not isinstance(tick_size, str) else tick_size
+        round_config = ROUNDING_CONFIG[tick_size_str]
 
         # Round price and size
         rounded_price = round_normal(price, round_config.price)

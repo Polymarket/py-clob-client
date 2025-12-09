@@ -12,7 +12,7 @@ load_dotenv()
 
 def main():
     host = os.getenv("CLOB_API_URL", "https://clob-staging.polymarket.com/")
-    chain_id = os.getenv("CHAIN_ID", AMOY)
+    chain_id = int(os.getenv("CHAIN_ID", AMOY))
     key = os.getenv("PK")
     creds = ApiCreds(
         api_key=os.getenv("CLOB_API_KEY"),
@@ -21,12 +21,13 @@ def main():
     )
     client = ClobClient(host, key=key, chain_id=chain_id, creds=creds)
 
-    # Create a quote for an RFQ request to SELL 100 tokens at $0.50 each
+    # Create a quote for an RFQ request to SELL 40 tokens at $0.50 each
     user_quote = RfqUserQuote(
-        request_id="0xaaaa",
+        request_id="019b04a4-2f4b-73b3-8fa2-2760b2754601",
+        token_id="34097058504275310827233323421517291090691602969494795225921954353603704046623",
         price=0.50,
         side=SELL,
-        size=100.0,
+        size=40.0,
     )
 
     resp = client.rfq.create_rfq_quote(user_quote)

@@ -48,6 +48,9 @@ class RfqUserQuote:
     request_id: str
     """ID of the RFQ request being quoted."""
 
+    token_id: str
+    """Token ID of the conditional token being traded."""
+
     price: float
     """Price per token (0 < price < 1)."""
 

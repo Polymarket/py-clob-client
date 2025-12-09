@@ -12,7 +12,7 @@ load_dotenv()
 
 def main():
     host = os.getenv("CLOB_API_URL", "https://clob-staging.polymarket.com/")
-    chain_id = os.getenv("CHAIN_ID", AMOY)
+    chain_id = int(os.getenv("CHAIN_ID", AMOY))
     key = os.getenv("PK")
     creds = ApiCreds(
         api_key=os.getenv("CLOB_API_KEY"),
@@ -26,8 +26,8 @@ def main():
     expiration = int(time.time()) + 3600
 
     approve_params = ApproveOrderParams(
-        request_id="0xaaaa",
-        quote_id="0xbbbb",
+        request_id="019b04a4-2f4b-73b3-8fa2-2760b2754601",
+        quote_id="019b04a7-5205-7eeb-9a48-227e8d53bd17",
         expiration=expiration,
     )
 
