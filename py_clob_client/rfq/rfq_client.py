@@ -173,8 +173,8 @@ class RfqClient:
         # Calculate amounts based on side
         if side == BUY:
             # Buying tokens: pay USDC, receive tokens
-            # asset_in = tokens (what taker receives)
-            # asset_out = USDC (what taker pays)
+            # asset_in = tokens (what requester receives)
+            # asset_out = USDC (what requester pays)
             amount_in = parse_units(rounded_size_str, COLLATERAL_TOKEN_DECIMALS)
 
             usdc_amount = size_num * price_num
@@ -185,8 +185,8 @@ class RfqClient:
             asset_out = "0"  # USDC
         else:
             # Selling tokens: pay tokens, receive USDC
-            # asset_in = USDC (what taker receives)
-            # asset_out = tokens (what taker pays)
+            # asset_in = USDC (what requester receives)
+            # asset_out = tokens (what requester pays)
             usdc_amount = size_num * price_num
             usdc_amount_str = f"{usdc_amount:.{amount_decimals}f}"
             amount_in = parse_units(usdc_amount_str, COLLATERAL_TOKEN_DECIMALS)
