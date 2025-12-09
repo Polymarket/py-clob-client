@@ -21,8 +21,8 @@ def main():
     )
     client = ClobClient(host, key=key, chain_id=chain_id, creds=creds)
 
-    # Approve an order (maker side)
-    # Set expiration to 1 hour from now
+    # Approve an order (quoter side)
+    # Refers to the order expiry, not quote expiry. For quote expiry, check the server RFQ config.
     expiration = int(time.time()) + 3600
 
     approve_params = ApproveOrderParams(
