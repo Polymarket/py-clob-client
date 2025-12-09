@@ -17,7 +17,6 @@ from .clob_types import (
 # RFQ exports
 from .rfq import (
     RfqClient,
-    RfqUserOrder,
     CreateRfqRequestParams,
     CreateRfqQuoteParams,
     CancelRfqRequestParams,
@@ -53,7 +52,7 @@ __all__ = [
     # RFQ client
     "RfqClient",
     # RFQ input types
-    "RfqUserOrder",
+    "RfqUserRequest",
     "CreateRfqRequestParams",
     "CreateRfqQuoteParams",
     "CancelRfqRequestParams",

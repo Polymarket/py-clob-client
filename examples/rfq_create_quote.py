@@ -2,7 +2,8 @@ import os
 
 from py_clob_client.client import ClobClient
 from py_clob_client.clob_types import ApiCreds
-from py_clob_client.rfq import CreateRfqQuoteParams
+from py_clob_client.rfq import RfqUserQuote
+from py_clob_client.order_builder.constants import SELL
 from py_clob_client.constants import AMOY
 from dotenv import load_dotenv
 
@@ -20,16 +21,15 @@ def main():
     )
     client = ClobClient(host, key=key, chain_id=chain_id, creds=creds)
 
-    # Create a quote for an RFQ request
-    quote_params = CreateRfqQuoteParams(
+    # Create a quote for an RFQ request to SELL 100 tokens at $0.50 each
+    user_quote = RfqUserQuote(
         request_id="0xaaaa",
-        asset_in="0",  # Maker receives USDC
-        asset_out="71321045679252212594626385532706912750332728571942532289631379312455583992563",
-        amount_in="50000000",
-        amount_out="100000000",
+        price=0.50,
+        side=SELL,
+        size=100.0,
     )
 
-    resp = client.rfq.create_rfq_quote(quote_params)
+    resp = client.rfq.create_rfq_quote(user_quote)
     print(resp)
     print("Done!")
 

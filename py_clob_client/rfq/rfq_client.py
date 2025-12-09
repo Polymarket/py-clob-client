@@ -28,9 +28,9 @@ from ..endpoints import (
 )
 
 from .rfq_types import (
-    RfqUserOrder,
-    CreateRfqRequestParams,
-    CreateRfqQuoteParams,
+    RfqUserRequest,
+    RfqUserQuote,
+
     CancelRfqRequestParams,
     CancelRfqQuoteParams,
     AcceptQuoteParams,
@@ -57,8 +57,7 @@ class RfqClient:
     This client is typically accessed via the parent ClobClient's `rfq` attribute:
 
         client = ClobClient(host, chain_id, key, creds)
-        request_params = client.rfq.create_rfq_request(user_order)
-        response = client.rfq.post_rfq_request(request_params)
+        response = client.rfq.create_rfq_request(user_request)
     """
 
     def __init__(self, parent: "ClobClient"):
@@ -109,11 +108,11 @@ class RfqClient:
 
     def create_rfq_request(
         self,
-        user_order: RfqUserOrder,
+        user_request: RfqUserRequest,
         options: Optional[PartialCreateOrderOptions] = None,
     ) -> dict:
         """
-        Create and post an RFQ request from a user order.
+        Create and post an RFQ request from a user request.
 
         This method:
         1. Resolves the tick size for the token
@@ -130,7 +129,7 @@ class RfqClient:
 
         Example:
             >>> response = client.rfq.create_rfq_request(
-            ...     RfqUserOrder(
+            ...     RfqUserRequest(
             ...         token_id="123...",
             ...         price=0.5,
             ...         side="BUY",
@@ -138,10 +137,10 @@ class RfqClient:
             ...     )
             ... )
         """
-        token_id = user_order.token_id
-        price = user_order.price
-        side = user_order.side
-        size = user_order.size
+        token_id = user_request.token_id
+        price = user_request.price
+        side = user_request.side
+        size = user_request.size
 
         # Resolve tick size (from options or fetch from server)
         tick_size = self._parent._ClobClient__resolve_tick_size(
@@ -197,34 +196,15 @@ class RfqClient:
             asset_in = "0"  # USDC
             asset_out = token_id
 
-        params = CreateRfqRequestParams(
-            asset_in=asset_in,
-            asset_out=asset_out,
-            amount_in=str(amount_in),
-            amount_out=str(amount_out),
-            user_type=user_type,
-        )
-
-        return self.post_rfq_request(params)
-
-    def post_rfq_request(self, payload: CreateRfqRequestParams) -> dict:
-        """
-        Post an RFQ request to the server.
-
-        Args:
-            payload: Request parameters from create_rfq_request()
-
-        Returns:
-            Response dict with request_id on success.
-        """
+        # Post directly to the server
         self._ensure_l2_auth()
 
         body = {
-            "assetIn": payload.asset_in,
-            "assetOut": payload.asset_out,
-            "amountIn": payload.amount_in,
-            "amountOut": payload.amount_out,
-            "userType": payload.user_type,
+            "assetIn": asset_in,
+            "assetOut": asset_out,
+            "amountIn": str(amount_in),
+            "amountOut": str(amount_out),
+            "userType": user_type,
         }
 
         headers = self._get_l2_headers("POST", CREATE_RFQ_REQUEST, body)
@@ -276,47 +256,120 @@ class RfqClient:
     # Quote-side methods
     # =========================================================================
 
-    def create_rfq_quote(self, payload: CreateRfqQuoteParams) -> dict:
+    def create_rfq_quote(
+        self,
+        user_quote: RfqUserQuote,
+        options: Optional[PartialCreateOrderOptions] = None,
+    ) -> dict:
         """
-        Create an RFQ quote in response to an RFQ request.
+        Create and post an RFQ quote in response to an RFQ request.
 
-        This method allows a market maker to respond to an RFQ request with a quote
-        offering to fill the request.
+        This method:
+        1. Fetches the RFQ request to get token_id
+        2. Resolves the tick size for the token
+        3. Rounds price and size according to tick size rules
+        4. Calculates amount_in and amount_out based on side
+        5. Posts the quote to the server
 
         Args:
-            payload: Quote parameters containing:
-                - request_id: The ID of the RFQ request being quoted
-                - asset_in: The asset the quoter will receive (token ID or "0" for USDC)
-                - asset_out: The asset the quoter will provide
-                - amount_in: Amount of asset_in (in smallest units, e.g., 6 decimals for USDC)
-                - amount_out: Amount of asset_out the quoter offers
+            user_quote: Simplified quote with request_id, price, side, size
+            options: Optional tick size override
 
         Returns:
             Response dict with quote_id on success.
 
         Example:
-            >>> quote = client.rfq.create_rfq_quote(
-            ...     CreateRfqQuoteParams(
+            >>> response = client.rfq.create_rfq_quote(
+            ...     RfqUserQuote(
             ...         request_id="019a83a9-f4c7-7c96-9139-2da2b2d934ef",
-            ...         asset_in="0",  # Receiving USDC
-            ...         asset_out="3409705850...",  # Providing this token
-            ...         amount_in="20000000",  # 20 USDC (6 decimals)
-            ...         amount_out="40000000",  # 40 tokens
+            ...         price=0.5,
+            ...         side="SELL",
+            ...         size=100.0,
             ...     )
             ... )
-            >>> # Returns: { "quoteId": "..." }
         """
-        self._ensure_l2_auth()
+        request_id = user_quote.request_id
+        price = user_quote.price
+        side = user_quote.side
+        size = user_quote.size
+
+        # Fetch the RFQ request to get token_id
+        rfq_requests = self.get_rfq_requests(
+            GetRfqRequestsParams(request_ids=[request_id])
+        )
+
+        if not rfq_requests.get("data") or len(rfq_requests["data"]) == 0:
+            raise Exception("RFQ request not found")
+
+        rfq_request = rfq_requests["data"][0]
+        token_id = rfq_request.get("token")
+
+        if not token_id:
+            raise Exception("Token ID not found in RFQ request")
+
+        # Resolve tick size (from options or fetch from server)
+        tick_size = self._parent._ClobClient__resolve_tick_size(
+            token_id,
+            options.tick_size if options else None,
+        )
+
+        # Get rounding configuration
+        round_config = ROUNDING_CONFIG[tick_size]
+
+        # Round price and size
+        rounded_price = round_normal(price, round_config.price)
+        rounded_size = round_down(size, round_config.size)
+
+        # Format with correct decimal places
+        price_decimals = int(round_config.price)
+        size_decimals = int(round_config.size)
+        amount_decimals = int(round_config.amount)
+
+        rounded_price_str = f"{rounded_price:.{price_decimals}f}"
+        rounded_size_str = f"{rounded_size:.{size_decimals}f}"
+
+        # Parse back to numbers for calculation
+        size_num = float(rounded_size_str)
+        price_num = float(rounded_price_str)
 
         # Get signature type from parent's order builder
         user_type = self._parent.builder.sig_type
 
+        # Calculate amounts based on side
+        if side == BUY:
+            # Buying tokens: pay USDC, receive tokens
+            # asset_in = tokens (what quoter receives)
+            # asset_out = USDC (what quoter pays)
+            amount_in = parse_units(rounded_size_str, COLLATERAL_TOKEN_DECIMALS)
+
+            usdc_amount = size_num * price_num
+            usdc_amount_str = f"{usdc_amount:.{amount_decimals}f}"
+            amount_out = parse_units(usdc_amount_str, COLLATERAL_TOKEN_DECIMALS)
+
+            asset_in = token_id
+            asset_out = "0"  # USDC
+        else:
+            # Selling tokens: pay tokens, receive USDC
+            # asset_in = USDC (what quoter receives)
+            # asset_out = tokens (what quoter pays)
+            usdc_amount = size_num * price_num
+            usdc_amount_str = f"{usdc_amount:.{amount_decimals}f}"
+            amount_in = parse_units(usdc_amount_str, COLLATERAL_TOKEN_DECIMALS)
+
+            amount_out = parse_units(rounded_size_str, COLLATERAL_TOKEN_DECIMALS)
+
+            asset_in = "0"  # USDC
+            asset_out = token_id
+
+        # Post directly to the server
+        self._ensure_l2_auth()
+
         body = {
-            "requestId": payload.request_id,
-            "assetIn": payload.asset_in,
-            "assetOut": payload.asset_out,
-            "amountIn": payload.amount_in,
-            "amountOut": payload.amount_out,
+            "requestId": request_id,
+            "assetIn": asset_in,
+            "assetOut": asset_out,
+            "amountIn": str(amount_in),
+            "amountOut": str(amount_out),
             "userType": user_type,
         }
 

@@ -15,7 +15,7 @@ from datetime import datetime
 
 
 @dataclass
-class RfqUserOrder:
+class RfqUserRequest:
     """
     Simplified user input for creating an RFQ request.
 
@@ -37,11 +37,33 @@ class RfqUserOrder:
 
 
 @dataclass
+class RfqUserQuote:
+    """
+    Simplified user input for creating an RFQ quote.
+
+    This is the user-facing quote format that gets converted to
+    CreateRfqQuoteParams for the API.
+    """
+
+    request_id: str
+    """ID of the RFQ request being quoted."""
+
+    price: float
+    """Price per token (0 < price < 1)."""
+
+    side: str
+    """Quoter's side: "BUY" or "SELL"."""
+
+    size: float
+    """Size in conditional tokens."""
+
+
+@dataclass
 class CreateRfqRequestParams:
     """
     Server payload for creating an RFQ request.
 
-    This is the format sent to the API after converting from RfqUserOrder.
+    This is the format sent to the API after converting from RfqUserRequest.
     """
 
     asset_in: str

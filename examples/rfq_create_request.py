@@ -2,7 +2,7 @@ import os
 
 from py_clob_client.client import ClobClient
 from py_clob_client.clob_types import ApiCreds
-from py_clob_client.rfq import RfqUserOrder
+from py_clob_client.rfq import RfqUserRequest
 from py_clob_client.order_builder.constants import BUY
 from py_clob_client.constants import AMOY
 from dotenv import load_dotenv
@@ -22,14 +22,14 @@ def main():
     client = ClobClient(host, key=key, chain_id=chain_id, creds=creds)
 
     # Create an RFQ request to BUY 100 tokens at $0.50 each
-    user_order = RfqUserOrder(
+    user_request = RfqUserRequest(
         token_id="34097058504275310827233323421517291090691602969494795225921954353603704046623",
         price=0.50,
         side=BUY,
         size=100.0,
     )
 
-    resp = client.rfq.create_rfq_request(user_order)
+    resp = client.rfq.create_rfq_request(user_request)
     print(resp)
     print("Done!")
 

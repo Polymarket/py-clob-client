@@ -23,8 +23,8 @@ from dotenv import load_dotenv
 
 from py_clob_client.client import ClobClient
 from py_clob_client.clob_types import ApiCreds
-from py_clob_client.rfq import RfqUserOrder, RfqUserQuote, AcceptQuoteParams, ApproveOrderParams
-from py_clob_client.order_builder.constants import BUY
+from py_clob_client.rfq import RfqUserRequest, RfqUserQuote, AcceptQuoteParams, ApproveOrderParams
+from py_clob_client.order_builder.constants import BUY, SELL
 from py_clob_client.constants import AMOY
 
 load_dotenv()
@@ -34,7 +34,7 @@ load_dotenv()
 # ============================================
 TOKEN_ID = "34097058504275310827233323421517291090691602969494795225921954353603704046623"
 
-REQUEST_ORDER = RfqUserOrder(
+REQUEST_REQUEST = RfqUserRequest(
     token_id=TOKEN_ID,
     price=0.50,       # Price per token (e.g., 0.50 = 50 cents)
     side=BUY,         # BUY or SELL
@@ -45,6 +45,7 @@ REQUEST_ORDER = RfqUserOrder(
 # RFQ QUOTE PARAMETERS (QUOTER) - EDIT THESE
 # ============================================
 QUOTE_PRICE = 0.50  # Quoted price per token
+QUOTE_SIZE = 100.0  # Number of tokens to quote
 
 # ============================================
 # EXPIRATION CONFIGURATION
@@ -115,10 +116,14 @@ def main():
     print("\n[Step 2] Quoter creating quote for request...")
     print(f"  Request ID: {request_id}")
     print(f"  Price: {QUOTE_PRICE}")
+    print(f"  Side: {SELL}")
+    print(f"  Size: {QUOTE_SIZE}")
 
     user_quote = RfqUserQuote(
         request_id=request_id,
         price=QUOTE_PRICE,
+        side=SELL,
+        size=QUOTE_SIZE,
     )
     rfq_quote_response = quoter_client.rfq.create_rfq_quote(user_quote)
 

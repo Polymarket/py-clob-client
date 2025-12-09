@@ -1,6 +1,7 @@
 from .rfq_types import (
     # Input types
-    RfqUserOrder,
+    RfqUserRequest,
+    RfqUserQuote,
     CreateRfqRequestParams,
     CreateRfqQuoteParams,
     CancelRfqRequestParams,
@@ -33,7 +34,8 @@ __all__ = [
     # Client
     "RfqClient",
     # Input types
-    "RfqUserOrder",
+    "RfqUserRequest",
+    "RfqUserQuote",
     "CreateRfqRequestParams",
     "CreateRfqQuoteParams",
     "CancelRfqRequestParams",
