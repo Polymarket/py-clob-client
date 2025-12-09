@@ -23,6 +23,10 @@ from .endpoints import (
     DERIVE_API_KEY,
     GET_API_KEYS,
     CLOSED_ONLY,
+    CREATE_READONLY_API_KEY,
+    GET_READONLY_API_KEYS,
+    DELETE_READONLY_API_KEY,
+    VALIDATE_READONLY_API_KEY,
     GET_LAST_TRADE_PRICE,
     GET_ORDER,
     GET_ORDER_BOOK,
@@ -58,6 +62,7 @@ from .endpoints import (
 )
 from .clob_types import (
     ApiCreds,
+    ReadonlyApiKeyResponse,
     TradeParams,
     OpenOrderParams,
     OrderArgs,
@@ -288,6 +293,67 @@ class ClobClient:
         request_args = RequestArgs(method="DELETE", request_path=DELETE_API_KEY)
         headers = create_level_2_headers(self.signer, self.creds, request_args)
         return delete("{}{}".format(self.host, DELETE_API_KEY), headers=headers)
+
+    def create_readonly_api_key(self) -> ReadonlyApiKeyResponse:
+        """
+        Creates a new readonly API key for a user
+        Level 2 Auth required
+        """
+        self.assert_level_2_auth()
+
+        request_args = RequestArgs(method="POST", request_path=CREATE_READONLY_API_KEY)
+        headers = create_level_2_headers(self.signer, self.creds, request_args)
+
+        response = post("{}{}".format(self.host, CREATE_READONLY_API_KEY), headers=headers)
+        try:
+            return ReadonlyApiKeyResponse(api_key=response["apiKey"])
+        except:
+            self.logger.error("Couldn't parse readonly API key response")
+            return None
+
+    def get_readonly_api_keys(self) -> list[str]:
+        """
+        Gets the available readonly API keys for this address
+        Level 2 Auth required
+        """
+        self.assert_level_2_auth()
+
+        request_args = RequestArgs(method="GET", request_path=GET_READONLY_API_KEYS)
+        headers = create_level_2_headers(self.signer, self.creds, request_args)
+        return get("{}{}".format(self.host, GET_READONLY_API_KEYS), headers=headers)
+
+    def delete_readonly_api_key(self, key: str) -> bool:
+        """
+        Deletes a readonly API key for a user
+        Level 2 Auth required
+        """
+        self.assert_level_2_auth()
+
+        body = {"key": key}
+        serialized = json.dumps(body, separators=(",", ":"), ensure_ascii=False)
+        request_args = RequestArgs(
+            method="DELETE",
+            request_path=DELETE_READONLY_API_KEY,
+            body=body,
+            serialized_body=serialized,
+        )
+        headers = create_level_2_headers(self.signer, self.creds, request_args)
+        return delete(
+            "{}{}".format(self.host, DELETE_READONLY_API_KEY),
+            headers=headers,
+            data=serialized,
+        )
+
+    def validate_readonly_api_key(self, address: str, key: str) -> str:
+        """
+        Validates a readonly API key for a given address
+        This is a public endpoint, no authentication required
+        """
+        return get(
+            "{}{}?address={}&key={}".format(
+                self.host, VALIDATE_READONLY_API_KEY, address, key
+            )
+        )
 
     def get_midpoint(self, token_id):
         """

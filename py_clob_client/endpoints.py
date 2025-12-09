@@ -4,6 +4,13 @@ GET_API_KEYS = "/auth/api-keys"
 DELETE_API_KEY = "/auth/api-key"
 DERIVE_API_KEY = "/auth/derive-api-key"
 CLOSED_ONLY = "/auth/ban-status/closed-only"
+
+# Readonly API Key endpoints
+CREATE_READONLY_API_KEY = "/auth/readonly-api-key"
+GET_READONLY_API_KEYS = "/auth/readonly-api-keys"
+DELETE_READONLY_API_KEY = "/auth/readonly-api-key"
+VALIDATE_READONLY_API_KEY = "/auth/validate-readonly-api-key"
+
 TRADES = "/data/trades"
 GET_ORDER_BOOK = "/book"
 GET_ORDER_BOOKS = "/books"
