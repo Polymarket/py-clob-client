@@ -443,3 +443,8 @@ class RfqPaginatedResponse:
 
     total_count: Optional[int] = None
     """Total count (optional)."""
+
+class MatchType(enumerate):
+    COMPLEMENTARY = "COMPLEMENTARY"
+    MINT = "MINT"
+    MERGE = "MERGE"
