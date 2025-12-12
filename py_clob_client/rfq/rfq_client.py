@@ -618,12 +618,7 @@ class RfqClient:
         Build the order creation payload for an RFQ request based on quote details.
         """
         match_type = quote.get("matchType", MatchType.COMPLEMENTARY)
-        print("match_type: ")
-        print(match_type)
-
         side = quote.get("side", BUY)
-        print("side: ")
-        print(side)
 
         if match_type == MatchType.COMPLEMENTARY:
             # For BUY <> SELL and SELL <> BUY
