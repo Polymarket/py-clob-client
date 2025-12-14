@@ -57,6 +57,7 @@ class TestCreateAcceptQuotePayload(TestCase):
             "sizeIn": "30",    # tokens bought
             "sizeOut": "15",
         }
+        payload = client._get_request_order_creation_payload(quote)
         self.assertEqual(payload["token"], "tokenC")
         self.assertEqual(payload["side"], BUY)
         self.assertEqual(payload["size"], "30")
