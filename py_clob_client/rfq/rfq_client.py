@@ -647,7 +647,6 @@ class RfqClient:
             token = quote.get("complement")
             if not token:
                 raise Exception("missing complement token for MINT/MERGE match")
-            side = BUY if side == BUY else SELL
             size = quote.get("sizeIn") if side == BUY else quote.get("sizeOut")
             if size is None:
                 raise Exception("missing sizeIn/sizeOut for MINT/MERGE match")
