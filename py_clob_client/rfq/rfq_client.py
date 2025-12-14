@@ -38,6 +38,7 @@ from .rfq_types import (
     GetRfqRequestsParams,
     GetRfqQuotesParams,
     GetRfqBestQuoteParams,
+    MatchType,
 )
 from .rfq_helpers import (
     parse_units,
@@ -449,33 +450,24 @@ class RfqClient:
         """
         self._ensure_l2_auth()
 
-        # Step 1: Fetch the RFQ request
-        rfq_requests = self.get_rfq_requests(
-            GetRfqRequestsParams(request_ids=[params.request_id])
+        resp = self.get_rfq_quotes(
+            GetRfqQuotesParams(quote_ids=[params.quote_id])
         )
 
-        if not rfq_requests.get("data") or len(rfq_requests["data"]) == 0:
-            raise Exception("RFQ request not found")
+        if not resp.get("data") or len(resp["data"]) == 0:
+            raise Exception("RFQ quote not found")
 
-        rfq_request = rfq_requests["data"][0]
-
-        # Step 2: Create an order based on request details
-        # Requester keeps their original side
-        side = rfq_request.get("side", BUY)
-
-        # Determine size based on request side
-        if side == BUY:
-            size = rfq_request.get("sizeIn")
-        else:
-            size = rfq_request.get("sizeOut")
-
-        token_id = rfq_request.get("token")
-        price = rfq_request.get("price")
+        rfq_quote = resp["data"][0]
+        order_creation_payload = self._get_request_order_creation_payload(rfq_quote)
+        price = rfq_quote.get("price")
+        side = order_creation_payload["side"]
+        size = float(order_creation_payload["size"])
+        token = order_creation_payload["token"]
 
         order_args = OrderArgs(
-            token_id=token_id,
+            token_id=token,
             price=float(price),
-            size=float(size),
+            size=size,
             side=side,
             expiration=params.expiration,
         )
@@ -485,7 +477,6 @@ class RfqClient:
         if not order:
             raise Exception("Error creating order")
 
-        # Step 3: Build accept payload
         order_dict = order.dict()
 
         accept_payload = {
@@ -621,3 +612,49 @@ class RfqClient:
 
         headers = self._get_l2_headers("GET", RFQ_CONFIG)
         return get(self._build_url(RFQ_CONFIG), headers=headers)
+
+    def _get_request_order_creation_payload(self, quote: dict) -> dict:
+        """
+        Build the order creation payload for an RFQ request based on quote details.
+        """
+        raw_match_type = quote.get("matchType", MatchType.COMPLEMENTARY)
+        match_type = (
+            raw_match_type
+            if isinstance(raw_match_type, MatchType)
+            else MatchType(str(raw_match_type))
+        )
+
+        side = quote.get("side", BUY)
+
+        if match_type == MatchType.COMPLEMENTARY:
+            # For BUY <> SELL and SELL <> BUY
+            # the order side is opposite the quote side
+            token = quote.get("token")
+            if not token:
+                raise Exception("missing token for COMPLEMENTARY match")
+            side = SELL if side == BUY else BUY
+            size = quote.get("sizeOut") if side == BUY else quote.get("sizeIn")
+            if size is None:
+                raise Exception("missing sizeIn/sizeOut for COMPLEMENTARY match")
+            return {
+                "token": token,
+                "side": side,
+                "size": size,
+            }
+        elif match_type in (MatchType.MINT, MatchType.MERGE):
+            # BUY<> BUY, SELL <> SELL
+            # the order side is the same as the quote side
+            token = quote.get("complement")
+            if not token:
+                raise Exception("missing complement token for MINT/MERGE match")
+            size = quote.get("sizeIn") if side == BUY else quote.get("sizeOut")
+            if size is None:
+                raise Exception("missing sizeIn/sizeOut for MINT/MERGE match")
+            return {
+                "token": token,
+                "side": side,
+                "size": size,
+            }
+        else:
+            raise Exception(f"invalid match type: {raw_match_type}")
+
