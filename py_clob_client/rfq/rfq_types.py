@@ -6,7 +6,7 @@ This module defines all input and response types used by the RFQ client.
 
 from dataclasses import dataclass, field
 from typing import List, Optional, Any
-from datetime import datetime
+from enum import Enum
 
 
 # =============================================================================
@@ -444,7 +444,8 @@ class RfqPaginatedResponse:
     total_count: Optional[int] = None
     """Total count (optional)."""
 
-class MatchType(enumerate):
+
+class MatchType(str, Enum):
     COMPLEMENTARY = "COMPLEMENTARY"
     MINT = "MINT"
     MERGE = "MERGE"

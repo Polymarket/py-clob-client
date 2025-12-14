@@ -617,15 +617,25 @@ class RfqClient:
         """
         Build the order creation payload for an RFQ request based on quote details.
         """
-        match_type = quote.get("matchType", MatchType.COMPLEMENTARY)
+        raw_match_type = quote.get("matchType", MatchType.COMPLEMENTARY)
+        match_type = (
+            raw_match_type
+            if isinstance(raw_match_type, MatchType)
+            else MatchType(str(raw_match_type))
+        )
+
         side = quote.get("side", BUY)
 
         if match_type == MatchType.COMPLEMENTARY:
             # For BUY <> SELL and SELL <> BUY
             # the order side is opposite the quote side
             token = quote.get("token")
+            if not token:
+                raise Exception("missing token for COMPLEMENTARY match")
             side = SELL if side == BUY else BUY
             size = quote.get("sizeOut") if side == BUY else quote.get("sizeIn")
+            if size is None:
+                raise Exception("missing sizeIn/sizeOut for COMPLEMENTARY match")
             return {
                 "token": token,
                 "side": side,
@@ -635,13 +645,17 @@ class RfqClient:
             # BUY<> BUY, SELL <> SELL
             # the order side is the same as the quote side
             token = quote.get("complement")
+            if not token:
+                raise Exception("missing complement token for MINT/MERGE match")
             side = BUY if side == BUY else SELL
             size = quote.get("sizeIn") if side == BUY else quote.get("sizeOut")
+            if size is None:
+                raise Exception("missing sizeIn/sizeOut for MINT/MERGE match")
             return {
                 "token": token,
                 "side": side,
                 "size": size,
             }
         else:
-            raise Exception("invalid match type")
+            raise Exception(f"invalid match type: {raw_match_type}")
 
