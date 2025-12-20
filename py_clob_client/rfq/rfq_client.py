@@ -214,7 +214,7 @@ class RfqClient:
         }
         serialized_body = json.dumps(body, separators=(",", ":"), ensure_ascii=False)
         headers = self._get_l2_headers("POST", CREATE_RFQ_REQUEST, body, serialized_body)
-        return post(self._build_url(CREATE_RFQ_REQUEST), headers=headers, data=body, serialized_body=serialized_body)
+        return post(self._build_url(CREATE_RFQ_REQUEST), headers=headers, data=serialized_body)
 
     def cancel_rfq_request(self, params: CancelRfqRequestParams) -> str:
         """
@@ -231,7 +231,7 @@ class RfqClient:
         body = {"requestId": params.request_id}
         serialized_body = json.dumps(body, separators=(",", ":"), ensure_ascii=False)
         headers = self._get_l2_headers("DELETE", CANCEL_RFQ_REQUEST, body, serialized_body)
-        return delete(self._build_url(CANCEL_RFQ_REQUEST), headers=headers, data=body, serialized_body=serialized_body)
+        return delete(self._build_url(CANCEL_RFQ_REQUEST), headers=headers, data=serialized_body)
 
     def get_rfq_requests(
         self, params: Optional[GetRfqRequestsParams] = None
@@ -370,7 +370,7 @@ class RfqClient:
         }
         serialized_body = json.dumps(body, separators=(",", ":"), ensure_ascii=False)
         headers = self._get_l2_headers("POST", CREATE_RFQ_QUOTE, body, serialized_body)
-        return post(self._build_url(CREATE_RFQ_QUOTE), headers=headers, data=body, serialized_body=serialized_body)
+        return post(self._build_url(CREATE_RFQ_QUOTE), headers=headers, data=serialized_body)
 
     def get_rfq_quotes(self, params: Optional[GetRfqQuotesParams] = None) -> dict:
         """
@@ -516,8 +516,7 @@ class RfqClient:
         return post(
             self._build_url(RFQ_REQUESTS_ACCEPT),
             headers=headers,
-            data=accept_payload,
-            serialized_body=serialized_body,
+            data=serialized_body,
         )
 
     def approve_rfq_order(self, params: ApproveOrderParams) -> str:
@@ -600,8 +599,7 @@ class RfqClient:
         return post(
             self._build_url(RFQ_QUOTE_APPROVE),
             headers=headers,
-            data=approve_payload,
-            serialized_body=serialized_body,
+            data=serialized_body,
         )
 
     # =========================================================================
