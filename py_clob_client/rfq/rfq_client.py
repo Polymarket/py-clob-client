@@ -81,7 +81,7 @@ class RfqClient:
         """
         self._parent.assert_level_2_auth()
 
-    def _get_l2_headers(self, method: str, endpoint: str, body: Any = None) -> dict:
+    def _get_l2_headers(self, method: str, endpoint: str, body: Any = None, serialized_body: Any = None) -> dict:
         """
         Create L2 authentication headers for a request.
 
@@ -94,8 +94,7 @@ class RfqClient:
             Dictionary of authentication headers.
         """
         request_args = RequestArgs(method=method, request_path=endpoint, body=body)
-        if isinstance(body, (dict, list)):
-            serialized_body=json.dumps(body, separators=(",", ":"), ensure_ascii=False)
+        if serialized_body is not None:
             request_args.serialized_body = serialized_body
 
         return create_level_2_headers(
@@ -213,9 +212,9 @@ class RfqClient:
             "amountOut": str(amount_out),
             "userType": user_type,
         }
-
-        headers = self._get_l2_headers("POST", CREATE_RFQ_REQUEST, body)
-        return post(self._build_url(CREATE_RFQ_REQUEST), headers=headers, data=body)
+        serialized_body = json.dumps(body, separators=(",", ":"), ensure_ascii=False)
+        headers = self._get_l2_headers("POST", CREATE_RFQ_REQUEST, body, serialized_body)
+        return post(self._build_url(CREATE_RFQ_REQUEST), headers=headers, data=body, serialized_body=serialized_body)
 
     def cancel_rfq_request(self, params: CancelRfqRequestParams) -> str:
         """
@@ -230,9 +229,9 @@ class RfqClient:
         self._ensure_l2_auth()
 
         body = {"requestId": params.request_id}
-
-        headers = self._get_l2_headers("DELETE", CANCEL_RFQ_REQUEST, body)
-        return delete(self._build_url(CANCEL_RFQ_REQUEST), headers=headers, data=body)
+        serialized_body = json.dumps(body, separators=(",", ":"), ensure_ascii=False)
+        headers = self._get_l2_headers("DELETE", CANCEL_RFQ_REQUEST, body, serialized_body)
+        return delete(self._build_url(CANCEL_RFQ_REQUEST), headers=headers, data=body, serialized_body=serialized_body)
 
     def get_rfq_requests(
         self, params: Optional[GetRfqRequestsParams] = None
@@ -369,9 +368,9 @@ class RfqClient:
             "amountOut": str(amount_out),
             "userType": user_type,
         }
-
-        headers = self._get_l2_headers("POST", CREATE_RFQ_QUOTE, body)
-        return post(self._build_url(CREATE_RFQ_QUOTE), headers=headers, data=body)
+        serialized_body = json.dumps(body, separators=(",", ":"), ensure_ascii=False)
+        headers = self._get_l2_headers("POST", CREATE_RFQ_QUOTE, body, serialized_body)
+        return post(self._build_url(CREATE_RFQ_QUOTE), headers=headers, data=body, serialized_body=serialized_body)
 
     def get_rfq_quotes(self, params: Optional[GetRfqQuotesParams] = None) -> dict:
         """
@@ -431,9 +430,9 @@ class RfqClient:
         self._ensure_l2_auth()
 
         body = {"quoteId": params.quote_id}
-
-        headers = self._get_l2_headers("DELETE", CANCEL_RFQ_QUOTE, body)
-        return delete(self._build_url(CANCEL_RFQ_QUOTE), headers=headers, data=body)
+        serialized_body = json.dumps(body, separators=(",", ":"), ensure_ascii=False)
+        headers = self._get_l2_headers("DELETE", CANCEL_RFQ_QUOTE, body, serialized_body)
+        return delete(self._build_url(CANCEL_RFQ_QUOTE), headers=headers, data=body, serialized_body=serialized_body)
 
     # =========================================================================
     # Trade execution methods
@@ -512,12 +511,13 @@ class RfqClient:
             accept_payload.get("tokenId"),
             accept_payload.get("side"),
         )
-
-        headers = self._get_l2_headers("POST", RFQ_REQUESTS_ACCEPT, accept_payload)
+        serialized_body = json.dumps(accept_payload, separators=(",", ":"), ensure_ascii=False)
+        headers = self._get_l2_headers("POST", RFQ_REQUESTS_ACCEPT, accept_payload, serialized_body)
         return post(
             self._build_url(RFQ_REQUESTS_ACCEPT),
             headers=headers,
             data=accept_payload,
+            serialized_body=serialized_body,
         )
 
     def approve_rfq_order(self, params: ApproveOrderParams) -> str:
@@ -595,12 +595,13 @@ class RfqClient:
             "signatureType": int(order_dict["signatureType"]),
             "signature": order_dict["signature"],
         }
-
-        headers = self._get_l2_headers("POST", RFQ_QUOTE_APPROVE, approve_payload)
+        serialized_body = json.dumps(approve_payload, separators=(",", ":"), ensure_ascii=False)
+        headers = self._get_l2_headers("POST", RFQ_QUOTE_APPROVE, approve_payload, serialized_body)
         return post(
             self._build_url(RFQ_QUOTE_APPROVE),
             headers=headers,
             data=approve_payload,
+            serialized_body=serialized_body,
         )
 
     # =========================================================================
