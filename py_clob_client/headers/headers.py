@@ -36,12 +36,7 @@ def create_level_1_headers(signer: Signer, nonce: int = None):
 
 
 def create_level_2_headers(signer: Signer, creds: ApiCreds, request_args: RequestArgs):
-    """Creates Level 2 Poly headers for a request with deterministic JSON signing.
-
-    If request_args.serialized_body is provided, it will be used directly.
-    Otherwise, if the body is a dict/list, it will be serialized with
-    canonical options to ensure the signed bytes match the transmitted bytes.
-    """
+    """Creates Level 2 Poly headers for a request using pre-serialized body if provided"""
     timestamp = int(datetime.now().timestamp())
 
     # Prefer a pre-serialized body string for deterministic signing
