@@ -4,6 +4,7 @@ from ..signer import Signer
 from ..signing.eip712 import sign_clob_auth_message
 
 from datetime import datetime
+import json
 
 POLY_ADDRESS = "POLY_ADDRESS"
 POLY_SIGNATURE = "POLY_SIGNATURE"
@@ -35,15 +36,23 @@ def create_level_1_headers(signer: Signer, nonce: int = None):
 
 
 def create_level_2_headers(signer: Signer, creds: ApiCreds, request_args: RequestArgs):
-    """Creates Level 2 Poly headers for a request using pre-serialized body if provided"""
+    """Creates Level 2 Poly headers for a request with deterministic JSON signing.
+
+    If request_args.serialized_body is provided, it will be used directly.
+    Otherwise, if the body is a dict/list, it will be serialized with
+    canonical options to ensure the signed bytes match the transmitted bytes.
+    """
     timestamp = int(datetime.now().timestamp())
 
-    # Prefer the pre-serialized body string for deterministic signing if available
-    body_for_sig = (
-        request_args.serialized_body
-        if request_args.serialized_body is not None
-        else request_args.body
-    )
+    # Prefer a pre-serialized body string for deterministic signing
+    if request_args.serialized_body is not None:
+        body_for_sig = request_args.serialized_body
+    else:
+        body = request_args.body
+        if isinstance(body, (dict, list)):
+            body_for_sig = json.dumps(body, separators=(",", ":"), ensure_ascii=False)
+        else:
+            body_for_sig = body
 
     hmac_sig = build_hmac_signature(
         creds.api_secret,

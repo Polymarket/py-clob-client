@@ -1,4 +1,5 @@
 import httpx
+import json
 
 from py_clob_client.clob_types import (
     DropNotificationParams,
@@ -45,7 +46,17 @@ def request(endpoint: str, method: str, headers=None, data=None):
                 headers=headers,
                 content=data.encode("utf-8"),
             )
+        elif isinstance(data, (dict, list)):
+            # Deterministic JSON serialization for exact match with HMAC
+            serialized = json.dumps(data, separators=(",", ":"), ensure_ascii=False)
+            resp = _http_client.request(
+                method=method,
+                url=endpoint,
+                headers=headers,
+                content=serialized.encode("utf-8"),
+            )
         else:
+            # Fallback to default json handling
             resp = _http_client.request(
                 method=method,
                 url=endpoint,
