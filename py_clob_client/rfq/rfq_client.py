@@ -6,6 +6,7 @@ including creating requests, quotes, and executing trades.
 """
 
 import logging
+import json
 from typing import Optional, Any, TYPE_CHECKING
 
 from ..clob_types import RequestArgs, OrderArgs, PartialCreateOrderOptions
@@ -93,6 +94,10 @@ class RfqClient:
             Dictionary of authentication headers.
         """
         request_args = RequestArgs(method=method, request_path=endpoint, body=body)
+        if isinstance(body, (dict, list)):
+            serialized_body=json.dumps(body, separators=(",", ":"), ensure_ascii=False)
+            request_args.serialized_body = serialized_body
+
         return create_level_2_headers(
             self._parent.signer,
             self._parent.creds,
@@ -142,7 +147,6 @@ class RfqClient:
         price = user_request.price
         side = user_request.side
         size = user_request.size
-        print("[py-clob-client editable] create_rfq_request called", user_request)
 
         # Resolve tick size (from options or fetch from server)
         tick_size = self._parent._ClobClient__resolve_tick_size(
@@ -209,10 +213,8 @@ class RfqClient:
             "amountOut": str(amount_out),
             "userType": user_type,
         }
-        print("body=", body)
 
         headers = self._get_l2_headers("POST", CREATE_RFQ_REQUEST, body)
-        print("headers=", headers)
         return post(self._build_url(CREATE_RFQ_REQUEST), headers=headers, data=body)
 
     def cancel_rfq_request(self, params: CancelRfqRequestParams) -> str:
@@ -294,7 +296,6 @@ class RfqClient:
             ...     )
             ... )
         """
-        print("[py-clob-client editable] create_rfq_quote called", user_quote)
 
         request_id = user_quote.request_id
         token_id = user_quote.token_id
