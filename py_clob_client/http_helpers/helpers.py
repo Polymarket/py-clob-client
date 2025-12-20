@@ -1,5 +1,4 @@
 import httpx
-import json
 
 from py_clob_client.clob_types import (
     DropNotificationParams,
