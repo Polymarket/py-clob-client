@@ -432,7 +432,7 @@ class RfqClient:
         body = {"quoteId": params.quote_id}
         serialized_body = json.dumps(body, separators=(",", ":"), ensure_ascii=False)
         headers = self._get_l2_headers("DELETE", CANCEL_RFQ_QUOTE, body, serialized_body)
-        return delete(self._build_url(CANCEL_RFQ_QUOTE), headers=headers, data=body, serialized_body=serialized_body)
+        return delete(self._build_url(CANCEL_RFQ_QUOTE), headers=headers, data=serialized_body)
 
     # =========================================================================
     # Trade execution methods
