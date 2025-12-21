@@ -464,14 +464,14 @@ class RfqClient:
 
         rfq_quote = resp["data"][0]
         order_creation_payload = self._get_request_order_creation_payload(rfq_quote)
-        price = rfq_quote.get("price")
+        price = order_creation_payload.get("price")
         side = order_creation_payload["side"]
         size = float(order_creation_payload["size"])
         token = order_creation_payload["token"]
 
         order_args = OrderArgs(
             token_id=token,
-            price=float(price),
+            price=price,
             size=size,
             side=side,
             expiration=params.expiration,
@@ -641,10 +641,15 @@ class RfqClient:
             size = quote.get("sizeOut") if side == BUY else quote.get("sizeIn")
             if size is None:
                 raise Exception("missing sizeIn/sizeOut for COMPLEMENTARY match")
+            price = quote.get("price")
+            if price is None:
+                raise Exception("missing price for COMPLEMENTARY match")
+            price = float(price)
             return {
                 "token": token,
                 "side": side,
                 "size": size,
+                "price": price,
             }
         elif match_type in (MatchType.MINT, MatchType.MERGE):
             # BUY<> BUY, SELL <> SELL
@@ -655,10 +660,19 @@ class RfqClient:
             size = quote.get("sizeIn") if side == BUY else quote.get("sizeOut")
             if size is None:
                 raise Exception("missing sizeIn/sizeOut for MINT/MERGE match")
+            price = quote.get("price")
+            if price is None:
+                raise Exception("missing price for MINT/MERGE match")
+            price = float(price)
+            # For a MINT or a MERGE, the requester price is the inverse of the quote price
+            # 95c Quote to BUY NO, implies that the Requester is buying YES at 5c
+            # 45c Quote to SELL NO, implies the Requester is selling YES at 55c
+            price = 1 - price
             return {
                 "token": token,
                 "side": side,
                 "size": size,
+                "price": price,
             }
         else:
             raise Exception(f"invalid match type: {raw_match_type}")
