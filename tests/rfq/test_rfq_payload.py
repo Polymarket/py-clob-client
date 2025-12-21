@@ -14,12 +14,14 @@ class TestCreateAcceptQuotePayload(TestCase):
             "token": "tokenA",
             "sizeIn": "100", 
             "sizeOut": "50",
+            "price": "0.5",
         }
 
         payload = client._get_request_order_creation_payload(quote)
         self.assertEqual(payload["token"], "tokenA")
         self.assertEqual(payload["side"], SELL)
         self.assertEqual(payload["size"], "100")
+        self.assertEqual(payload["price"], 0.5)
 
         quote = {
             "matchType": "COMPLEMENTARY",
@@ -27,12 +29,14 @@ class TestCreateAcceptQuotePayload(TestCase):
             "token": "tokenB",
             "sizeIn": "200",
             "sizeOut": "75",
+            "price": "0.60"
         }
 
         payload = client._get_request_order_creation_payload(quote)
         self.assertEqual(payload["token"], "tokenB")
         self.assertEqual(payload["side"], BUY)
-        self.assertEqual(payload["size"], "75")        
+        self.assertEqual(payload["size"], "75")
+        self.assertEqual(payload["price"], 0.60)
 
 
     def test_mint_merge(self):
@@ -43,12 +47,14 @@ class TestCreateAcceptQuotePayload(TestCase):
             "complement": "tokenC",
             "sizeIn": "30",
             "sizeOut": "15",
+            "price": "0.35",
         }
 
         payload = client._get_request_order_creation_payload(quote)
         self.assertEqual(payload["token"], "tokenC")
         self.assertEqual(payload["side"], BUY)
         self.assertEqual(payload["size"], "30")
+        self.assertEqual(payload["price"], 0.65)
 
         quote = {
             "matchType": "MINT",
@@ -56,8 +62,10 @@ class TestCreateAcceptQuotePayload(TestCase):
             "complement": "tokenC",
             "sizeIn": "30",    # tokens bought
             "sizeOut": "15",
+            "price": "0.40",
         }
         payload = client._get_request_order_creation_payload(quote)
         self.assertEqual(payload["token"], "tokenC")
         self.assertEqual(payload["side"], BUY)
         self.assertEqual(payload["size"], "30")
+        self.assertEqual(payload["price"], 0.60)
