@@ -4,7 +4,7 @@
     <img src='https://img.shields.io/pypi/v/py-clob-client.svg' alt='PyPI'/>
 </a>
 
-Python client for the Polymarket Central Limit Order Book (CLOB).
+Async Python client for the Polymarket Central Limit Order Book (CLOB). (WORK IN PROGRESS)
 
 ## Documentation
 
