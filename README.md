@@ -49,7 +49,7 @@ PRIVATE_KEY = "<your-private-key>"
 FUNDER = "<your-funder-address>"
 
 client = ClobClient(
-    HOST,  # The CLOB API endpoint
+    HOST,  # Read/write CLOB API endpoint on Polygon (mainnet)
     key=PRIVATE_KEY,  # Your wallet's private key
     chain_id=CHAIN_ID,  # Polygon chain ID (137)
     signature_type=1,  # 1 for email/Magic wallet signatures
@@ -80,7 +80,7 @@ PRIVATE_KEY = "<your-private-key>"
 PROXY_FUNDER = "<your-proxy-or-smart-wallet-address>"  # Address that holds your funds
 
 client = ClobClient(
-    HOST,  # The CLOB API endpoint
+    HOST,  # Read/write CLOB API endpoint on Polygon (mainnet)
     key=PRIVATE_KEY,  # Your wallet's private key
     chain_id=CHAIN_ID,  # Polygon chain ID (137)
     signature_type=1,  # 1 for email/Magic wallet signatures
@@ -121,7 +121,7 @@ PRIVATE_KEY = "<your-private-key>"
 FUNDER = "<your-funder-address>"
 
 client = ClobClient(
-    HOST,  # The CLOB API endpoint
+    HOST,  # Read/write CLOB API endpoint on Polygon (mainnet)
     key=PRIVATE_KEY,  # Your wallet's private key
     chain_id=CHAIN_ID,  # Polygon chain ID (137)
     signature_type=1,  # 1 for email/Magic wallet signatures
@@ -150,7 +150,7 @@ PRIVATE_KEY = "<your-private-key>"
 FUNDER = "<your-funder-address>"
 
 client = ClobClient(
-    HOST,  # The CLOB API endpoint
+    HOST,  # Read/write CLOB API endpoint on Polygon (mainnet)
     key=PRIVATE_KEY,  # Your wallet's private key
     chain_id=CHAIN_ID,  # Polygon chain ID (137)
     signature_type=1,  # 1 for email/Magic wallet signatures
@@ -178,7 +178,7 @@ PRIVATE_KEY = "<your-private-key>"
 FUNDER = "<your-funder-address>"
 
 client = ClobClient(
-    HOST,  # The CLOB API endpoint
+    HOST,  # Read/write CLOB API endpoint on Polygon (mainnet)
     key=PRIVATE_KEY,  # Your wallet's private key
     chain_id=CHAIN_ID,  # Polygon chain ID (137)
     signature_type=1,  # 1 for email/Magic wallet signatures
@@ -218,7 +218,7 @@ PRIVATE_KEY = "<your-private-key>"
 FUNDER = "<your-funder-address>"
 
 client = ClobClient(
-    HOST,  # The CLOB API endpoint
+    HOST,  # Read/write CLOB API endpoint on Polygon (mainnet)
     key=PRIVATE_KEY,  # Your wallet's private key
     chain_id=CHAIN_ID,  # Polygon chain ID (137)
     signature_type=1,  # 1 for email/Magic wallet signatures
