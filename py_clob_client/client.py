@@ -135,6 +135,10 @@ class ClobClient:
                     Allows access to all endpoints
         """
         self.host = host[0:-1] if host.endswith("/") else host
+
+        if chain_id is not None and not isinstance(chain_id, int):
+    raise TypeError(f"chain_id must be an int, got {type(chain_id).__name__}")
+
         self.chain_id = chain_id
         self.signer = Signer(key, chain_id) if key else None
         self.creds = creds
