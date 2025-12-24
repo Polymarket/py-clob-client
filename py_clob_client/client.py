@@ -304,7 +304,9 @@ class ClobClient:
         request_args = RequestArgs(method="POST", request_path=CREATE_READONLY_API_KEY)
         headers = create_level_2_headers(self.signer, self.creds, request_args)
 
-        response = post("{}{}".format(self.host, CREATE_READONLY_API_KEY), headers=headers)
+        response = post(
+            "{}{}".format(self.host, CREATE_READONLY_API_KEY), headers=headers
+        )
         try:
             return ReadonlyApiKeyResponse(api_key=response["apiKey"])
         except:
@@ -699,12 +701,14 @@ class ClobClient:
         Requires Level 2 authentication
         """
         self.assert_level_2_auth()
-        request_args = RequestArgs(method="GET", request_path=ORDERS)
-        headers = create_level_2_headers(self.signer, self.creds, request_args)
 
         results = []
         next_cursor = next_cursor if next_cursor is not None else "MA=="
         while next_cursor != END_CURSOR:
+            # Generate fresh headers for each request to avoid HMAC signature expiry
+            request_args = RequestArgs(method="GET", request_path=ORDERS)
+            headers = create_level_2_headers(self.signer, self.creds, request_args)
+
             url = add_query_open_orders_params(
                 "{}{}".format(self.host, ORDERS), params, next_cursor
             )
@@ -752,12 +756,14 @@ class ClobClient:
         Requires Level 2 authentication
         """
         self.assert_level_2_auth()
-        request_args = RequestArgs(method="GET", request_path=TRADES)
-        headers = create_level_2_headers(self.signer, self.creds, request_args)
 
         results = []
         next_cursor = next_cursor if next_cursor is not None else "MA=="
         while next_cursor != END_CURSOR:
+            # Generate fresh headers for each request to avoid HMAC signature expiry
+            request_args = RequestArgs(method="GET", request_path=TRADES)
+            headers = create_level_2_headers(self.signer, self.creds, request_args)
+
             url = add_query_trade_params(
                 "{}{}".format(self.host, TRADES), params, next_cursor
             )
@@ -983,14 +989,15 @@ class ClobClient:
         """
         self.assert_builder_auth()
 
-        request_args = RequestArgs(method="GET", request_path=GET_BUILDER_TRADES)
-        headers = self._get_builder_headers(
-            request_args.method, request_args.request_path, request_args.body
-        )
-
         results = []
         next_cursor = next_cursor if next_cursor is not None else "MA=="
         while next_cursor != END_CURSOR:
+            # Generate fresh headers for each request to avoid signature expiry
+            request_args = RequestArgs(method="GET", request_path=GET_BUILDER_TRADES)
+            headers = self._get_builder_headers(
+                request_args.method, request_args.request_path, request_args.body
+            )
+
             url = add_query_trade_params(
                 "{}{}".format(self.host, GET_BUILDER_TRADES), params, next_cursor
             )
