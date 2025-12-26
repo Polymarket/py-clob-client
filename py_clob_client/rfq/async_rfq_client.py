@@ -567,7 +567,7 @@ class AsyncRfqClient:
             expiration=params.expiration,
         )
 
-        order = self._parent.create_order(order_args)
+        order = await self._parent.create_order(order_args)
 
         if not order:
             raise Exception("Error creating order")
