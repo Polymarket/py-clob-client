@@ -49,25 +49,25 @@ from .rfq_helpers import (
 )
 
 if TYPE_CHECKING:
-    from ..client import ClobClient
+    from ..async_client import AsyncClobClient
 
 
 class AsyncRfqClient:
     """
     RFQ client for creating and managing RFQ requests and quotes.
 
-    This client is typically accessed via the parent ClobClient's `rfq` attribute:
+    This client is typically accessed via the parent asyncClobClient's `rfq` attribute:
 
-        client = ClobClient(host, chain_id, key, creds)
+        client = AsyncClobClient(host, chain_id, key, creds)
         response = client.rfq.create_rfq_request(user_request)
     """
 
-    def __init__(self, parent: "ClobClient"):
+    def __init__(self, parent: "AsyncClobClient"):
         """
         Initialize the RFQ client.
 
         Args:
-            parent: The parent ClobClient instance providing auth and config.
+            parent: The parent AsyncClobClient instance providing auth and config.
         """
         self._parent = parent
         self.logger = logging.getLogger(self.__class__.__name__)
@@ -148,7 +148,7 @@ class AsyncRfqClient:
         size = user_request.size
 
         # Resolve tick size (from options or fetch from server)
-        tick_size = self._parent._ClobClient__resolve_tick_size(
+        tick_size = await self._parent._AsyncClobClient__resolve_tick_size(
             token_id,
             options.tick_size if options else None,
         )
@@ -303,7 +303,7 @@ class AsyncRfqClient:
         size = user_quote.size
 
         # Resolve tick size (from options or fetch from server)
-        tick_size = self._parent._ClobClient__resolve_tick_size(
+        tick_size = await self._parent._AsyncClobClient__resolve_tick_size(
             token_id,
             options.tick_size if options else None,
         )
@@ -477,7 +477,7 @@ class AsyncRfqClient:
             expiration=params.expiration,
         )
 
-        order = self._parent.create_order(order_args)
+        order = await self._parent.create_order(order_args)
 
         if not order:
             raise Exception("Error creating order")
