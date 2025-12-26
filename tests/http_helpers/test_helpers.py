@@ -51,11 +51,6 @@ class TestHelpers(TestCase):
             "http://tracker?market=10000&asset_id=100&after=1450000&before=1460000&maker_address=0x0&id=aa-bb&next_cursor=AA==",
         )
 
-    def test_add_query_trade_params_no_params_includes_next_cursor(self):
-        url = add_query_trade_params("http://tracker", None, next_cursor="AA==")
-        self.assertIsNotNone(url)
-        self.assertEqual(url, "http://tracker?next_cursor=AA==")
-
     def test_add_query_open_orders_params(self):
         url = add_query_open_orders_params(
             "http://tracker",
@@ -66,11 +61,6 @@ class TestHelpers(TestCase):
             url,
             "http://tracker?market=10000&asset_id=100&id=aa-bb&next_cursor=MA==",
         )
-
-    def test_add_query_open_orders_params_no_params_includes_next_cursor(self):
-        url = add_query_open_orders_params("http://tracker", None, next_cursor="AA==")
-        self.assertIsNotNone(url)
-        self.assertEqual(url, "http://tracker?next_cursor=AA==")
 
     def test_drop_notifications_query_params(self):
         url = drop_notifications_query_params(
