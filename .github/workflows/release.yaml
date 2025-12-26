@@ -1,0 +1,45 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  id-token: write
+
+jobs:
+  release:
+    name: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.9
+
+      - run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -e .
+
+      - name: Run Tests
+        run: make test
+
+      # If your build system reads version dynamically, set it here.
+      # Common pattern: setuptools-scm or hatch-vcs will pick up the git tag automatically.
+      - name: Install build tooling
+        run: |
+          pip install build
+
+      - name: Build sdist and wheel
+        env:
+          # Many tools will respect this if you wire it up (optional)
+          PACKAGE_VERSION: ${{ github.ref_name }}
+        run: python -m build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
