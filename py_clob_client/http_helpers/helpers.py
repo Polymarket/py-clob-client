@@ -100,8 +100,23 @@ def add_query_trade_params(
     Adds query parameters to a url
     """
     url = base_url
-    if params:
+    # Include `next_cursor` even when `params` is None to advance pagination.
+    has_query = bool(next_cursor) or (
+        bool(params)
+        and any(
+            [
+                params.market,
+                params.asset_id,
+                params.after,
+                params.before,
+                params.maker_address,
+                params.id,
+            ]
+        )
+    )
+    if has_query:
         url = url + "?"
+    if params:
         if params.market:
             url = build_query_params(url, "market", params.market)
         if params.asset_id:
@@ -114,8 +129,8 @@ def add_query_trade_params(
             url = build_query_params(url, "maker_address", params.maker_address)
         if params.id:
             url = build_query_params(url, "id", params.id)
-        if next_cursor:
-            url = build_query_params(url, "next_cursor", next_cursor)
+    if next_cursor:
+        url = build_query_params(url, "next_cursor", next_cursor)
     return url
 
 
@@ -126,16 +141,21 @@ def add_query_open_orders_params(
     Adds query parameters to a url
     """
     url = base_url
-    if params:
+    # Include `next_cursor` even when `params` is None to advance pagination.
+    has_query = bool(next_cursor) or (
+        bool(params) and any([params.market, params.asset_id, params.id])
+    )
+    if has_query:
         url = url + "?"
+    if params:
         if params.market:
             url = build_query_params(url, "market", params.market)
         if params.asset_id:
             url = build_query_params(url, "asset_id", params.asset_id)
         if params.id:
             url = build_query_params(url, "id", params.id)
-        if next_cursor:
-            url = build_query_params(url, "next_cursor", next_cursor)
+    if next_cursor:
+        url = build_query_params(url, "next_cursor", next_cursor)
     return url
 
 
