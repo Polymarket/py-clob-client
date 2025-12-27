@@ -1,4 +1,7 @@
 from unittest import TestCase
+import httpx
+
+import py_clob_client.http_helpers.helpers as helpers_module
 from py_clob_client.clob_types import (
     TradeParams,
     OpenOrderParams,
@@ -8,6 +11,7 @@ from py_clob_client.clob_types import (
     OrderScoringParams,
     OrdersScoringParams,
 )
+from py_clob_client.exceptions import PolyApiException
 
 from py_clob_client.http_helpers.helpers import (
     build_query_params,
@@ -17,10 +21,15 @@ from py_clob_client.http_helpers.helpers import (
     add_balance_allowance_params_to_url,
     add_order_scoring_params_to_url,
     add_orders_scoring_params_to_url,
+    _prepare_http_proxies,
+    set_http_client_proxies,
 )
 
 
 class TestHelpers(TestCase):
+    def tearDown(self):
+        set_http_client_proxies(None)
+
     def test_build_query_params(self):
         # last is ?
         url = build_query_params("http://tracker?", "q1", "a")
@@ -114,3 +123,30 @@ class TestHelpers(TestCase):
         )
         self.assertIsNotNone(url)
         self.assertEqual(url, "http://tracker?order_ids=0x0,0x1,0x2")
+
+    def test_prepare_http_proxies_with_valid_entries(self):
+        proxies = _prepare_http_proxies(
+            {
+                "http": "http://localhost:8080",
+                "https": "https://localhost:8081",
+            }
+        )
+        self.assertEqual(
+            proxies,
+            {"http": "http://localhost:8080", "https": "https://localhost:8081"},
+        )
+
+    def test_prepare_http_proxies_rejects_invalid_shape(self):
+        with self.assertRaises(PolyApiException):
+            _prepare_http_proxies({"socks5": "socks://localhost:1080"})
+
+    def test_prepare_http_proxies_rejects_non_string_values(self):
+        with self.assertRaises(PolyApiException):
+            _prepare_http_proxies({"http": 123})
+
+    def test_set_http_client_proxies_configures_mounts(self):
+        proxy_url = "http://localhost:8080"
+        set_http_client_proxies({"http": proxy_url})
+        client = helpers_module._http_client
+        self.assertIn("http://", client._mounts)
+        self.assertIsInstance(client._mounts["http://"], httpx.HTTPTransport)
