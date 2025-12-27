@@ -18,6 +18,53 @@ PUT = "PUT"
 
 _http_client = httpx.Client(http2=True)
 
+def _build_proxy_mounts(proxies: dict[str, str]) -> dict[str, httpx.HTTPTransport]:
+    return {
+        f"{scheme}://": httpx.HTTPTransport(proxy=url)
+        for scheme, url in proxies.items()
+    }
+
+
+def _create_http_client(http_proxies: dict[str, str] | None):
+    if http_proxies is None:
+        return httpx.Client(http2=True)
+    prepared = _prepare_http_proxies(http_proxies)
+    mounts = _build_proxy_mounts(prepared)
+    return httpx.Client(http2=True, mounts=mounts)
+
+
+def set_http_client_proxies(http_proxies: dict[str, str] | None):
+    global _http_client
+    new_client = _create_http_client(http_proxies)
+    old_client = _http_client
+    _http_client = new_client
+    if old_client is not None:
+        old_client.close()
+
+
+def _prepare_http_proxies(http_proxies: dict[str, str] | None):
+    if http_proxies is None:
+        return None
+    if not isinstance(http_proxies, dict):
+        raise PolyApiException(error_msg="http_proxies must be a dict")
+
+    prepared: dict[str, str] = {}
+    for scheme in ("http", "https"):
+        if scheme in http_proxies:
+            value = http_proxies[scheme]
+            if not isinstance(value, str):
+                raise PolyApiException(
+                    error_msg="http_proxies values must be strings",
+                )
+            prepared[scheme] = value
+
+    if not prepared:
+        raise PolyApiException(
+            error_msg="http_proxies must include at least one of 'http' or 'https'",
+        )
+
+    return prepared
+
 
 def overloadHeaders(method: str, headers: dict) -> dict:
     if headers is None:
