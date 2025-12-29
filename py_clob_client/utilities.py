@@ -34,8 +34,8 @@ def generate_orderbook_summary_hash(orderbook: OrderBookSummary) -> str:
     return hash
 
 
-def order_to_json(order, owner, orderType) -> dict:
-    return {"order": order.dict(), "owner": owner, "orderType": orderType}
+def order_to_json(order, owner, orderType, post_only) -> dict:
+    return {"order": order.dict(), "owner": owner, "orderType": orderType, "postOnly": post_only}
 
 
 def is_tick_size_smaller(a: TickSize, b: TickSize) -> bool:

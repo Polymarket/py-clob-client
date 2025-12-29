@@ -560,7 +560,7 @@ class ClobClient:
         """
         self.assert_level_2_auth()
         body = [
-            order_to_json(arg.order, self.creds.api_key, arg.orderType) for arg in args
+            order_to_json(arg.order, self.creds.api_key, arg.orderType, arg.postOnly) for arg in args
         ]
         request_args = RequestArgs(
             method="POST",
@@ -585,12 +585,15 @@ class ClobClient:
             data=request_args.serialized_body,
         )
 
-    def post_order(self, order, orderType: OrderType = OrderType.GTC):
+    def post_order(self, order, orderType: OrderType = OrderType.GTC, post_only: bool = False):
         """
         Posts the order
         """
+        if post_only and (orderType != OrderType.GTC or orderType != OrderType.GTD):
+            raise Exception("post_only orders can only be of type GTC or GTD")
+
         self.assert_level_2_auth()
-        body = order_to_json(order, self.creds.api_key, orderType)
+        body = order_to_json(order, self.creds.api_key, orderType, post_only)
         request_args = RequestArgs(
             method="POST",
             request_path=POST_ORDER,
