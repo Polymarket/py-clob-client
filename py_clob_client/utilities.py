@@ -34,7 +34,7 @@ def generate_orderbook_summary_hash(orderbook: OrderBookSummary) -> str:
     return hash
 
 
-def order_to_json(order, owner, orderType, post_only) -> dict:
+def order_to_json(order, owner, orderType, post_only: bool = False) -> dict:
     return {"order": order.dict(), "owner": owner, "orderType": orderType, "postOnly": post_only}
 
 
