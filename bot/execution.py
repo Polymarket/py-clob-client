@@ -5,6 +5,7 @@ Provides a clean interface for the trading bot to interact with Polymarket.
 All order placement, cancellation, and balance queries go through here.
 """
 
+import base64
 import logging
 import os
 from dataclasses import dataclass
@@ -24,6 +25,19 @@ from py_clob_client.order_builder.constants import BUY, SELL
 from bot.state import state
 
 logger = logging.getLogger(__name__)
+
+
+def is_valid_base64(s: str) -> bool:
+    """Check if a string is valid base64."""
+    try:
+        base64.urlsafe_b64decode(s)
+        return True
+    except Exception:
+        try:
+            base64.b64decode(s)
+            return True
+        except Exception:
+            return False
 
 
 @dataclass
@@ -77,8 +91,18 @@ class ExecutionEngine:
             logger.info(f"Host: {host}")
             logger.info(f"POLY_PRIVATE_KEY: {'SET' if private_key else 'MISSING'} (len={len(private_key)})")
             logger.info(f"POLY_API_KEY: {'SET' if api_key else 'MISSING'} (len={len(api_key)}, starts={api_key[:8] if len(api_key) > 8 else 'N/A'}...)")
-            logger.info(f"POLY_API_SECRET: {'SET' if api_secret else 'MISSING'} (len={len(api_secret)})")
+            logger.info(f"POLY_API_SECRET: {'SET' if api_secret else 'MISSING'} (len={len(api_secret)}, valid_base64={is_valid_base64(api_secret)})")
             logger.info(f"POLY_API_PASSPHRASE: {'SET' if api_passphrase else 'MISSING'} (len={len(api_passphrase)})")
+
+            # Check for common issues with environment variables
+            if api_key and (api_key.startswith('"') or api_key.endswith('"')):
+                logger.warning("POLY_API_KEY appears to have quotes - this may cause issues")
+            if api_secret and (api_secret.startswith('"') or api_secret.endswith('"')):
+                logger.warning("POLY_API_SECRET appears to have quotes - this may cause issues")
+            if api_passphrase and (api_passphrase.startswith('"') or api_passphrase.endswith('"')):
+                logger.warning("POLY_API_PASSPHRASE appears to have quotes - this may cause issues")
+            if private_key and (private_key.startswith('"') or private_key.endswith('"')):
+                logger.warning("POLY_PRIVATE_KEY appears to have quotes - this may cause issues")
 
             if not all([private_key, api_key, api_secret, api_passphrase]):
                 logger.error("Missing required environment variables for CLOB client")
@@ -105,10 +129,28 @@ class ExecutionEngine:
             wallet_address = self.client.get_address()
             logger.info(f"Wallet address derived from private key: {wallet_address}")
 
-            # Verify connection
+            # Verify connection (public endpoint - no auth needed)
             self.client.get_ok()
+            logger.info("Basic connection to CLOB verified (public endpoint)")
+
+            # Verify API credentials by fetching API keys list
+            try:
+                api_keys = self.client.get_api_keys()
+                logger.info(f"API credentials verified - found {len(api_keys) if api_keys else 0} API key(s)")
+                # Check if current API key is in the list
+                if api_keys:
+                    for i, key in enumerate(api_keys):
+                        key_id = key.get("apiKey", "unknown")[:12] if isinstance(key, dict) else str(key)[:12]
+                        logger.info(f"  API key {i+1}: {key_id}...")
+            except Exception as e:
+                logger.error(f"Failed to verify API credentials: {e}")
+                logger.error("This suggests the API key/secret/passphrase do not match the wallet")
+                logger.error(f"Make sure API credentials were created by wallet: {wallet_address}")
+                # Don't fail initialization - just warn
+                logger.warning("Continuing despite API credential verification failure")
+
             self._initialized = True
-            logger.info("CLOB client initialized successfully")
+            logger.info("CLOB client initialized")
             logger.info("=== End Initialization ===")
             return True
 
