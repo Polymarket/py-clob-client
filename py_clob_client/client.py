@@ -673,7 +673,7 @@ class ClobClient:
         headers = create_level_2_headers(self.signer, self.creds, request_args)
         return delete("{}{}".format(self.host, CANCEL_ALL), headers=headers)
 
-    def post_heartbeat(self, heartbeat_id: str):
+    def post_heartbeat(self, heartbeat_id: Optional[str]):
         """
         Sends a heartbeat to the server, if heartbeats are started and one isn't sent within 10s, all orders will be cancelled
         Requires Level 2 authentication
