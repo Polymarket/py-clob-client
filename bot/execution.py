@@ -66,16 +66,29 @@ class ExecutionEngine:
         Returns True if initialization succeeded, False otherwise.
         """
         try:
-            private_key = os.environ.get("POLY_PRIVATE_KEY")
-            api_key = os.environ.get("POLY_API_KEY")
-            api_secret = os.environ.get("POLY_API_SECRET")
-            api_passphrase = os.environ.get("POLY_API_PASSPHRASE")
-            host = os.environ.get("POLY_HOST", "https://clob.polymarket.com")
+            private_key = os.environ.get("POLY_PRIVATE_KEY", "").strip()
+            api_key = os.environ.get("POLY_API_KEY", "").strip()
+            api_secret = os.environ.get("POLY_API_SECRET", "").strip()
+            api_passphrase = os.environ.get("POLY_API_PASSPHRASE", "").strip()
+            host = os.environ.get("POLY_HOST", "https://clob.polymarket.com").strip()
+
+            # Debug: Log what we have (without exposing secrets)
+            logger.info("=== CLOB Client Initialization ===")
+            logger.info(f"Host: {host}")
+            logger.info(f"POLY_PRIVATE_KEY: {'SET' if private_key else 'MISSING'} (len={len(private_key)})")
+            logger.info(f"POLY_API_KEY: {'SET' if api_key else 'MISSING'} (len={len(api_key)}, starts={api_key[:8] if len(api_key) > 8 else 'N/A'}...)")
+            logger.info(f"POLY_API_SECRET: {'SET' if api_secret else 'MISSING'} (len={len(api_secret)})")
+            logger.info(f"POLY_API_PASSPHRASE: {'SET' if api_passphrase else 'MISSING'} (len={len(api_passphrase)})")
 
             if not all([private_key, api_key, api_secret, api_passphrase]):
                 logger.error("Missing required environment variables for CLOB client")
                 logger.error("Required: POLY_PRIVATE_KEY, POLY_API_KEY, POLY_API_SECRET, POLY_API_PASSPHRASE")
                 return False
+
+            # Ensure private key has 0x prefix
+            if not private_key.startswith("0x"):
+                logger.info("Adding 0x prefix to private key")
+                private_key = "0x" + private_key
 
             self.client = ClobClient(
                 host=host,
@@ -88,10 +101,15 @@ class ExecutionEngine:
                 ),
             )
 
+            # Log the derived wallet address
+            wallet_address = self.client.get_address()
+            logger.info(f"Wallet address derived from private key: {wallet_address}")
+
             # Verify connection
             self.client.get_ok()
             self._initialized = True
             logger.info("CLOB client initialized successfully")
+            logger.info("=== End Initialization ===")
             return True
 
         except Exception as e:
