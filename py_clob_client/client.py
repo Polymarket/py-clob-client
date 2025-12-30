@@ -589,7 +589,7 @@ class ClobClient:
         """
         Posts the order
         """
-        if post_only and (orderType != OrderType.GTC or orderType != OrderType.GTD):
+        if post_only and (orderType != OrderType.GTC and orderType != OrderType.GTD):
             raise Exception("post_only orders can only be of type GTC or GTD")
 
         self.assert_level_2_auth()
