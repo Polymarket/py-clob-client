@@ -29,10 +29,12 @@ from .rfq_helpers import (
 )
 
 from .rfq_client import RfqClient
+from .async_rfq_client import AsyncRfqClient
 
 __all__ = [
     # Client
     "RfqClient",
+    "AsyncRfqClient",
     # Input types
     "RfqUserRequest",
     "RfqUserQuote",
