@@ -26,7 +26,7 @@ def main():
         [
             PostOrdersArgs(
                 # Create and sign a limit order buying 100 YES tokens for 0.50 each
-                order=client.create_order(
+                signed_order=client.create_order(
                     OrderArgs(
                         price=0.5,
                         size=100,
@@ -39,7 +39,7 @@ def main():
             ),
             PostOrdersArgs(
                 # Create and sign a limit order selling 200 NO tokens for 0.25 each
-                order=client.create_order(
+                signed_order=client.create_order(
                     OrderArgs(
                         price=0.25,
                         size=200,
