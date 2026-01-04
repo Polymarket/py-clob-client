@@ -561,7 +561,7 @@ class ClobClient:
         """
         self.assert_level_2_auth()
         body = [
-            order_to_json(arg.signedOrder, arg.owner, arg.orderType) for arg in args
+            order_to_json(arg.order, arg.owner, arg.orderType) for arg in args
         ]
         request_args = RequestArgs(
             method="POST",

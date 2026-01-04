@@ -251,6 +251,6 @@ class ContractConfig:
 
 @dataclass
 class PostOrdersArgs:
-    signedOrder: SignedOrder
+    order: SignedOrder
     orderType: OrderType = OrderType.GTC
     owner: str
