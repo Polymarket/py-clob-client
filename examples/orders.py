@@ -26,7 +26,7 @@ def main():
         [
             PostOrdersArgs(
                 # Create and sign a limit order buying 100 YES tokens for 0.50 each
-                signed_order=client.create_order(
+                order=client.create_order(
                     OrderArgs(
                         price=0.5,
                         size=100,
@@ -35,10 +35,11 @@ def main():
                     )
                 ),
                 orderType=OrderType.GTC,  # Good 'Til Cancelled
+                postOnly=False,
             ),
             PostOrdersArgs(
                 # Create and sign a limit order selling 200 NO tokens for 0.25 each
-                signed_order=client.create_order(
+                order=client.create_order(
                     OrderArgs(
                         price=0.25,
                         size=200,
@@ -47,6 +48,7 @@ def main():
                     )
                 ),
                 orderType=OrderType.GTC,  # Good 'Til Cancelled
+                postOnly=False, # Defaults to false, can be set to true to avoid matching on post
             ),
         ]
     )
