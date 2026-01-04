@@ -35,6 +35,7 @@ def main():
                     )
                 ),
                 orderType=OrderType.GTC,  # Good 'Til Cancelled
+                owner=creds.api_key,
             ),
             PostOrdersArgs(
                 # Create and sign a limit order selling 200 NO tokens for 0.25 each
@@ -47,6 +48,7 @@ def main():
                     )
                 ),
                 orderType=OrderType.GTC,  # Good 'Til Cancelled
+                owner=creds.api_key,
             ),
         ]
     )
