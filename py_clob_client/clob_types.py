@@ -253,3 +253,4 @@ class ContractConfig:
 class PostOrdersArgs:
     order: SignedOrder
     orderType: OrderType = OrderType.GTC
+    owner: str
