@@ -294,9 +294,11 @@ class TestUtilities(TestCase):
             ),
             owner=owner,
             orderType=OrderType.GTD,
+            post_only=True,
         )
 
         self.assertIsNotNone(json_order)
+        self.assertEqual(json_order["postOnly"], True)
         self.assertEqual(json_order["orderType"], "GTD")
         self.assertEqual(json_order["owner"], owner)
         self.assertIsNotNone(json_order["order"])
