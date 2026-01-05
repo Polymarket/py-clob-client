@@ -19,7 +19,7 @@ def main():
         api_secret=os.getenv("CLOB_SECRET"),
         api_passphrase=os.getenv("CLOB_PASS_PHRASE"),
     )
-    chain_id = AMOY
+    chain_id = int(os.getenv("CHAIN_ID", AMOY))
     client = ClobClient(host, key=key, chain_id=chain_id, creds=creds)
 
     # Create and sign a limit order buying 100 YES tokens for 0.0005 each
