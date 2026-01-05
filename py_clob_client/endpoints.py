@@ -45,7 +45,7 @@ GET_SIMPLIFIED_MARKETS = "/simplified-markets"
 GET_MARKETS = "/markets"
 GET_MARKET = "/markets/"
 GET_MARKET_TRADES_EVENTS = "/live-activity/events/"
-
+POST_HEARTBEAT = "/v1/heartbeats"
 GET_BUILDER_TRADES = "/builder/trades"
 
 # RFQ Endpoints

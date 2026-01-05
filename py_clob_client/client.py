@@ -59,6 +59,7 @@ from .endpoints import (
     GET_SPREAD,
     GET_SPREADS,
     GET_BUILDER_TRADES,
+    POST_HEARTBEAT,
 )
 from .clob_types import (
     ApiCreds,
@@ -560,7 +561,7 @@ class ClobClient:
         """
         self.assert_level_2_auth()
         body = [
-            order_to_json(arg.order, self.creds.api_key, arg.orderType) for arg in args
+            order_to_json(arg.order, self.creds.api_key, arg.orderType, arg.postOnly) for arg in args
         ]
         request_args = RequestArgs(
             method="POST",
@@ -585,12 +586,15 @@ class ClobClient:
             data=request_args.serialized_body,
         )
 
-    def post_order(self, order, orderType: OrderType = OrderType.GTC):
+    def post_order(self, order, orderType: OrderType = OrderType.GTC, post_only: bool = False):
         """
         Posts the order
         """
+        if post_only and (orderType != OrderType.GTC and orderType != OrderType.GTD):
+            raise Exception("post_only orders can only be of type GTC or GTD")
+
         self.assert_level_2_auth()
-        body = order_to_json(order, self.creds.api_key, orderType)
+        body = order_to_json(order, self.creds.api_key, orderType, post_only)
         request_args = RequestArgs(
             method="POST",
             request_path=POST_ORDER,
@@ -671,6 +675,22 @@ class ClobClient:
         request_args = RequestArgs(method="DELETE", request_path=CANCEL_ALL)
         headers = create_level_2_headers(self.signer, self.creds, request_args)
         return delete("{}{}".format(self.host, CANCEL_ALL), headers=headers)
+
+    def post_heartbeat(self, heartbeat_id: Optional[str]):
+        """
+        Sends a heartbeat to the server, if heartbeats are started and one isn't sent within 10s, all orders will be cancelled
+        Requires Level 2 authentication
+        """
+        self.assert_level_2_auth()
+        body = {"heartbeat_id": heartbeat_id}
+        serialized = json.dumps(body, separators=(",", ":"), ensure_ascii=False)
+        request_args = RequestArgs(method="POST", request_path=POST_HEARTBEAT, body=body, serialized_body=serialized)
+        headers = create_level_2_headers(self.signer, self.creds, request_args)
+        return post(
+            "{}{}".format(self.host, POST_HEARTBEAT),
+            headers=headers,
+            data=serialized
+        )
 
     def cancel_market_orders(self, market: str = "", asset_id: str = ""):
         """
