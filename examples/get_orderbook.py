@@ -1,4 +1,8 @@
 from py_clob_client.client import ClobClient
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 def main():
@@ -6,7 +10,7 @@ def main():
     client = ClobClient(host)
 
     orderbook = client.get_order_book(
-        "71321045679252212594626385532706912750332728571942532289631379312455583992563"
+        "34097058504275310827233323421517291090691602969494795225921954353603704046623"
     )
     print("orderbook", orderbook)
 

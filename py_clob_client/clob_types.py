@@ -172,6 +172,7 @@ class OrderBookSummary:
     min_order_size: str = None
     neg_risk: bool = None
     tick_size: str = None
+    last_trade_price: str = None
     hash: str = None
 
     @property
