@@ -7,6 +7,7 @@ including creating requests, quotes, and executing trades.
 
 import logging
 import json
+from urllib.parse import urlencode
 from typing import Optional, Any, TYPE_CHECKING
 
 from ..clob_types import RequestArgs, OrderArgs, PartialCreateOrderOptions
@@ -254,8 +255,9 @@ class RfqClient:
         # Build URL with query params
         url = self._build_url(GET_RFQ_REQUESTS)
         if query_params:
-            query_string = "&".join(f"{k}={v}" for k, v in query_params.items())
-            url = f"{url}?{query_string}"
+            # Use doseq=True so list values become repeated query params:
+            # requestIds=id1&requestIds=id2
+            url = f"{url}?{urlencode(query_params, doseq=True)}"
 
         return get(url, headers=headers)
 
@@ -393,8 +395,7 @@ class RfqClient:
         # Build URL with query params
         url = self._build_url(GET_RFQ_REQUESTER_QUOTES)
         if query_params:
-            query_string = "&".join(f"{k}={v}" for k, v in query_params.items())
-            url = f"{url}?{query_string}"
+            url = f"{url}?{urlencode(query_params, doseq=True)}"
 
         return get(url, headers=headers)
 
@@ -418,8 +419,7 @@ class RfqClient:
         # Build URL with query params
         url = self._build_url(GET_RFQ_QUOTER_QUOTES)
         if query_params:
-            query_string = "&".join(f"{k}={v}" for k, v in query_params.items())
-            url = f"{url}?{query_string}"
+            url = f"{url}?{urlencode(query_params, doseq=True)}"
 
         return get(url, headers=headers)
 
@@ -441,7 +441,7 @@ class RfqClient:
 
         url = self._build_url(GET_RFQ_BEST_QUOTE)
         if params and params.request_id:
-            url = f"{url}?requestId={params.request_id}"
+            url = f"{url}?{urlencode({'requestId': params.request_id})}"
 
         return get(url, headers=headers)
 

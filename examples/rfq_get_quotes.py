@@ -22,7 +22,7 @@ def main():
 
     params = GetRfqQuotesParams(
         # quote_ids=["0197656d-56ee-74a4-a06a-3b179121f3bf"],
-        # state="active",
+        state="active",
         # markets=["0x0000000000000000000000000000000000000000"],
         # size_min=5,
         # size_max=100,

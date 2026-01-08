@@ -69,8 +69,8 @@ def parse_rfq_requests_params(params: Optional[GetRfqRequestsParams] = None) -> 
     """
     Convert GetRfqRequestsParams to query string parameters.
 
-    Arrays are converted to comma-separated strings.
-    Snake_case fields are converted to camelCase.
+    Arrays are kept as Python lists so the caller can serialize them with
+    `urllib.parse.urlencode(..., doseq=True)` (repeated query params).
 
     Args:
         params: Optional filter parameters
@@ -104,13 +104,13 @@ def parse_rfq_requests_params(params: Optional[GetRfqRequestsParams] = None) -> 
         if value is not None:
             result[api_name] = value
 
-    # Array fields (convert to comma-separated strings)
+    # Array fields (keep as lists; let urlencode(doseq=True) expand them)
     if params.request_ids:
-        result["requestIds"] = ",".join(params.request_ids)
+        result["requestIds"] = params.request_ids
     if params.states:
-        result["states"] = ",".join(params.states)
+        result["states"] = params.states
     if params.markets:
-        result["markets"] = ",".join(params.markets)
+        result["markets"] = params.markets
 
     return result
 
@@ -119,8 +119,8 @@ def parse_rfq_quotes_params(params: Optional[GetRfqQuotesParams] = None) -> Dict
     """
     Convert GetRfqQuotesParams to query string parameters.
 
-    Arrays are converted to comma-separated strings.
-    Snake_case fields are converted to camelCase.
+    Arrays are kept as Python lists so the caller can serialize them with
+    `urllib.parse.urlencode(..., doseq=True)` (repeated query params).
 
     Args:
         params: Optional filter parameters
@@ -154,14 +154,14 @@ def parse_rfq_quotes_params(params: Optional[GetRfqQuotesParams] = None) -> Dict
         if value is not None:
             result[api_name] = value
 
-    # Array fields (convert to comma-separated strings)
+    # Array fields (keep as lists; let urlencode(doseq=True) expand them)
     if params.quote_ids:
-        result["quoteIds"] = ",".join(params.quote_ids)
+        result["quoteIds"] = params.quote_ids
     if params.request_ids:
-        result["requestIds"] = ",".join(params.request_ids)
+        result["requestIds"] = params.request_ids
     if params.states:
-        result["states"] = ",".join(params.states)
+        result["states"] = params.states
     if params.markets:
-        result["markets"] = ",".join(params.markets)
+        result["markets"] = params.markets
 
     return result
