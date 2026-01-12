@@ -85,7 +85,6 @@ def parse_rfq_requests_params(params: Optional[GetRfqRequestsParams] = None) -> 
 
     # Single value fields (convert snake_case to camelCase)
     single_fields = [
-        ("user_address", "userAddress"),
         ("state", "state"),
         ("size_min", "sizeMin"),
         ("size_max", "sizeMax"),
@@ -107,8 +106,6 @@ def parse_rfq_requests_params(params: Optional[GetRfqRequestsParams] = None) -> 
     # Array fields (keep as lists; let urlencode(doseq=True) expand them)
     if params.request_ids:
         result["requestIds"] = params.request_ids
-    if params.states:
-        result["states"] = params.states
     if params.markets:
         result["markets"] = params.markets
 
@@ -135,7 +132,6 @@ def parse_rfq_quotes_params(params: Optional[GetRfqQuotesParams] = None) -> Dict
 
     # Single value fields (convert snake_case to camelCase)
     single_fields = [
-        ("user_address", "userAddress"),
         ("state", "state"),
         ("size_min", "sizeMin"),
         ("size_max", "sizeMax"),
@@ -159,8 +155,6 @@ def parse_rfq_quotes_params(params: Optional[GetRfqQuotesParams] = None) -> Dict
         result["quoteIds"] = params.quote_ids
     if params.request_ids:
         result["requestIds"] = params.request_ids
-    if params.states:
-        result["states"] = params.states
     if params.markets:
         result["markets"] = params.markets
 
