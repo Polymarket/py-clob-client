@@ -275,7 +275,7 @@ class ClobClient:
 
     def get_closed_only_mode(self):
         """
-        Gets the closed only mode flag for thsi address
+        Gets the closed only mode flag for this address
         Level 2 Auth required
         """
         self.assert_level_2_auth()
