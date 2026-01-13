@@ -971,19 +971,61 @@ class ClobClient:
             )
         )
 
-    def get_markets(self, next_cursor="MA=="):
+    def get_markets(self, next_cursor: str = "MA=="):
         """
-        Get the current markets
+        Get the current markets (single page)
         """
         return get("{}{}?next_cursor={}".format(self.host, GET_MARKETS, next_cursor))
 
-    def get_simplified_markets(self, next_cursor="MA=="):
+    def get_simplified_markets(self, next_cursor: str = "MA=="):
         """
-        Get the current simplified markets
+        Get the current simplified markets (single page)
         """
         return get(
             "{}{}?next_cursor={}".format(self.host, GET_SIMPLIFIED_MARKETS, next_cursor)
         )
+
+    def get_all_markets(self, next_cursor: str = "MA=="):
+        """
+        Fetches all pages of markets by iterating through the API cursors.
+
+        Args:
+            next_cursor (str): The initial pagination cursor. Defaults to "MA==".
+                If None is passed, default will be used.
+
+        Returns:
+            list: A list of all market objects returned by the CLOB.
+        """
+        results: list = []
+        cursor = next_cursor if next_cursor is not None else "MA=="
+
+        # Loop until server signals end of pagination with END_CURSOR
+        while cursor != END_CURSOR:
+            response = self.get_markets(cursor)
+            cursor = response["next_cursor"]
+            results += response["data"]
+
+        return results
+
+    def get_all_simplified_markets(self, next_cursor: str = "MA=="):
+        """
+        Fetches all pages of simplified markets by iterating through the API cursors.
+
+        Args:
+            next_cursor (str): The initial pagination cursor. Defaults to "MA==".
+
+        Returns:
+            list: A list of all simplified market objects.
+        """
+        results: list = []
+        cursor = next_cursor if next_cursor is not None else "MA=="
+
+        while cursor != END_CURSOR:
+            response = self.get_simplified_markets(cursor)
+            cursor = response["next_cursor"]
+            results += response["data"]
+
+        return results
 
     def get_market(self, condition_id):
         """
