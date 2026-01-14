@@ -91,6 +91,7 @@ from .http_helpers.helpers import (
     drop_notifications_query_params,
     add_balance_allowance_params_to_url,
     add_order_scoring_params_to_url,
+    set_http_client_proxies,
 )
 
 from .constants import (
@@ -122,6 +123,7 @@ class ClobClient:
         signature_type: int = None,
         funder: str = None,
         builder_config: BuilderConfig = None,
+        http_proxies: Optional[dict[str, str]] = None,
     ):
         """
         Initializes the clob client
@@ -140,6 +142,9 @@ class ClobClient:
         self.signer = Signer(key, chain_id) if key else None
         self.creds = creds
         self.mode = self._get_client_mode()
+        self.http_proxies = http_proxies
+        if self.http_proxies:
+            set_http_client_proxies(self.http_proxies)
 
         if self.signer:
             self.builder = OrderBuilder(
