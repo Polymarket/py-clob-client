@@ -35,6 +35,7 @@ def main():
                     )
                 ),
                 orderType=OrderType.GTC,  # Good 'Til Cancelled
+                owner=creds.api_key,
                 postOnly=False,
             ),
             PostOrdersArgs(
@@ -48,6 +49,7 @@ def main():
                     )
                 ),
                 orderType=OrderType.GTC,  # Good 'Til Cancelled
+                owner=creds.api_key,
                 postOnly=False, # Defaults to false, can be set to true to avoid matching on post
             ),
         ]
