@@ -7,6 +7,7 @@ including creating requests, quotes, and executing trades.
 
 import logging
 import json
+from urllib.parse import urlencode
 from typing import Optional, Any, TYPE_CHECKING
 
 from ..clob_types import RequestArgs, OrderArgs, PartialCreateOrderOptions
@@ -21,7 +22,8 @@ from ..endpoints import (
     GET_RFQ_REQUESTS,
     CREATE_RFQ_QUOTE,
     CANCEL_RFQ_QUOTE,
-    GET_RFQ_QUOTES,
+    GET_RFQ_REQUESTER_QUOTES,
+    GET_RFQ_QUOTER_QUOTES,
     GET_RFQ_BEST_QUOTE,
     RFQ_REQUESTS_ACCEPT,
     RFQ_QUOTE_APPROVE,
@@ -253,8 +255,9 @@ class RfqClient:
         # Build URL with query params
         url = self._build_url(GET_RFQ_REQUESTS)
         if query_params:
-            query_string = "&".join(f"{k}={v}" for k, v in query_params.items())
-            url = f"{url}?{query_string}"
+            # Use doseq=True so list values become repeated query params:
+            # requestIds=id1&requestIds=id2
+            url = f"{url}?{urlencode(query_params, doseq=True)}"
 
         return get(url, headers=headers)
 
@@ -372,9 +375,11 @@ class RfqClient:
         headers = self._get_l2_headers("POST", CREATE_RFQ_QUOTE, body, serialized_body)
         return post(self._build_url(CREATE_RFQ_QUOTE), headers=headers, data=serialized_body)
 
-    def get_rfq_quotes(self, params: Optional[GetRfqQuotesParams] = None) -> dict:
+    def get_rfq_requester_quotes(self, params: Optional[GetRfqQuotesParams] = None) -> dict:
         """
-        Get RFQ quotes with optional filtering.
+        Get quotes on requests created by the authenticated user (requester view).
+
+        Returns quotes that others have made on your RFQ requests.
 
         Args:
             params: Optional filter parameters.
@@ -384,14 +389,37 @@ class RfqClient:
         """
         self._ensure_l2_auth()
 
-        headers = self._get_l2_headers("GET", GET_RFQ_QUOTES)
+        headers = self._get_l2_headers("GET", GET_RFQ_REQUESTER_QUOTES)
         query_params = parse_rfq_quotes_params(params)
 
         # Build URL with query params
-        url = self._build_url(GET_RFQ_QUOTES)
+        url = self._build_url(GET_RFQ_REQUESTER_QUOTES)
         if query_params:
-            query_string = "&".join(f"{k}={v}" for k, v in query_params.items())
-            url = f"{url}?{query_string}"
+            url = f"{url}?{urlencode(query_params, doseq=True)}"
+
+        return get(url, headers=headers)
+
+    def get_rfq_quoter_quotes(self, params: Optional[GetRfqQuotesParams] = None) -> dict:
+        """
+        Get quotes created by the authenticated user (quoter view).
+
+        Returns quotes that you have made on others' RFQ requests.
+
+        Args:
+            params: Optional filter parameters.
+
+        Returns:
+            Paginated response with RFQ quotes.
+        """
+        self._ensure_l2_auth()
+
+        headers = self._get_l2_headers("GET", GET_RFQ_QUOTER_QUOTES)
+        query_params = parse_rfq_quotes_params(params)
+
+        # Build URL with query params
+        url = self._build_url(GET_RFQ_QUOTER_QUOTES)
+        if query_params:
+            url = f"{url}?{urlencode(query_params, doseq=True)}"
 
         return get(url, headers=headers)
 
@@ -413,7 +441,7 @@ class RfqClient:
 
         url = self._build_url(GET_RFQ_BEST_QUOTE)
         if params and params.request_id:
-            url = f"{url}?requestId={params.request_id}"
+            url = f"{url}?{urlencode({'requestId': params.request_id})}"
 
         return get(url, headers=headers)
 
@@ -455,7 +483,7 @@ class RfqClient:
         """
         self._ensure_l2_auth()
 
-        resp = self.get_rfq_quotes(
+        resp = self.get_rfq_requester_quotes(
             GetRfqQuotesParams(quote_ids=[params.quote_id])
         )
 
@@ -537,7 +565,7 @@ class RfqClient:
         self._ensure_l2_auth()
 
         # Step 1: Fetch the RFQ quote
-        rfq_quotes = self.get_rfq_quotes(
+        rfq_quotes = self.get_rfq_quoter_quotes(
             GetRfqQuotesParams(quote_ids=[params.quote_id])
         )
 
