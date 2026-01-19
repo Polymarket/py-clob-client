@@ -27,14 +27,32 @@ The examples below are short and copy‑pasteable.
 ### Quickstart (read‑only)
 
 ```python
+import os
+
 from py_clob_client.client import ClobClient
 
-client = ClobClient("https://clob.polymarket.com")  # Level 0 (no auth)
 
-ok = client.get_ok()
-time = client.get_server_time()
-print(ok, time)
+def require_env(name: str) -> str:
+    try:
+        return os.environ[name]
+    except KeyError:
+        raise RuntimeError(f"Missing required environment variable: {name}")
+
+
+def main() -> None:
+    host = require_env("POLYMARKET_CLOB_URL")
+
+    client = ClobClient(host)  # Level 0 (no auth)
+
+    ok = client.get_ok()
+    time = client.get_server_time()
+    print(ok, time)
+
+
+if __name__ == "__main__":
+    main()
 ```
+Tip: set POLYMARKET_CLOB_URL in your environment or `.env` file before running the example.
 
 ### Start trading (EOA)
 
