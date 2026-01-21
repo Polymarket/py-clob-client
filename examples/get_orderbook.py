@@ -1,3 +1,5 @@
+import os
+
 from py_clob_client.client import ClobClient
 import os
 from dotenv import load_dotenv
