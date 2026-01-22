@@ -3,6 +3,12 @@
 <a href='https://pypi.org/project/py-clob-client'>
     <img src='https://img.shields.io/pypi/v/py-clob-client.svg' alt='PyPI'/>
 </a>
+<a href='https://github.com/Polymarket/py-clob-client/blob/main/LICENSE'>
+    <img src='https://img.shields.io/github/license/Polymarket/py-clob-client' alt='License'/>
+</a>
+<a href='https://github.com/Polymarket/py-clob-client/actions/workflows/github-code-scanning/codeql'>
+    <img src='https://github.com/Polymarket/py-clob-client/actions/workflows/github-code-scanning/codeql/badge.svg' alt='CodeQL'/>
+</a>
 
 Python client for the Polymarket Central Limit Order Book (CLOB).
 
