@@ -7,7 +7,6 @@
 Python client for the Polymarket Central Limit Order Book (CLOB).
 
 ## Documentation
-
 ## Installation
 
 ```bash
