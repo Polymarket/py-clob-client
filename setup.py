@@ -32,7 +32,6 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     packages=setuptools.find_packages(),
-    include_package_data=True,
     package_data={"py_clob_client": ["py.typed"]},
     python_requires=">=3.9.10",
 )
