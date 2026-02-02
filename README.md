@@ -266,6 +266,18 @@ See [this Python example](https://gist.github.com/poly-rodr/44313920481de58d5a3f
 
 **Pro tip**: You only need to set these once per wallet. After that, you can trade freely.
 
+## Examples
+
+The `examples/` directory contains minimal Python scripts demonstrating common
+CLOB workflows:
+
+- `fetch_markets.py` – fetch active markets
+- `get_orderbook.py` – fetch a single orderbook by token_id
+- `get_orderbooks.py` – fetch multiple orderbooks in one request
+- `get_orders.py` – fetch open orders for a market (requires API credentials)
+
+These scripts are intentionally minimal and designed for quick experimentation.
+
 ## Notes
 - To discover token IDs, use the Markets API Explorer: [Get Markets](https://docs.polymarket.com/developers/gamma-markets-api/get-markets).
 - Prices are in dollars from 0.00 to 1.00. Shares are whole or fractional units of the outcome token.

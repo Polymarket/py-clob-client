@@ -1,3 +1,14 @@
+"""
+Example: Fetch open orders for a given market
+
+Requires:
+- CLOB_API_URL
+- PK
+- CLOB_API_KEY
+- CLOB_SECRET
+- CLOB_PASS_PHRASE
+"""
+
 import os
 
 from py_clob_client.client import ClobClient
@@ -28,4 +39,5 @@ def main():
     print("Done!")
 
 
-main()
+if __name__ == "__main__":
+    main()

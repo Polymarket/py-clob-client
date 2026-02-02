@@ -1,3 +1,11 @@
+"""
+Example: Fetch multiple orderbooks by token_id list
+
+Requires:
+- CLOB_API_URL (optional, defaults to Polymarket public endpoint)
+"""
+
+import os
 from py_clob_client.client import ClobClient
 from py_clob_client.clob_types import BookParams
 
@@ -20,4 +28,5 @@ def main():
     print("Done!")
 
 
-main()
+if __name__ == "__main__":
+    main()
