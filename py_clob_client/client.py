@@ -435,7 +435,7 @@ class ClobClient:
         Opportunistically updates the tick size cache from an order book response.
         """
         if book and book.asset_id and book.tick_size:
-            self.__tick_sizes[book.asset_id] = book.tick_size
+            self.__tick_sizes[book.asset_id] = str(book.tick_size)
             self.__tick_size_timestamps[book.asset_id] = time.monotonic()
 
     def get_neg_risk(self, token_id: str) -> bool:
