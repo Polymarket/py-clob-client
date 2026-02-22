@@ -238,11 +238,11 @@ print(last, len(trades))
 - **Using MetaMask or hardware wallet?** You need to set allowances before trading.
 
 ### What are allowances?
-Think of allowances as permissions. Before Polymarket can move your funds to execute trades, you need to give the exchange contracts permission to access your USDC and conditional tokens.
+Think of allowances as permissions. Before Polymarket can move your funds to execute trades, you need to give the exchange contracts permission to access your USDC.e and conditional tokens.
 
 ### Quick Setup
 You need to approve two types of tokens:
-1. **USDC** (for deposits and trading)
+1. **USDC.e** (for deposits and trading)
 2. **Conditional Tokens** (the outcome tokens you trade)
 
 Each needs approval for the exchange contracts to work properly.
@@ -250,7 +250,7 @@ Each needs approval for the exchange contracts to work properly.
 ### Setting Allowances
 Here's a simple breakdown of what needs to be approved:
 
-**For USDC (your trading currency):**
+**For USDC.e (your trading currency):**
 - Token: `0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174`
 - Approve for these contracts:
   - `0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E` (Main exchange)
