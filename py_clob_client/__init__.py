@@ -1,4 +1,5 @@
 from .client import ClobClient
+from .exceptions import TickSizeRejectedError
 from .clob_types import (
     ApiCreds,
     OrderArgs,
@@ -38,6 +39,8 @@ from .rfq import (
 __all__ = [
     # Main client
     "ClobClient",
+    # Exceptions
+    "TickSizeRejectedError",
     # Core types
     "ApiCreds",
     "OrderArgs",
