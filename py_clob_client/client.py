@@ -454,10 +454,32 @@ class ClobClient:
         """True if the API error message is likely due to tick size / price precision."""
         if error_msg is None:
             return False
-        msg = str(error_msg).lower()
+        msg = ClobClient._error_message_to_string(error_msg)
         return any(
             kw in msg for kw in ("tick", "precision", "minimum_tick")
         )
+
+    @staticmethod
+    def _flatten_error_message(value) -> str:
+        """Flatten dict/list error payloads into a single string (preserves casing)."""
+        if value is None:
+            return ""
+        if isinstance(value, str):
+            return value
+        if isinstance(value, dict):
+            return " ".join(
+                ClobClient._flatten_error_message(v) for v in value.values()
+            )
+        if isinstance(value, (list, tuple)):
+            return " ".join(
+                ClobClient._flatten_error_message(v) for v in value
+            )
+        return str(value)
+
+    @staticmethod
+    def _error_message_to_string(value) -> str:
+        """Flatten dict/list error payloads into a single lowercase string for keyword search."""
+        return ClobClient._flatten_error_message(value).lower()
 
     def get_neg_risk(self, token_id: str) -> bool:
         if token_id in self.__neg_risk:
@@ -648,7 +670,9 @@ class ClobClient:
             )
         except PolyApiException as e:
             if self._is_tick_size_related_error(e.error_msg):
-                err = TickSizeRejectedError(str(e.error_msg), api_exception=e)
+                err = TickSizeRejectedError(
+                    self._flatten_error_message(e.error_msg), api_exception=e
+                )
                 err.__cause__ = e
                 raise err
             raise
@@ -686,7 +710,9 @@ class ClobClient:
             )
         except PolyApiException as e:
             if self._is_tick_size_related_error(e.error_msg):
-                err = TickSizeRejectedError(str(e.error_msg), api_exception=e)
+                err = TickSizeRejectedError(
+                    self._flatten_error_message(e.error_msg), api_exception=e
+                )
                 err.__cause__ = e
                 raise err
             raise
