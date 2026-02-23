@@ -454,8 +454,6 @@ class ClobClient:
         """True if the API error message is likely due to tick size / price precision."""
         if error_msg is None:
             return False
-        s = json.dumps(error_msg).lower() if isinstance(error_msg, dict) else str(error_msg).lower()
-        return "tick" in s or "precision" in s or "minimum_tick" in s
 
     def get_neg_risk(self, token_id: str) -> bool:
         if token_id in self.__neg_risk:
