@@ -454,6 +454,10 @@ class ClobClient:
         """True if the API error message is likely due to tick size / price precision."""
         if error_msg is None:
             return False
+        msg = str(error_msg).lower()
+        return any(
+            kw in msg for kw in ("tick", "precision", "minimum_tick")
+        )
 
     def get_neg_risk(self, token_id: str) -> bool:
         if token_id in self.__neg_risk:
