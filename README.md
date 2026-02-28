@@ -8,6 +8,8 @@ Python client for the Polymarket Central Limit Order Book (CLOB).
 
 ## Documentation
 
+See the official Polymarket CLOB docs: [Quickstart](https://docs.polymarket.com/developers/CLOB/quickstart) and [Authentication](https://docs.polymarket.com/developers/CLOB/authentication).
+
 ## Installation
 
 ```bash
