@@ -1,24 +1,24 @@
-from math import floor, ceil
-from decimal import Decimal
+from decimal import Decimal, ROUND_FLOOR, ROUND_HALF_UP, ROUND_CEILING
 
 
 def round_down(x: float, sig_digits: int) -> float:
-    return floor(x * (10**sig_digits)) / (10**sig_digits)
+    d = Decimal(str(x))
+    return float(d.quantize(Decimal(10) ** -sig_digits, rounding=ROUND_FLOOR))
 
 
 def round_normal(x: float, sig_digits: int) -> float:
-    return round(x * (10**sig_digits)) / (10**sig_digits)
+    d = Decimal(str(x))
+    return float(d.quantize(Decimal(10) ** -sig_digits, rounding=ROUND_HALF_UP))
 
 
 def round_up(x: float, sig_digits: int) -> float:
-    return ceil(x * (10**sig_digits)) / (10**sig_digits)
+    d = Decimal(str(x))
+    return float(d.quantize(Decimal(10) ** -sig_digits, rounding=ROUND_CEILING))
 
 
 def to_token_decimals(x: float) -> int:
-    f = (10**6) * x
-    if decimal_places(f) > 0:
-        f = round_normal(f, 0)
-    return int(f)
+    d = Decimal(str(x)) * Decimal("1000000")
+    return int(d.quantize(Decimal("1"), rounding=ROUND_HALF_UP))
 
 
 def decimal_places(x: float) -> int:
