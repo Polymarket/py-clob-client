@@ -164,6 +164,12 @@ resp = client.post_order(signed, OrderType.GTC)
 print(resp)
 ```
 
+### Redeeming resolved positions (important)
+
+`py-clob-client` targets CLOB trading APIs (orders, books, trades, balances).
+
+At the moment, **redeeming/settling resolved market positions is not exposed as a direct SDK helper** in this package. If you need to redeem winnings from resolved markets, use the official Polymarket app/workflow or a dedicated settlement path from Polymarket docs/tools.
+
 ### Manage orders
 
 **Note**: EOA/MetaMask users must set token allowances before trading. See [Token Allowances section](#important-token-allowances-for-metamaskeoa-users) below.
