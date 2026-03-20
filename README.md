@@ -271,3 +271,8 @@ See [this Python example](https://gist.github.com/poly-rodr/44313920481de58d5a3f
 - Prices are in dollars from 0.00 to 1.00. Shares are whole or fractional units of the outcome token.
 
 See [/example](/examples) for more.
+## 🛠 Community Tools
+
+Projects built using py-clob-client:
+
+- [polymarket-whales](https://github.com/al1enjesus/polymarket-whales) - Real-time whale trade tracker — fires alerts when large orders hit the book. Terminal + Telegram, zero config.
