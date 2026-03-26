@@ -1,0 +1,44 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "py_clob_client"
+version = "0.34.6"
+description = "Python client for the Polymarket CLOB"
+readme = "README.md"
+requires-python = ">=3.9.10"
+license = { text = "MIT" }
+authors = [
+  { name = "Polymarket Engineering", email = "engineering@polymarket.com" }
+]
+maintainers = [
+  { name = "Polymarket Engineering", email = "engineering@polymarket.com" }
+]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
+dependencies = [
+  "eth-account>=0.13.0",
+  "eth-utils>=4.1.1",
+  "poly_eip712_structs>=0.0.1",
+  "py-order-utils>=0.3.2",
+  "python-dotenv",
+  "py-builder-signing-sdk>=0.0.2",
+  "httpx[http2]>=0.27.0",
+]
+
+[dependency-groups]
+dev = [
+    "black==24.4.2",
+    "pytest==8.2.2",
+]
+
+[project.urls]
+Homepage = "https://github.com/Polymarket/py-clob-client"
+"Bug Tracker" = "https://github.com/Polymarket/py-clob-client/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["py_clob_client"]
