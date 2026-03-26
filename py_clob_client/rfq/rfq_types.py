@@ -29,7 +29,7 @@ class RfqUserRequest:
     price: float
     """Price per token (0 < price < 1)."""
 
-    side: str
+    side: Literal["BUY", "SELL"]
     """Order side: "BUY" or "SELL"."""
 
     size: float
@@ -54,7 +54,7 @@ class RfqUserQuote:
     price: float
     """Price per token (0 < price < 1)."""
 
-    side: str
+    side: Literal["BUY", "SELL"]
     """Quoter's side: "BUY" or "SELL"."""
 
     size: float

@@ -1,7 +1,7 @@
 import logging
 import json
 import time
-from typing import Optional
+from typing import Literal, Optional
 
 from py_builder_signing_sdk.config import BuilderConfig
 
@@ -1060,7 +1060,7 @@ class ClobClient:
         return results
 
     def calculate_market_price(
-        self, token_id: str, side: str, amount: float, order_type: OrderType
+        self, token_id: str, side: Literal["BUY", "SELL"], amount: float, order_type: OrderType
     ) -> float:
         """
         Calculates the matching price considering an amount and the current orderbook
