@@ -25,10 +25,14 @@ def set_proxy(proxy: str = None):
     Pass None or empty string to disable proxy.
     """
     global _http_client
+
+    old_client = _http_client
     kwargs = {"http2": True}
     if proxy:
         kwargs["proxy"] = proxy
+
     _http_client = httpx.Client(**kwargs)
+    old_client.close()
 
 
 def overloadHeaders(method: str, headers: dict) -> dict:

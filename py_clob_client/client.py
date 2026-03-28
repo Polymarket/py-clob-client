@@ -162,8 +162,7 @@ class ClobClient:
         self.__fee_rates = {}
 
         # proxy
-        if proxy:
-            set_proxy(proxy)
+        set_proxy(proxy)
 
         # RFQ client
         self.rfq = RfqClient(self)
