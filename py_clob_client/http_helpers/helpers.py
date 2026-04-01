@@ -19,6 +19,14 @@ PUT = "PUT"
 _http_client = httpx.Client(http2=True)
 
 
+def set_http_timeout(timeout: float) -> None:
+    """
+    Reconfigure the module-level HTTP client with a custom timeout (in seconds).
+    """
+    global _http_client
+    _http_client = httpx.Client(http2=True, timeout=timeout)
+
+
 def overloadHeaders(method: str, headers: dict) -> dict:
     if headers is None:
         headers = dict()
@@ -61,8 +69,8 @@ def request(endpoint: str, method: str, headers=None, data=None):
         except ValueError:
             return resp.text
 
-    except httpx.RequestError:
-        raise PolyApiException(error_msg="Request exception!")
+    except httpx.RequestError as exc:
+        raise PolyApiException(error_msg=f"Request exception: {exc}") from exc
 
 
 def post(endpoint, headers=None, data=None):
