@@ -662,7 +662,12 @@ class ClobClient:
 
     def cancel(self, order_id):
         """
-        Cancels an order
+        Cancels an order and returns the full order object (including sizeMatched).
+
+        If the order was successfully canceled, fetches and returns the order details
+        so callers can inspect ``sizeMatched`` without waiting for a fill event.
+        If the cancellation failed, returns the raw API response unchanged.
+
         Level 2 Auth required
         """
         self.assert_level_2_auth()
@@ -675,15 +680,28 @@ class ClobClient:
             serialized_body=json.dumps(body, separators=(",", ":"), ensure_ascii=False),
         )
         headers = create_level_2_headers(self.signer, self.creds, request_args)
-        return delete(
+        response = delete(
             "{}{}".format(self.host, CANCEL),
             headers=headers,
             data=request_args.serialized_body,
         )
+        canceled = response.get("canceled", [])
+        if order_id in canceled:
+            try:
+                return self.get_order(order_id)
+            except Exception:
+                return response
+        return response
 
     def cancel_orders(self, order_ids):
         """
-        Cancels orders
+        Cancels a list of orders and returns full order objects (including sizeMatched)
+        for each successfully canceled order.
+
+        Returns a dict with:
+        - ``canceled``: list of full order objects for successfully canceled orders
+        - ``not_canceled``: dict mapping order IDs to error reasons (unchanged from API)
+
         Level 2 Auth required
         """
         self.assert_level_2_auth()
@@ -696,9 +714,20 @@ class ClobClient:
             serialized_body=serialized,
         )
         headers = create_level_2_headers(self.signer, self.creds, request_args)
-        return delete(
+        response = delete(
             "{}{}".format(self.host, CANCEL_ORDERS), headers=headers, data=serialized
         )
+        canceled_ids = response.get("canceled", [])
+        canceled_orders = []
+        for oid in canceled_ids:
+            try:
+                canceled_orders.append(self.get_order(oid))
+            except Exception:
+                canceled_orders.append({"id": oid})
+        return {
+            "canceled": canceled_orders,
+            "not_canceled": response.get("not_canceled", {}),
+        }
 
     def cancel_all(self):
         """
