@@ -516,7 +516,7 @@ class ClobClient:
 
         neg_risk = (
             options.neg_risk
-            if options and options.neg_risk
+            if options and options.neg_risk is not None
             else self.get_neg_risk(order_args.token_id)
         )
 
@@ -571,7 +571,7 @@ class ClobClient:
 
         neg_risk = (
             options.neg_risk
-            if options and options.neg_risk
+            if options and options.neg_risk is not None
             else self.get_neg_risk(order_args.token_id)
         )
 
