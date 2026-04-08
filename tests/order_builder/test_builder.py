@@ -12,7 +12,7 @@ from py_clob_client.order_builder.constants import BUY, SELL
 
 from py_clob_client.signer import Signer
 from py_clob_client.order_builder.builder import OrderBuilder, ROUNDING_CONFIG
-from py_clob_client.order_builder.helpers import decimal_places, round_normal
+from py_clob_client.order_builder.helpers import decimal_places, round_normal, round_down
 from py_order_utils.model import (
     POLY_GNOSIS_SAFE,
     EOA,
@@ -3442,3 +3442,34 @@ class TestOrderBuilder(TestCase):
             / float(signed_order.order["makerAmount"]),
             0.0056,
         )
+
+    def test_market_order_uses_round_down_for_price(self):
+        """
+        Regression test for #323: get_market_order_amounts should use
+        round_down for price, not round_normal, to match the TypeScript
+        client and avoid rounding prices in the unfavorable direction.
+
+        With price=0.555 and tick_size="0.01" (price precision=2):
+          round_normal(0.555, 2) = 0.56  (rounds up — worse for buyer)
+          round_down(0.555, 2)   = 0.55  (rounds down — correct)
+        """
+        builder = OrderBuilder(signer)
+        config = ROUNDING_CONFIG["0.01"]
+
+        # BUY: higher price means fewer shares per dollar — round_down is favorable
+        side, maker, taker = builder.get_market_order_amounts(
+            BUY, 100.0, 0.555, config
+        )
+        self.assertEqual(side, UtilsBuy)
+        # With round_down, effective price is 0.55, so taker = 100/0.55 = 181.81...
+        # With round_normal, effective price would be 0.56, taker = 100/0.56 = 178.57...
+        # Verify price used was 0.55 (round_down), not 0.56 (round_normal)
+        effective_price = round_down(maker / taker, config.price)
+        self.assertEqual(effective_price, round_down(0.555, config.price))
+        self.assertNotEqual(effective_price, round_normal(0.555, config.price))
+
+        # SELL: lower price means less received — round_down is conservative
+        side, maker, taker = builder.get_market_order_amounts(
+            SELL, 100.0, 0.555, config
+        )
+        self.assertEqual(side, UtilsSell)
