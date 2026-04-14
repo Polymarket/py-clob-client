@@ -85,7 +85,7 @@ class OrderBuilder:
     def get_market_order_amounts(
         self, side: str, amount: float, price: float, round_config: RoundConfig
     ):
-        raw_price = round_normal(price, round_config.price)
+        raw_price = round_down(price, round_config.price)
 
         if side == BUY:
             raw_maker_amt = round_down(amount, round_config.size)
