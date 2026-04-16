@@ -231,6 +231,25 @@ trades = client.get_trades()
 print(last, len(trades))
 ```
 
+### Fee rates (per market)
+
+Fees are set per market and can change over time. Always query the live rate for the specific token you are trading rather than assuming a fixed value — different markets in the same category can return different rates.
+
+```python
+from py_clob_client.client import ClobClient
+
+client = ClobClient("https://clob.polymarket.com")
+
+token_id = "<token-id>"
+fee_rate_bps = client.get_fee_rate_bps(token_id)  # calls GET /fee-rate?token_id=...
+print(f"base_fee: {fee_rate_bps} bps")
+```
+
+Notes:
+- The value is in basis points (e.g. `1000` = 10%, `0` = no fee on that market).
+- When creating orders, the client automatically resolves the market's fee rate via `get_fee_rate_bps`. If you pass a non‑zero `fee_rate_bps` in `OrderArgs`, it must match the market's rate or order creation raises.
+- Fees are applied on-chain by the CTF Exchange. The authoritative calculation lives in [`CalculatorHelper.sol`](https://github.com/Polymarket/ctf-exchange/blob/main/src/exchange/libraries/CalculatorHelper.sol).
+
 ## Important: Token Allowances for MetaMask/EOA Users
 
 ### Do I need to set allowances?
