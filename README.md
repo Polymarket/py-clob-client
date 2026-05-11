@@ -1,3 +1,11 @@
+> [!WARNING]
+> This repository has been archived and is no longer maintained.
+>
+> The client is no longer functional and should not be used for new or existing integrations.
+>
+> Please migrate to the V2 client:
+> https://github.com/Polymarket/py-clob-client-v2
+
 # Polymarket Python CLOB Client
 
 <a href='https://pypi.org/project/py-clob-client'>
