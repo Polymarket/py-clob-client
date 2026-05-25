@@ -3,8 +3,8 @@
 >
 > The client is no longer functional and should not be used for new or existing integrations.
 >
-> Please migrate to the V2 client:
-> https://github.com/Polymarket/py-clob-client-v2
+> Please migrate to our new unified SDK:
+> https://github.com/Polymarket/py-sdk
 
 # Polymarket Python CLOB Client
 
