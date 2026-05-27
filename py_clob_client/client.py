@@ -84,6 +84,7 @@ from .clob_types import (
 )
 from .exceptions import PolyException
 from .http_helpers.helpers import (
+    set_http_timeout,
     add_query_trade_params,
     add_query_open_orders_params,
     delete,
@@ -124,6 +125,7 @@ class ClobClient:
         funder: str = None,
         builder_config: BuilderConfig = None,
         tick_size_ttl: float = 300.0,
+        timeout: float = None,
     ):
         """
         Initializes the clob client
@@ -142,6 +144,9 @@ class ClobClient:
         self.signer = Signer(key, chain_id) if key else None
         self.creds = creds
         self.mode = self._get_client_mode()
+
+        if timeout is not None:
+            set_http_timeout(timeout)
 
         if self.signer:
             self.builder = OrderBuilder(
