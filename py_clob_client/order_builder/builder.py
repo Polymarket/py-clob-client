@@ -1,3 +1,5 @@
+from typing import Literal
+
 from py_order_utils.builders import OrderBuilder as UtilsOrderBuilder
 from py_order_utils.signer import Signer as UtilsSigner
 from py_order_utils.model import (
@@ -49,7 +51,7 @@ class OrderBuilder:
         self.funder = funder if funder is not None else self.signer.address()
 
     def get_order_amounts(
-        self, side: str, size: float, price: float, round_config: RoundConfig
+        self, side: Literal["BUY", "SELL"], size: float, price: float, round_config: RoundConfig
     ):
         raw_price = round_normal(price, round_config.price)
 
@@ -83,7 +85,7 @@ class OrderBuilder:
             raise ValueError(f"order_args.side must be '{BUY}' or '{SELL}'")
 
     def get_market_order_amounts(
-        self, side: str, amount: float, price: float, round_config: RoundConfig
+        self, side: Literal["BUY", "SELL"], amount: float, price: float, round_config: RoundConfig
     ):
         raw_price = round_normal(price, round_config.price)
 

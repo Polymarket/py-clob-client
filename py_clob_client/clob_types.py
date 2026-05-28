@@ -39,7 +39,7 @@ class RequestArgs:
 @dataclass
 class BookParams:
     token_id: str
-    side: str = ""
+    side: Literal["BUY", "SELL", ""] = ""
 
 
 @dataclass
@@ -59,7 +59,7 @@ class OrderArgs:
     Size in terms of the ConditionalToken
     """
 
-    side: str
+    side: Literal["BUY", "SELL"]
     """
     Side of the order
     """
@@ -98,7 +98,7 @@ class MarketOrderArgs:
     SELL orders: Shares to sell
     """
 
-    side: str
+    side: Literal["BUY", "SELL"]
     """
     Side of the order
     """
