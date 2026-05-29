@@ -3,14 +3,20 @@ from decimal import Decimal
 
 
 def round_down(x: float, sig_digits: int) -> float:
+    if decimal_places(x) <= sig_digits:
+        return x
     return floor(x * (10**sig_digits)) / (10**sig_digits)
 
 
 def round_normal(x: float, sig_digits: int) -> float:
+    if decimal_places(x) <= sig_digits:
+        return x
     return round(x * (10**sig_digits)) / (10**sig_digits)
 
 
 def round_up(x: float, sig_digits: int) -> float:
+    if decimal_places(x) <= sig_digits:
+        return x
     return ceil(x * (10**sig_digits)) / (10**sig_digits)
 
 
