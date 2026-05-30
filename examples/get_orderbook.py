@@ -1,3 +1,10 @@
+"""
+Example: Fetch a single orderbook by token_id
+
+Requires:
+- CLOB_API_URL (optional, defaults to Polymarket public endpoint)
+"""
+
 from py_clob_client.client import ClobClient
 import os
 from dotenv import load_dotenv
@@ -18,4 +25,5 @@ def main():
     print("orderbook hash", hash)
 
 
-main()
+if __name__ == "__main__":
+    main()
