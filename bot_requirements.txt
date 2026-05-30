@@ -1,0 +1,27 @@
+# Polymarket Trading Bot Requirements
+#
+# Install with: pip install -r bot_requirements.txt
+#
+# This file includes both the py-clob-client dependencies and
+# additional dependencies needed for the trading bot.
+
+# =============================================================================
+# py-clob-client dependencies
+# =============================================================================
+black==24.4.2
+eth-account===0.13.0
+eth-utils===4.1.1
+poly_eip712_structs==0.0.1
+py_order_utils==0.3.2
+pytest==8.2.2
+python-dotenv==0.19.2
+websockets==12.0
+py-builder-signing-sdk==0.0.2
+httpx[http2]==0.27.0
+
+# =============================================================================
+# Trading bot dependencies
+# =============================================================================
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+pydantic>=2.0.0
