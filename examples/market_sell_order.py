@@ -21,7 +21,7 @@ def main():
     chain_id = AMOY
     client = ClobClient(host, key=key, chain_id=chain_id, creds=creds)
 
-    # create a market buy order for the equivalent of 100 USDC at the market price
+    # create a market sell order for the equivalent of 100 USDC at the market price
     order_args = MarketOrderArgs(
         token_id="71321045679252212594626385532706912750332728571942532289631379312455583992563",
         amount=100,  # SHARES
