@@ -30,3 +30,29 @@ class PolyApiException(PolyException):
 
     def __str__(self):
         return self.__repr__()
+
+
+class TickSizeRejectedError(PolyApiException):
+    """
+    Raised when an order is rejected and the error is likely due to tick size /
+    price precision (e.g. the market's tick size changed on the CLOB). Clear the
+    tick size cache and retry: client.clear_tick_size_cache() or
+    client.clear_tick_size_cache(token_id), then create and post the order again.
+    """
+
+    def __init__(self, msg, api_exception=None):
+        self.api_exception = api_exception
+        hint = (
+            "Clear tick size cache: client.clear_tick_size_cache() or "
+            "client.clear_tick_size_cache(token_id), then create and post the order again."
+        )
+        self.msg = f"{msg}. {hint}"
+        super().__init__(error_msg=self.msg)
+        if api_exception is not None:
+            self.status_code = api_exception.status_code
+
+    def __str__(self):
+        return self.msg
+
+    def __repr__(self):
+        return f"TickSizeRejectedError({self.msg!r})"

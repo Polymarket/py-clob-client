@@ -274,8 +274,26 @@ See [this Python example](https://gist.github.com/poly-rodr/44313920481de58d5a3f
 
 **Pro tip**: You only need to set these once per wallet. After that, you can trade freely.
 
+## Tick size and order rejection
+
+The client **caches** each market’s minimum tick size (from `get_tick_size`) for a short time to reduce API calls. When you **create or sign orders** (`create_order`, `create_market_order`), the client always fetches the **current** tick size from the CLOB, so signed orders use the correct value even if the cache is stale.
+
+- **Using `get_tick_size` elsewhere** (e.g. for display or validation): if the market’s tick size may have changed on the CLOB, either call `get_tick_size(token_id, force_refresh=True)` or clear the cache first: `client.clear_tick_size_cache(token_id)` (or `client.clear_tick_size_cache()` for all tokens).
+- **Order rejected by the API**: if the server rejects an order and the error is related to tick size or price precision, the client may raise `TickSizeRejectedError` with a message suggesting you clear the tick size cache and retry:
+  ```python
+  from py_clob_client import ClobClient, TickSizeRejectedError
+
+  try:
+      resp = client.post_order(signed, OrderType.GTC)
+  except TickSizeRejectedError as e:
+      # Market tick size may have changed; clear cache and retry
+      client.clear_tick_size_cache()  # or client.clear_tick_size_cache(token_id)
+      # Re-create and post the order
+  ```
+
 ## Notes
 - To discover token IDs, use the Markets API Explorer: [Get Markets](https://docs.polymarket.com/developers/gamma-markets-api/get-markets).
 - Prices are in dollars from 0.00 to 1.00. Shares are whole or fractional units of the outcome token.
+- If an order is rejected due to tick size or price precision, see [Tick size and order rejection](#tick-size-and-order-rejection) above.
 
 See [/example](/examples) for more.

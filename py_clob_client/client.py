@@ -82,7 +82,7 @@ from .clob_types import (
     MarketOrderArgs,
     PostOrdersArgs,
 )
-from .exceptions import PolyException
+from .exceptions import PolyException, PolyApiException, TickSizeRejectedError
 from .http_helpers.helpers import (
     add_query_trade_params,
     add_query_open_orders_params,
@@ -399,11 +399,22 @@ class ClobClient:
         body = [{"token_id": param.token_id} for param in params]
         return post("{}{}".format(self.host, GET_SPREADS), data=body)
 
-    def get_tick_size(self, token_id: str) -> TickSize:
+    def get_tick_size(self, token_id: str, force_refresh: bool = False) -> TickSize:
+        """
+        Returns the minimum tick size for the given token (market).
+
+        Results are cached for tick_size_ttl seconds. If the order book's tick
+        size has changed on the CLOB, you may get a stale value until the cache
+        expires or you force a refresh. When signing orders, the client
+        automatically uses a fresh tick size; if you use get_tick_size elsewhere
+        and the market may have changed, pass force_refresh=True or call
+        clear_tick_size_cache(token_id) first.
+        """
         cached_at = self.__tick_size_timestamps.get(token_id)
 
         if (
-            token_id in self.__tick_sizes
+            not force_refresh
+            and token_id in self.__tick_sizes
             and cached_at is not None
             and (time.monotonic() - cached_at) < self.__tick_size_ttl
         ):
@@ -438,6 +449,38 @@ class ClobClient:
             self.__tick_sizes[book.asset_id] = str(book.tick_size)
             self.__tick_size_timestamps[book.asset_id] = time.monotonic()
 
+    @staticmethod
+    def _is_tick_size_related_error(error_msg) -> bool:
+        """True if the API error message is likely due to tick size / price precision."""
+        if error_msg is None:
+            return False
+        msg = ClobClient._error_message_to_string(error_msg)
+        return any(
+            kw in msg for kw in ("tick", "precision", "minimum_tick")
+        )
+
+    @staticmethod
+    def _flatten_error_message(value) -> str:
+        """Flatten dict/list error payloads into a single string (preserves casing)."""
+        if value is None:
+            return ""
+        if isinstance(value, str):
+            return value
+        if isinstance(value, dict):
+            return " ".join(
+                ClobClient._flatten_error_message(v) for v in value.values()
+            )
+        if isinstance(value, (list, tuple)):
+            return " ".join(
+                ClobClient._flatten_error_message(v) for v in value
+            )
+        return str(value)
+
+    @staticmethod
+    def _error_message_to_string(value) -> str:
+        """Flatten dict/list error payloads into a single lowercase string for keyword search."""
+        return ClobClient._flatten_error_message(value).lower()
+
     def get_neg_risk(self, token_id: str) -> bool:
         if token_id in self.__neg_risk:
             return self.__neg_risk[token_id]
@@ -458,9 +501,12 @@ class ClobClient:
         return fee_rate
 
     def __resolve_tick_size(
-        self, token_id: str, tick_size: TickSize = None
+        self,
+        token_id: str,
+        tick_size: TickSize = None,
+        force_refresh: bool = False,
     ) -> TickSize:
-        min_tick_size = self.get_tick_size(token_id)
+        min_tick_size = self.get_tick_size(token_id, force_refresh=force_refresh)
         if tick_size is not None:
             if is_tick_size_smaller(tick_size, min_tick_size):
                 raise Exception(
@@ -498,10 +544,11 @@ class ClobClient:
         """
         self.assert_level_1_auth()
 
-        # add resolve_order_options, or similar
+        # Resolve tick size from CLOB (force refresh to avoid stale cache when signing)
         tick_size = self.__resolve_tick_size(
             order_args.token_id,
             options.tick_size if options else None,
+            force_refresh=True,
         )
 
         if not price_valid(order_args.price, tick_size):
@@ -545,10 +592,11 @@ class ClobClient:
         """
         self.assert_level_1_auth()
 
-        # add resolve_order_options, or similar
+        # Resolve tick size from CLOB (force refresh to avoid stale cache when signing)
         tick_size = self.__resolve_tick_size(
             order_args.token_id,
             options.tick_size if options else None,
+            force_refresh=True,
         )
 
         if order_args.price is None or order_args.price <= 0:
@@ -604,21 +652,30 @@ class ClobClient:
             serialized_body=json.dumps(body, separators=(",", ":"), ensure_ascii=False),
         )
         headers = create_level_2_headers(self.signer, self.creds, request_args)
-        # Builder flow
-        if self.can_builder_auth():
-            builder_headers = self._generate_builder_headers(request_args, headers)
-            if builder_headers is not None:
-                return post(
-                    "{}{}".format(self.host, POST_ORDERS),
-                    headers=builder_headers,
-                    data=request_args.serialized_body,
+        try:
+            # Builder flow
+            if self.can_builder_auth():
+                builder_headers = self._generate_builder_headers(request_args, headers)
+                if builder_headers is not None:
+                    return post(
+                        "{}{}".format(self.host, POST_ORDERS),
+                        headers=builder_headers,
+                        data=request_args.serialized_body,
+                    )
+            # send exact serialized bytes
+            return post(
+                "{}{}".format(self.host, POST_ORDERS),
+                headers=headers,
+                data=request_args.serialized_body,
+            )
+        except PolyApiException as e:
+            if self._is_tick_size_related_error(e.error_msg):
+                err = TickSizeRejectedError(
+                    self._flatten_error_message(e.error_msg), api_exception=e
                 )
-        # send exact serialized bytes
-        return post(
-            "{}{}".format(self.host, POST_ORDERS),
-            headers=headers,
-            data=request_args.serialized_body,
-        )
+                err.__cause__ = e
+                raise err
+            raise
 
     def post_order(self, order, orderType: OrderType = OrderType.GTC, post_only: bool = False):
         """
@@ -636,20 +693,29 @@ class ClobClient:
             serialized_body=json.dumps(body, separators=(",", ":"), ensure_ascii=False),
         )
         headers = create_level_2_headers(self.signer, self.creds, request_args)
-        # Builder flow
-        if self.can_builder_auth():
-            builder_headers = self._generate_builder_headers(request_args, headers)
-            if builder_headers is not None:
-                return post(
-                    "{}{}".format(self.host, POST_ORDER),
-                    headers=builder_headers,
-                    data=request_args.serialized_body,
+        try:
+            # Builder flow
+            if self.can_builder_auth():
+                builder_headers = self._generate_builder_headers(request_args, headers)
+                if builder_headers is not None:
+                    return post(
+                        "{}{}".format(self.host, POST_ORDER),
+                        headers=builder_headers,
+                        data=request_args.serialized_body,
+                    )
+            return post(
+                "{}{}".format(self.host, POST_ORDER),
+                headers=headers,
+                data=request_args.serialized_body,
+            )
+        except PolyApiException as e:
+            if self._is_tick_size_related_error(e.error_msg):
+                err = TickSizeRejectedError(
+                    self._flatten_error_message(e.error_msg), api_exception=e
                 )
-        return post(
-            "{}{}".format(self.host, POST_ORDER),
-            headers=headers,
-            data=request_args.serialized_body,
-        )
+                err.__cause__ = e
+                raise err
+            raise
 
     def create_and_post_order(
         self, order_args: OrderArgs, options: PartialCreateOrderOptions = None
