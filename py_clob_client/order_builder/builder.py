@@ -2,11 +2,14 @@ from py_order_utils.builders import OrderBuilder as UtilsOrderBuilder
 from py_order_utils.signer import Signer as UtilsSigner
 from py_order_utils.model import (
     EOA,
+    POLY_PROXY,
+    POLY_GNOSIS_SAFE,
     OrderData,
     SignedOrder,
     BUY as UtilsBuy,
     SELL as UtilsSell,
 )
+import logging
 
 from .helpers import (
     to_token_decimals,
@@ -47,6 +50,39 @@ class OrderBuilder:
         # Used for Polymarket proxy wallets and other smart contract wallets
         # Defaults to the address of the signer
         self.funder = funder if funder is not None else self.signer.address()
+        
+        # Validate proxy configuration to catch common mistakes
+        self._validate_proxy_config()
+
+    def _validate_proxy_config(self):
+        """Validate proxy configuration and warn about common mistakes."""
+        signer_address = self.signer.address().lower()
+        funder_address = self.funder.lower()
+        
+        # Check for common signature_type=2 (Gnosis Safe) mistakes
+        if self.sig_type == POLY_GNOSIS_SAFE:
+            if signer_address == funder_address:
+                logging.warning(
+                    "⚠️  Proxy configuration warning: For signature_type=2 (Gnosis Safe), "
+                    "the 'funder' should be the Safe contract address, not your EOA address. "
+                    "Current config has signer and funder as the same address. "
+                    "If you get 'invalid signature' errors, verify that:\n"
+                    "  • private_key = EOA that OWNS the Gnosis Safe\n"
+                    "  • funder = Gnosis Safe contract address\n"
+                    "See README.md troubleshooting section for more details."
+                )
+        
+        # Check for common signature_type=1 (Polymarket Proxy) mistakes  
+        elif self.sig_type == POLY_PROXY:
+            if signer_address == funder_address:
+                logging.warning(
+                    "⚠️  Proxy configuration warning: For signature_type=1 (Polymarket Proxy), "
+                    "the 'funder' should typically be the proxy contract address, not your EOA address. "
+                    "If you get 'invalid signature' errors, verify that:\n"
+                    "  • private_key = EOA that controls the proxy\n" 
+                    "  • funder = Proxy contract address\n"
+                    "See README.md troubleshooting section for more details."
+                )
 
     def get_order_amounts(
         self, side: str, size: float, price: float, round_config: RoundConfig

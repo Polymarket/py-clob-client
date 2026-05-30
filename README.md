@@ -68,32 +68,85 @@ client.set_api_creds(client.create_or_derive_api_creds())
 
 ### Start trading (proxy wallet)
 
-For email/Magic or browser wallet proxies, you need to specify two additional parameters:
-
-#### Funder Address
-The **funder address** is the actual address that holds your funds on Polymarket. When using proxy wallets (email wallets like Magic or browser extension wallets), the signing key differs from the address holding the funds. The funder address ensures orders are properly attributed to your funded account.
+For email/Magic or browser wallet proxies, you need to specify two additional parameters. **Critical: The most common mistake is confusing which address goes in `key` vs `funder`.**
 
 #### Signature Types
 The **signature_type** parameter tells the system how to verify your signatures:
-- `signature_type=0` (default): Standard EOA (Externally Owned Account) signatures - includes MetaMask, hardware wallets, and any wallet where you control the private key directly
-- `signature_type=1`: Email/Magic wallet signatures (delegated signing)
-- `signature_type=2`: Browser wallet proxy signatures (when using a proxy contract, not direct wallet connections)
+
+- `signature_type=0` (default): **EOA (Externally Owned Account)** - MetaMask, hardware wallets, any wallet where you directly control the private key
+  - `key`: Your wallet's private key
+  - `funder`: Your wallet's address (or omit - defaults to signer address)
+
+- `signature_type=1`: **Polymarket Proxy** - Email/Magic wallets with Polymarket's proxy system  
+  - `key`: Your wallet's private key (the one that controls the proxy)
+  - `funder`: The proxy contract address (where your funds are held)
+
+- `signature_type=2`: **Gnosis Safe Proxy** - 1-of-1 Gnosis Safe where you're the sole owner
+  - `key`: **EOA private key that OWNS the Gnosis Safe** (not the Safe's address)
+  - `funder`: **The Gnosis Safe contract address** (where your funds are held)
+
+#### ⚠️ Common "Invalid Signature" Mistakes
+
+**For signature_type=2 (Gnosis Safe):**
+- ❌ **Wrong:** `key=safe_address, funder=eoa_address` 
+- ✅ **Correct:** `key=eoa_private_key, funder=safe_address`
+
+**The private key must be from the EOA that owns/controls the proxy, and funder must be the proxy contract address itself.**
+
+#### Funder Address
+The **funder address** is where your funds are actually held on Polymarket:
+- **EOA mode:** Your wallet address (usually auto-detected)
+- **Proxy mode:** The proxy contract address (not your EOA address)
+
+#### Troubleshooting "Invalid Signature" Errors
+
+If you get "invalid signature" errors with proxy mode:
+
+1. **Verify your setup:**
+   - For signature_type=2: private_key = EOA that owns the Safe, funder = Safe address
+   - For signature_type=1: private_key = EOA that controls the proxy, funder = proxy address
+
+2. **Test with EOA mode first:**
+   ```python
+   # Test that your private key works at all
+   client = ClobClient(HOST, key=PRIVATE_KEY, chain_id=CHAIN_ID, signature_type=0)
+   # Should get "not enough balance/allowance" error, not "invalid signature"
+   ```
+
+3. **Verify proxy ownership:**
+   - For Gnosis Safe: Check that your EOA is the sole owner of the 1-of-1 Safe
+   - For Polymarket proxy: Verify the proxy is properly linked to your EOA
 
 ```python
 from py_clob_client.client import ClobClient
 
 HOST = "https://clob.polymarket.com"
 CHAIN_ID = 137
-PRIVATE_KEY = "<your-private-key>"
-PROXY_FUNDER = "<your-proxy-or-smart-wallet-address>"  # Address that holds your funds
+
+# Example 1: Polymarket Proxy (signature_type=1)
+EOA_PRIVATE_KEY = "<your-eoa-private-key>"  # EOA that controls the proxy
+POLYMARKET_PROXY_ADDRESS = "<proxy-contract-address>"  # Where your funds are held
 
 client = ClobClient(
-    HOST,  # The CLOB API endpoint
-    key=PRIVATE_KEY,  # Your wallet's private key
-    chain_id=CHAIN_ID,  # Polygon chain ID (137)
-    signature_type=1,  # 1 for email/Magic wallet signatures
-    funder=PROXY_FUNDER  # Address that holds your funds
+    HOST,
+    key=EOA_PRIVATE_KEY,  # The EOA key that controls the proxy
+    chain_id=CHAIN_ID,
+    signature_type=1,  # Polymarket proxy
+    funder=POLYMARKET_PROXY_ADDRESS  # The proxy contract (not your EOA)
 )
+
+# Example 2: Gnosis Safe Proxy (signature_type=2)  
+SAFE_OWNER_PRIVATE_KEY = "<eoa-owner-private-key>"  # EOA that owns the 1-of-1 Safe
+GNOSIS_SAFE_ADDRESS = "<safe-contract-address>"  # Your Gnosis Safe address
+
+client = ClobClient(
+    HOST,
+    key=SAFE_OWNER_PRIVATE_KEY,  # Private key of the Safe owner (EOA)
+    chain_id=CHAIN_ID,
+    signature_type=2,  # Gnosis Safe proxy
+    funder=GNOSIS_SAFE_ADDRESS  # The Safe contract address
+)
+
 client.set_api_creds(client.create_or_derive_api_creds())
 ```
 
