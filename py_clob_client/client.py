@@ -89,6 +89,7 @@ from .http_helpers.helpers import (
     delete,
     get,
     post,
+    set_proxy,
     drop_notifications_query_params,
     add_balance_allowance_params_to_url,
     add_order_scoring_params_to_url,
@@ -124,6 +125,7 @@ class ClobClient:
         funder: str = None,
         builder_config: BuilderConfig = None,
         tick_size_ttl: float = 300.0,
+        proxy: Optional[str] = None,
     ):
         """
         Initializes the clob client
@@ -158,6 +160,9 @@ class ClobClient:
         self.__tick_size_ttl = tick_size_ttl
         self.__neg_risk = {}
         self.__fee_rates = {}
+
+        # proxy
+        set_proxy(proxy)
 
         # RFQ client
         self.rfq = RfqClient(self)

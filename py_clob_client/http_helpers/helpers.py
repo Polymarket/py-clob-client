@@ -19,6 +19,22 @@ PUT = "PUT"
 _http_client = httpx.Client(http2=True)
 
 
+def set_proxy(proxy: str = None):
+    """
+    Reconfigures the shared HTTP client to use the given proxy.
+    Pass None or empty string to disable proxy.
+    """
+    global _http_client
+
+    old_client = _http_client
+    kwargs = {"http2": True}
+    if proxy:
+        kwargs["proxy"] = proxy
+
+    _http_client = httpx.Client(**kwargs)
+    old_client.close()
+
+
 def overloadHeaders(method: str, headers: dict) -> dict:
     if headers is None:
         headers = dict()
