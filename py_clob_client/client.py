@@ -934,6 +934,8 @@ class ClobClient:
         Requires Level 2 authentication
         """
         self.assert_level_2_auth()
+        if params is None:
+            raise ValueError("params is required for get_balance_allowance")
         request_args = RequestArgs(method="GET", request_path=GET_BALANCE_ALLOWANCE)
         headers = create_level_2_headers(self.signer, self.creds, request_args)
         if params.signature_type == -1:
@@ -949,6 +951,8 @@ class ClobClient:
         Requires Level 2 authentication
         """
         self.assert_level_2_auth()
+        if params is None:
+            raise ValueError("params is required for update_balance_allowance")
         request_args = RequestArgs(method="GET", request_path=UPDATE_BALANCE_ALLOWANCE)
         headers = create_level_2_headers(self.signer, self.creds, request_args)
         if params.signature_type == -1:
