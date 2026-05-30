@@ -4,7 +4,7 @@ import base64
 
 
 def build_hmac_signature(
-    secret: str, timestamp: str, method: str, requestPath: str, body=None
+    secret: str, timestamp: int, method: str, requestPath: str, body=None
 ):
     """
     Creates an HMAC signature by signing a payload with the secret
