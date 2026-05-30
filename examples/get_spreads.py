@@ -1,3 +1,5 @@
+import os
+
 from py_clob_client.client import ClobClient
 from py_clob_client.clob_types import BookParams
 
