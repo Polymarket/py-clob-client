@@ -171,6 +171,15 @@ signed = client.create_order(order)
 resp = client.post_order(signed, OrderType.GTC)
 print(resp)
 ```
+### Order requirements
+
+Before placing orders, note the following CLOB requirements:
+
+**Minimum order size**: 5 shares. Applies to both limit and market orders. Orders below this will be rejected with a `Size lower than the minimum: 5` error. 
+**Minimum tick size**: 0.01. Prices must be in increments of $0.01 (e.g., 0.50, 0.51). 
+**Price range**: 0.01 – 0.99. Prices outside this range are invalid. 
+
+**Common pitfall**: If you're placing a small dollar amount (e.g., $1.00) at a high price (e.g., $0.95), the resulting share count may fall below 5 — causing the order to be rejected. Make sure your `amount / price ≥ 5` for market orders, or `size ≥ 5` for limit orders.
 
 ### Manage orders
 
