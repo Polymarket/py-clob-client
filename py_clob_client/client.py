@@ -755,6 +755,11 @@ class ClobClient:
         self.assert_level_2_auth()
         request_args = RequestArgs(method="GET", request_path=ORDERS)
         headers = create_level_2_headers(self.signer, self.creds, request_args)
+        # Builder flow
+        if self.can_builder_auth():
+            builder_headers = self._generate_builder_headers(request_args, headers)
+            if builder_headers is not None:
+                headers = builder_headers
 
         results = []
         next_cursor = next_cursor if next_cursor is not None else "MA=="
@@ -803,6 +808,11 @@ class ClobClient:
         endpoint = "{}{}".format(GET_ORDER, order_id)
         request_args = RequestArgs(method="GET", request_path=endpoint)
         headers = create_level_2_headers(self.signer, self.creds, request_args)
+        # Builder flow
+        if self.can_builder_auth():
+            builder_headers = self._generate_builder_headers(request_args, headers)
+            if builder_headers is not None:
+                return get("{}{}".format(self.host, endpoint), headers=builder_headers)
         return get("{}{}".format(self.host, endpoint), headers=headers)
 
     def get_trades(self, params: TradeParams = None, next_cursor="MA=="):
